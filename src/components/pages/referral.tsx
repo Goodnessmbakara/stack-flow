@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useStacksWallet } from "../../hooks/useStacksWallet";
 import CustomConnectButton from "../atoms/ConnectButton";
 import { axiosInstance } from "../../utils/axios";
 import { MdOutlineLink } from "react-icons/md";
@@ -14,7 +14,7 @@ interface Referral {
 }
 
 const Referral = () => {
-  const { address } = useAccount();
+  const { userData } = useStacksWallet();
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [referralCode, setReferralCode] = useState("");
 
@@ -22,7 +22,7 @@ const Referral = () => {
     const fetchReferrals = async () => {
       try {
         const res = await axiosInstance.post(
-          `/referrals/generateCode/${address}`
+          `/referrals/generateCode/${userData?.address}`
         );
 
         const pageUrl = window.location.href;
@@ -46,10 +46,10 @@ const Referral = () => {
       }
     };
 
-    if (!address) return;
+    if (!userData?.address) return;
 
     fetchReferrals();
-  }, [address]);
+  }, [userData?.address]);
 
   return (
     <Fragment>
@@ -80,7 +80,7 @@ const Referral = () => {
             Refer your friends and earn 50% of their commissions
           </p>
 
-          {!address && <CustomConnectButton />}
+          {!userData?.address && <CustomConnectButton />}
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CustomConnectButton from "../atoms/ConnectButton";
 import { IoCloseOutline } from "react-icons/io5";
-import { useAccount } from "wagmi";
+import { useStacksWallet } from "../../hooks/useStacksWallet";
 import { axiosInstance } from "../../utils/axios";
 import { toast } from "react-toastify";
 
@@ -10,15 +10,15 @@ const ReferralModal = () => {
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get("ref");
   const [showReferralModal, setShowReferralModal] = useState(true);
-  const { address } = useAccount();
+  const { userData } = useStacksWallet();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleRegisterReferral = async () => {
-    if (address && referralCode && !isProcessing) {
+    if (userData?.address && referralCode && !isProcessing) {
       setIsProcessing(true);
       try {
         await axiosInstance.post("referrals/register", {
-          refereeWalletAddress: address,
+          refereeWalletAddress: userData.address,
           referralCode,
         });
 
@@ -37,11 +37,11 @@ const ReferralModal = () => {
   };
 
   useEffect(() => {
-    if (address) {
+    if (userData?.address) {
       handleRegisterReferral();
       setShowReferralModal(false);
     }
-  }, [address]);
+  }, [userData?.address]);
 
   return (
     <>

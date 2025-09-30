@@ -6,17 +6,17 @@ import {
   FaArrowUp,
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import logo from "../../assets/optrix logo 1.png";
+import StackFlowLogo from "../../assets/stackflow-logo.svg";
 
 const socialLinks = [
-  { href: "https://t.me/optrix_fi_bot", icon: <FaTelegram /> },
-  { href: "https://x.com/Optrix_Finance", icon: <FaTwitter /> },
+  { href: "https://t.me/stackflow_io", icon: <FaTelegram /> },
+  { href: "https://x.com/StackFlow_io", icon: <FaTwitter /> },
   {
-    href: "https://www.youtube.com/@Optrix_Finance",
+    href: "https://www.youtube.com/@StackFlow_io",
     icon: <FaYoutube />,
   },
   {
-    href: "https://medium.com/@optrix_finance",
+    href: "https://medium.com/@stackflow_io",
     icon: <FaMedium />,
   },
 ];
@@ -56,13 +56,11 @@ const Footer = () => {
           <div>
             <div className="mb-8">
               <div className="flex items-center gap-2">
-                <img src={logo} alt="Optrix.Finance" className="w-12" />
-                <span className="font-bold text-white">Optrix.Finance</span>
+                <img src={StackFlowLogo} alt="StackFlow" className="h-8" />
               </div>
 
               <p className="mt-4 text-gray-300">
-                Elevate your crypto options trading experience with
-                Optrix.Finance's innovative platform.
+                Ride the flow of capital and sentiment on Stacks. Bitcoin-secured DeFi and sentiment trading platform.
               </p>
 
               <div className="flex gap-4 mt-6">
@@ -84,7 +82,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 pt-8 border-t border-gray-800 md:grid-cols-2">
           <div>
             <p className="text-gray-300">
-              2024 | Optrix.finance All rights reserved.
+              © 2025 StackFlow. All rights reserved.
             </p>
           </div>
 

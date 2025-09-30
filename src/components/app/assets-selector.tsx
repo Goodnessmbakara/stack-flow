@@ -22,10 +22,10 @@ export function AssetSelector({ selectedAsset }: AssetSelectorProps) {
               ? "text-[#090909]"
               : "text-[#ECECEC] border border-[#BDF738]"
           }`}
-          onClick={() => handleAssetChange("ETH")}
+          onClick={() => handleAssetChange("STX")}
         >
           <Icons.eth className="w-4 h-4 mr-2" />
-          ETH
+          STX
         </Button>
         <Button
           variant={selectedAsset === "BTC" ? "gradient" : "default"}

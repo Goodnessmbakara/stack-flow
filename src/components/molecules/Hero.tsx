@@ -32,25 +32,24 @@ const Hero = (): ReactElement => {
 
                   <div className="space-y-5 text-4xl font-black md:text-6xl ">
                     <h1 className="gradient-text">
-                      The First <br className="brr" />
-                      AI-Powered <br className="brr" />
-                      Derivatives
+                      StackFlow <br className="brr" />
+                      Bitcoin-Secured <br className="brr" />
+                      DeFi
                     </h1>
-                    <h1>Trading Bot</h1>
+                    <h1>Sentiment Trading</h1>
                   </div>
                   <p className="text-lg md:text-2xl text-[#f6f6f6] ">
-                    Effortless crypto options trading via Option AI's on-chain
-                    Telegram bot for all traders.
+                    Ride the flow of capital and sentiment on Stacks. Track whales, copy trades, and engage in meme-driven investing.
                   </p>
 
                   <div className="flex items-center gap-5">
                     <Button variant="gradient" className="text-black">
                       <Link
-                        to="https://t.me/Options_ai_trading_bot"
+                        to="https://t.me/stackflow_io"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Get Started
+                        Join Community
                       </Link>
                     </Button>
                     <Button>
@@ -59,7 +58,7 @@ const Hero = (): ReactElement => {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Enter DApp
+                        Launch StackFlow
                       </Link>
                     </Button>
                   </div>
@@ -99,11 +98,11 @@ const Hero = (): ReactElement => {
                   </div>
                   <div>
                     <img src="/assets/check.png" />
-                    <h5>ai based strategies</h5>
+                    <h5>whale tracking</h5>
                   </div>
                   <div>
                     <img src="/assets/check.png" />
-                    <h5>Simplify Options Trading </h5>
+                    <h5>copy trading</h5>
                   </div>
                   <div>
                     <img src="/assets/check.png" />

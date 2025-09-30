@@ -1,36 +1,29 @@
 import { useEffect, useState } from "react";
-import {
-  getUserHegicPositions,
-  HegicPositionType,
-} from "../../blockchain/hegic/hegicPositions";
+// TODO: Implement Stacks positions fetching
+// import { getUserStacksPositions, StacksPositionType } from "../../blockchain/stacks/positions";
 import CustomConnectButton from "../atoms/ConnectButton";
-import { useAccount } from "wagmi";
+import { useStacksWallet } from "../../hooks/useStacksWallet";
 import closePositionLogo from "./../../assets/icons/closeHegic.svg";
 
 export default function HistoryPage() {
-  const { address } = useAccount();
+  const { userData } = useStacksWallet();
   const [isFetching, setIsFetching] = useState(false);
   const [isError, setIsError] = useState<Error | null>(null);
-  const [positions, setPositions] = useState<HegicPositionType[] | []>([]);
+  const [positions, setPositions] = useState<any[]>([]);
 
   useEffect(() => {
-    console.log("address", address);
-    if (!address) return;
+    console.log("address", userData?.address);
+    if (!userData?.address) return;
     setIsFetching(true);
-    getUserHegicPositions(address as string)
-      .then((positions) => {
-        setPositions(positions);
-      })
-      .catch((err) => {
-        setIsError(err);
-      })
-      .finally(() => {
-        setIsFetching(false);
-      });
-  }, [address]);
+    // TODO: Implement getUserStacksPositions
+    console.log("Fetching Stacks positions for:", userData.address);
+    setPositions([]); // Placeholder
+    setIsFetching(false);
+  }, [userData?.address]);
+  
   return (
     <div className="bg-[#1D2215] h-fit rounded-lg py-7 px-6">
-      {!address && <CustomConnectButton />}
+      {!userData?.address && <CustomConnectButton />}
       {isError && (
         <div className="font-semibold text-white">
           Error: {isError?.message}
@@ -43,7 +36,7 @@ export default function HistoryPage() {
       )}
       {positions && (
         <div className="rounded-lg flex items-center justify-between flex-col gap-8">
-          {positions.map((el: HegicPositionType) => (
+          {positions.map((el: any) => (
             <div className="bg-[#252A1C] p-4 flex items-center gap-8 justify-between w-full m">
               <div>
                 <span className="text-green-400 font-semibold">

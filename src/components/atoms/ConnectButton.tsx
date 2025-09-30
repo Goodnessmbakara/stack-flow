@@ -1,10 +1,7 @@
 import { useEffect } from "react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Button from "./Button";
-import { useBalance, useAccount } from "wagmi";
-import { Hex } from "viem";
+import { useStacksWallet } from "../../hooks/useStacksWallet";
 import { useAppContext } from "../../context/AppContext";
-export const arbitrumUsdcAddress = "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8";
 
 const CustomConnectButton = ({
   onclick,
@@ -13,117 +10,86 @@ const CustomConnectButton = ({
   onclick?: () => void;
   onBalanceChange?: (balance: number) => void;
 }) => {
-  const { address } = useAccount();
+  const { userData, isConnecting, isLoading, connectWallet, disconnectWallet, isSignedIn } = useStacksWallet();
 
   const { state } = useAppContext();
   const { selectedPremium } = state;
 
-  const { data: usdcBalance } = useBalance({
-    address: address as Hex,
-    token: arbitrumUsdcAddress,
-  });
+  // For now, we'll simulate a balance - in a real app you'd fetch STX balance
+  const stxBalance = 1000; // This would come from Stacks API
 
   useEffect(() => {
-    if (usdcBalance && onBalanceChange) {
-      onBalanceChange(Number(usdcBalance.formatted));
+    if (onBalanceChange) {
+      onBalanceChange(stxBalance);
     }
-  }, [usdcBalance, onBalanceChange]);
+  }, [stxBalance, onBalanceChange]);
+
+  if (isLoading) {
+    return (
+      <Button variant="gradient" className="w-full" disabled>
+        Loading...
+      </Button>
+    );
+  }
 
   return (
-    <ConnectButton.Custom>
-      {({
-        account,
-        chain,
-        openAccountModal,
-        openChainModal,
-        openConnectModal,
-        mounted,
-      }) => {
-        const ready = mounted;
-        const connected = ready && account && chain;
+    <div className="w-full">
+      {(() => {
+        if (!isSignedIn) {
+          return (
+            <Button
+              variant="gradient"
+              className="w-full"
+              onclick={connectWallet}
+              disabled={isConnecting}
+            >
+              {isConnecting ? "Connecting..." : "Connect Stacks Wallet"}
+            </Button>
+          );
+        }
 
         return (
-          <div
-            {...(!ready && {
-              "aria-hidden": true,
-              style: {
-                opacity: 0,
-                pointerEvents: "none",
-                userSelect: "none",
-              },
-            })}
-          >
-            {(() => {
-              if (!connected) {
-                return (
-                  <Button
-                    variant="gradient"
-                    className="w-full"
-                    onclick={openConnectModal}
-                  >
-                    Connect Wallet
-                  </Button>
-                );
-              }
-              if (chain.unsupported) {
-                return (
-                  <Button
-                    className="w-full cursor-not-allowed"
-                    variant="gradient"
-                    onclick={openChainModal}
-                  >
-                    Wrong network
-                  </Button>
-                );
-              }
-              return (
-                <div className="flex items-center gap-2 w-full">
-                  {!onclick && (
-                    <Button
-                      variant="gradient"
-                      onclick={openAccountModal}
-                      className="w-full"
-                    >
-                      {chain.iconUrl && (
-                        <img
-                          alt={chain.name ?? "Chain icon"}
-                          src={chain.iconUrl}
-                          className="h-full"
-                        />
-                      )}
-                      {account.displayName}
-                      {account.displayBalance
-                        ? ` (${account.displayBalance})`
-                        : ""}
-                    </Button>
-                  )}
-
-                  {onclick && (
-                    <Button
-                      variant="gradient"
-                      className={`w-full ${
-                        usdcBalance &&
-                        selectedPremium &&
-                        Number(usdcBalance.formatted) < Number(selectedPremium)
-                          ? "cursor-not-allowed"
-                          : ""
-                      }`}
-                      onclick={onclick}
-                    >
-                      {usdcBalance &&
-                      selectedPremium &&
-                      Number(usdcBalance.formatted) < Number(selectedPremium)
-                        ? "Insufficient balance"
-                        : "Buy this strategy"}
-                    </Button>
-                  )}
+          <div className="flex items-center gap-2 w-full">
+            {!onclick && (
+              <Button
+                variant="gradient"
+                onclick={disconnectWallet}
+                className="w-full"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  {userData?.address ? 
+                    `${userData.address.slice(0, 6)}...${userData.address.slice(-4)}` : 
+                    "Connected"
+                  }
+                  {stxBalance ? ` (${stxBalance} STX)` : ""}
                 </div>
-              );
-            })()}
+              </Button>
+            )}
+
+            {onclick && (
+              <Button
+                variant="gradient"
+                className={`w-full ${
+                  stxBalance &&
+                  selectedPremium &&
+                  stxBalance < Number(selectedPremium)
+                    ? "cursor-not-allowed"
+                    : ""
+                }`}
+                onclick={onclick}
+              >
+                {stxBalance &&
+                selectedPremium &&
+                stxBalance < Number(selectedPremium)
+                  ? "Insufficient balance"
+                  : "Buy this strategy"}
+              </Button>
+            )}
           </div>
         );
-      }}
-    </ConnectButton.Custom>
+      })()}
+    </div>
   );
 };
 

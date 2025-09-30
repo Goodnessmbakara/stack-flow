@@ -1,0 +1,48 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient for the logo -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#BDF738;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FDEE61;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#BDF738;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#FDEE61;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#BDF738;stop-opacity:0.8" />
+    </linearGradient>
+    <linearGradient id="bitcoinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F7931A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main logo icon - represents "Stack" with flowing elements -->
+  <g transform="translate(10, 10)">
+    <!-- Stack blocks representing layers -->
+    <rect x="0" y="8" width="12" height="8" rx="2" fill="url(#logoGradient)" opacity="0.9"/>
+    <rect x="3" y="4" width="12" height="8" rx="2" fill="url(#logoGradient)" opacity="0.7"/>
+    <rect x="6" y="0" width="12" height="8" rx="2" fill="url(#logoGradient)"/>
+    
+    <!-- Flow lines representing capital movement -->
+    <path d="M18 4 Q25 2, 32 4 Q39 6, 46 4" stroke="url(#flowGradient)" stroke-width="2" fill="none" opacity="0.8"/>
+    <path d="M21 8 Q28 6, 35 8 Q42 10, 49 8" stroke="url(#flowGradient)" stroke-width="2" fill="none" opacity="0.6"/>
+    <path d="M24 12 Q31 10, 38 12 Q45 14, 52 12" stroke="url(#flowGradient)" stroke-width="2" fill="none" opacity="0.4"/>
+    
+    <!-- Bitcoin symbol integration -->
+    <circle cx="55" cy="8" r="6" fill="url(#bitcoinGradient)" opacity="0.8"/>
+    <path d="M52 5 L58 5 M52 5 L52 11 L58 11 M55 5 L55 11" stroke="#000" stroke-width="1" fill="none"/>
+  </g>
+  
+  <!-- StackFlow text -->
+  <text x="75" y="25" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="20" font-weight="700" fill="url(#logoGradient)">
+    Stack
+  </text>
+  <text x="75" y="45" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="16" font-weight="400" fill="#ECECEC" opacity="0.8">
+    Flow
+  </text>
+  
+  <!-- Tagline -->
+  <text x="75" y="55" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-size="8" font-weight="300" fill="#BDF738" opacity="0.7">
+    Ride the flow of capital and sentiment on Stacks
+  </text>
+</svg>

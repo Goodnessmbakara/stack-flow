@@ -4,7 +4,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { MdOutlineMenu } from "react-icons/md";
 import CustomConnectButton from "../atoms/ConnectButton";
 
-import logo2 from "../../assets/optrix logo 2.png";
+import StackFlowIcon from "../../assets/stackflow-icon.svg";
 import twitterIcon from "../../assets/icons/twitter.svg";
 import telegramIcon from "../../assets/icons/telegram.svg";
 
@@ -25,11 +25,11 @@ const Nav = (): ReactElement => {
               <div>
                 <div
                   className="sticky flex items-center gap-2"
-                  title="Optrix.Finance"
+                  title="StackFlow"
                 >
-                  <img src={logo2} alt="logo" className="w-12" />
+                  <img src={StackFlowIcon} alt="logo" className="w-12" />
                   <h4 className="text-base font-bold text-white md:text-xl">
-                    Optrix.Finance
+                    StackFlow
                   </h4>
                 </div>
               </div>
@@ -53,14 +53,14 @@ const Nav = (): ReactElement => {
 
               <div className="flex gap-2.5 items-center">
                 <a
-                  href="https://t.me/optrix_fi_bot"
+                  href="https://t.me/stackflow_io"
                   className="hover:opacity-80"
                   target="_blank"
                 >
                   <img src={telegramIcon} className="w-6 h-6" />
                 </a>
                 <a
-                  href="https://x.com/Optrix_Finance"
+                  href="https://x.com/StackFlow_io"
                   className="hover:opacity-80"
                   target="_blank"
                 >
@@ -95,8 +95,8 @@ const Nav = (): ReactElement => {
         <div className="">
           <div className="flex items-center justify-between text-white ">
             <div className="font-bold flex items-center gap-1.5">
-              <img src={logo2} alt="logo" className="w-12" />
-              <span className="font-bold text-white">Optrix.Finance</span>
+              <img src={StackFlowIcon} alt="logo" className="w-12" />
+              <span className="font-bold text-white">StackFlow</span>
             </div>
             {isMenuOpen ? (
               <IoCloseOutline

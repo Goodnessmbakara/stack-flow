@@ -9,9 +9,15 @@ import {
 import { useNavigate } from "react-router-dom";
 import { TSentiment } from "../lib/types";
 import { getProfitZones } from "../blockchain/hegic/profitZoneCalculator";
-import calculatePremium, {
-  TokenType,
-} from "../blockchain/hegic/premuimCalculator";
+// TODO: Implement Stacks premium calculator
+// import calculatePremium, { TokenType } from "../blockchain/stacks/premiumCalculator";
+
+// Placeholder types and functions for now
+type TokenType = 'STX' | 'BTC';
+const calculatePremium = async (amount: number, period: string, asset: string): Promise<number[]> => {
+  // Placeholder implementation
+  return [100, 200, 300, 400, 500]; // Mock premiums
+};
 import { getAssetPrice } from "../blockchain/hegic/assetPrices";
 
 type AppContextState = {
@@ -145,20 +151,19 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
       calculatePremium(
         Number(state.amount),
-        Number(state.period),
-        state.strategy.split("-")[0].toUpperCase() as string,
+        state.period,
         state.asset
       )
         .then((premiums) => {
           const profitZones = getProfitZones(
-            premiums as string[],
+            premiums.map(p => p.toString()),
             state.strategy,
             state.assetPrice,
             state.amount
           );
 
-          const combinedData = (premiums as string[]).map((premium, index) => ({
-            premium,
+          const combinedData = premiums.map((premium, index) => ({
+            premium: premium.toString(),
             profitZone: profitZones[index],
           }));
 

@@ -2,29 +2,23 @@ import { useState } from "react";
 import CustomConnectButton from "../atoms/ConnectButton";
 import { Icons } from "../ui/icons";
 import { useAppContext } from "../../context/AppContext";
-import {
-  Asset,
-  callHegicStrategyContract,
-  OptionType,
-} from "../../blockchain/hegic/hegicCalls";
 import ConfirmModal from "../molecules/ConfirmModal";
 import SuccessModal from "../molecules/SuccessModal";
-import { Hex } from "viem";
 import { toast } from "react-toastify";
 import { axiosInstance } from "../../utils/axios";
-import { useAccount } from "wagmi";
+import { useStacksWallet } from "../../hooks/useStacksWallet";
 
 export function TradeSummary() {
   const [userBalance, setUserBalance] = useState<number | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [txHash, setTxHash] = useState<Hex | "">("");
+  const [txHash, setTxHash] = useState<string>("");
 
   const { state } = useAppContext();
   const { asset, strategy, isFetching, selectedPremium, period, amount } =
     state;
 
-  const { address } = useAccount();
+  const { userData } = useStacksWallet();
 
   const handleBalanceChange = (balance: number) => {
     setUserBalance(balance);
@@ -33,30 +27,20 @@ export function TradeSummary() {
   const callStrategy = async () => {
     try {
       setShowConfirmModal(true);
-      const tx = await callHegicStrategyContract({
-        optionType: state.strategy.toUpperCase() as OptionType,
-        amount: parseFloat(amount),
-        period,
-        asset: asset as Asset,
-        index: 0,
-        premium: parseFloat(selectedPremium),
-      });
+      // TODO: Implement Stacks contract call
+      console.log("Calling Stacks strategy contract...");
+      const tx = { hash: "mock-tx-hash" }; // Placeholder for now
 
       if (typeof tx === "object" && "status" in tx) {
-        console.log("Transaction status:", tx.status);
-        console.log("Transaction message:", tx.message);
-
-        setShowConfirmModal(false);
-        toast.error(tx.message);
-      } else {
-        setTxHash(tx);
+        console.log("Transaction completed");
+        setTxHash(tx.hash);
         setShowConfirmModal(false);
         setShowSuccessModal(true);
 
         // call the referral reward function
         try {
           await axiosInstance.post("/referrals/reward", {
-            refereeAddress: address,
+            refereeAddress: userData?.address,
             rewardAmount: parseFloat(amount) * 0.002,
             transactionHash: tx,
           });
