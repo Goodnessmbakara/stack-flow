@@ -67,8 +67,7 @@ const Nav = (): ReactElement => {
                   <img src={twitterIcon} className="w-6 h-6" />
                 </a>
                 <a
-                  href="/WHITEPAPER.md"
-                  target="_blank"
+                  href="/whitepaper"
                 >
                   <Button>Whitepaper</Button>
                 </a>
@@ -137,8 +136,7 @@ const Nav = (): ReactElement => {
           <div className="flex flex-col w-full gap-2">
             <a
               className="w-full [&>*]:w-full"
-              href="/WHITEPAPER.md"
-              target="_blank"
+              href="/whitepaper"
             >
               <Button>Whitepaper</Button>
             </a>

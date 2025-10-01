@@ -69,3 +69,45 @@ input[type="number"]::-webkit-outer-spin-button {
     box-shadow: 14px 0 0 -2px, 38px 0 0 2px, -14px 0 0 -2px, -38px 0 0 -2px;
   }
 }
+
+/* Whitepaper specific styles */
+.whitepaper-content {
+  scroll-behavior: smooth;
+}
+
+.whitepaper-content a[id] {
+  scroll-margin-top: 2rem;
+}
+
+/* Custom scrollbar for whitepaper */
+.whitepaper-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.whitepaper-content::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.whitepaper-content::-webkit-scrollbar-thumb {
+  background: #bbf737;
+  border-radius: 4px;
+}
+
+.whitepaper-content::-webkit-scrollbar-thumb:hover {
+  background: #d4ff5a;
+}
+
+/* Better list styling in whitepaper */
+.whitepaper-content li::marker {
+  color: #bbf737;
+}
+
+/* Table of contents smooth scroll */
+.whitepaper-content a[href^="#"] {
+  transition: all 0.2s ease-in-out;
+}
+
+.whitepaper-content a[href^="#"]:hover {
+  transform: translateX(4px);
+}

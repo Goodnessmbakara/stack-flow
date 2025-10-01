@@ -6,6 +6,7 @@ const HomePage = lazy(() => import("./components/pages/home"));
 const NewTradePage = lazy(() => import("./components/pages/new"));
 const TradingHistoryPage = lazy(() => import("./components/pages/history"));
 const ReferralPage = lazy(() => import("./components/pages/referral"));
+const WhitepaperPage = lazy(() => import("./components/pages/whitepaper"));
 import { AppContextProvider } from "./context/AppContext";
 
 const router = createBrowserRouter([
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <HomePage />,
+      },
+      {
+        path: "/whitepaper",
+        element: <WhitepaperPage />,
       },
       // @DEV: Default /app route to /app/trade/new
       {
