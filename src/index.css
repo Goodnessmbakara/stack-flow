@@ -99,6 +99,43 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* Better list styling in whitepaper */
+.whitepaper-content li::before {
+  content: "▸";
+  color: #bbf737;
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+  margin-right: 0.5em;
+}
+
+/* Smooth animations for whitepaper elements */
+.whitepaper-content > * {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add subtle glow effect to headings */
+.whitepaper-content h2,
+.whitepaper-content h3 {
+  text-shadow: 0 0 30px rgba(187, 247, 55, 0.1);
+}
+
+/* Enhance link hover effects */
+.whitepaper-content a:hover {
+  text-shadow: 0 0 10px rgba(187, 247, 55, 0.3);
+}
+
 .whitepaper-content li::marker {
   color: #bbf737;
 }
