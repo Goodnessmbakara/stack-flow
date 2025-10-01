@@ -6,6 +6,7 @@ import {
   FaArrowUp,
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import StackFlowLogo from "../../assets/stackflow-logo.svg";
 
 const socialLinks = [
@@ -22,15 +23,17 @@ const socialLinks = [
 ];
 
 const navLinks = [
-  { href: "#home", label: "Home" },
-  { href: "#about", label: "About" },
-  { href: "#services", label: "Services" },
-  { href: "#options", label: "Options" },
+  { section: "home", label: "Home" },
+  { section: "about", label: "About" },
+  { section: "services", label: "Services" },
+  { section: "options", label: "Options" },
 ];
 
 const Footer = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,6 +50,26 @@ const Footer = () => {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleNavClick = (section: string) => {
+    // If we're on the home page, just scroll to the section
+    if (location.pathname === '/') {
+      const element = document.getElementById(section);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Navigate to home page with the hash
+      navigate(`/#${section}`);
+      // After navigation, scroll to the section
+      setTimeout(() => {
+        const element = document.getElementById(section);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
   };
 
   return (
@@ -90,12 +113,12 @@ const Footer = () => {
             <ul className="flex flex-wrap gap-6 md:justify-end">
               {navLinks.map((link, index) => (
                 <li key={index}>
-                  <a
-                    href={link.href}
-                    className="text-gray-300 transition-colors hover:text-white"
+                  <span
+                    onClick={() => handleNavClick(link.section)}
+                    className="text-gray-300 transition-colors hover:text-white cursor-pointer"
                   >
                     {link.label}
-                  </a>
+                  </span>
                 </li>
               ))}
             </ul>

@@ -1,4 +1,5 @@
 import { Fragment, ReactElement, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Button from "../atoms/Button";
 import { IoCloseOutline } from "react-icons/io5";
 import { MdOutlineMenu } from "react-icons/md";
@@ -10,9 +11,35 @@ import telegramIcon from "../../assets/icons/telegram.svg";
 
 const Nav = (): ReactElement => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
+  };
+
+  const handleNavClick = (section: string) => {
+    // If we're on the home page, just scroll to the section
+    if (location.pathname === '/') {
+      const element = document.getElementById(section);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Navigate to home page with the hash
+      navigate(`/#${section}`);
+      // After navigation, scroll to the section
+      setTimeout(() => {
+        const element = document.getElementById(section);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  };
+
+  const handleLogoClick = () => {
+    navigate('/');
   };
 
   const showToast = () => {};
@@ -24,8 +51,9 @@ const Nav = (): ReactElement => {
             <nav className="flex items-center justify-between w-full">
               <div>
                 <div
-                  className="sticky flex items-center gap-2"
+                  className="sticky flex items-center gap-2 cursor-pointer"
                   title="StackFlow"
+                  onClick={handleLogoClick}
                 >
                   <img src={StackFlowIcon} alt="logo" className="w-12" />
                   <h4 className="text-base font-bold text-white md:text-xl">
@@ -34,20 +62,20 @@ const Nav = (): ReactElement => {
                 </div>
               </div>
               <ul className="flex list-none gap-5 m-0 [&>*]:cursor-pointer [&>*]:text-[1.1rem]">
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#home">Home</a>
+                <li className="text-white hover:text-[#bbf737]" onClick={() => handleNavClick('home')}>
+                  Home
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#about">About</a>
+                <li className="text-white hover:text-[#bbf737]" onClick={() => handleNavClick('about')}>
+                  About
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#services">Services</a>
+                <li className="text-white hover:text-[#bbf737]" onClick={() => handleNavClick('services')}>
+                  Services
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#options">Options</a>
+                <li className="text-white hover:text-[#bbf737]" onClick={() => handleNavClick('options')}>
+                  Options
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#contact">Contact</a>
+                <li className="text-white hover:text-[#bbf737]" onClick={() => handleNavClick('contact')}>
+                  Contact
                 </li>
               </ul>
 
@@ -93,7 +121,7 @@ const Nav = (): ReactElement => {
       >
         <div className="">
           <div className="flex items-center justify-between text-white ">
-            <div className="font-bold flex items-center gap-1.5">
+            <div className="font-bold flex items-center gap-1.5 cursor-pointer" onClick={handleLogoClick}>
               <img src={StackFlowIcon} alt="logo" className="w-12" />
               <span className="font-bold text-white">StackFlow</span>
             </div>
@@ -112,20 +140,20 @@ const Nav = (): ReactElement => {
           {isMenuOpen && (
             <nav className="pt-10">
               <ul className="flex flex-col gap-4 [&>*]:border-b border-gray-800">
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#home">Home</a>
+                <li className="text-white hover:text-[#bbf737] cursor-pointer" onClick={() => { handleNavClick('home'); toggleMenu(); }}>
+                  Home
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#about">About</a>
+                <li className="text-white hover:text-[#bbf737] cursor-pointer" onClick={() => { handleNavClick('about'); toggleMenu(); }}>
+                  About
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#services">Services</a>
+                <li className="text-white hover:text-[#bbf737] cursor-pointer" onClick={() => { handleNavClick('services'); toggleMenu(); }}>
+                  Services
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#options">Options</a>
+                <li className="text-white hover:text-[#bbf737] cursor-pointer" onClick={() => { handleNavClick('options'); toggleMenu(); }}>
+                  Options
                 </li>
-                <li className="text-white hover:text-[#bbf737]">
-                  <a href="#contact">Contact</a>
+                <li className="text-white hover:text-[#bbf737] cursor-pointer" onClick={() => { handleNavClick('contact'); toggleMenu(); }}>
+                  Contact
                 </li>
               </ul>
             </nav>
