@@ -19,10 +19,11 @@ export default function DappPage() {
         <div className="flex flex-col items-start w-full gap-4 md:flex-row">
           <div className="w-full md:max-w-[388px] space-y-4 mx-auto">
             <AssetSelector selectedAsset={asset} />
-            <SentimentSelector selectedSentiment={sentiment} />
+            {asset === "STX" && <SentimentSelector selectedSentiment={sentiment} />}
             <StrategySelector
               selectedStrategy={strategy}
               selectedSentiment={sentiment}
+              asset={asset}
             />
           </div>
           <div className="w-full lg:max-w-[667px] bg-[#1D2215] p-7 rounded-lg">
