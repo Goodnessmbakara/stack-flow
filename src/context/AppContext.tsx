@@ -57,7 +57,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     amount: "1",
     selectedPremium: "0",
     selectedProfitZone: 0,
-    asset: "ETH" as TokenType,
+    asset: "STX" as TokenType,
     sentiment: "bull" as TSentiment,
     strategy: "CALL",
     premiumAndProfitZone: [],

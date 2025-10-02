@@ -28,7 +28,7 @@ export function TeamSection() {
       image: "assets/team/mfoniso.jpg",
     },
     {
-      name: "Tom Udo",
+      name: "Tom Udoh",
       role: "Full Stack Software Engineer",
       twitter: "@0xtomdan",
       twitterUrl: "https://x.com/0xtomdan",

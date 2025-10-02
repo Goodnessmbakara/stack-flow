@@ -91,35 +91,46 @@ const sentiments = [
   lowVolStrategies,
 ];
 
+const socialStrategies = [
+  {
+    name: "Copy Trading",
+    description: "Automatically mirror whale and efficient trader wallets.",
+  },
+  {
+    name: "Meme-Driven Investing",
+    description: "Community pools driven by viral content and meme culture.",
+  },
+];
+
 type Props = {
   selectedStrategy: string;
   selectedSentiment: TSentiment;
+  asset: string;
 };
 
 export function StrategySelector({
   selectedStrategy,
   selectedSentiment,
+  asset,
 }: Props) {
   const { handleStrategyChange } = useAppContext();
-  const currentStrategies =
-    sentiments.find(
-      (sentiment) =>
-        sentiment.tag.toLowerCase() === selectedSentiment.toLowerCase()
-    )?.items || sentiments[0].items;
+  const currentStrategies = asset === "STX" ? sentiments.find(
+    (sentiment) =>
+      sentiment.tag.toLowerCase() === selectedSentiment.toLowerCase()
+  )?.items || sentiments[0].items : socialStrategies;
 
   useEffect(() => {
-    const defaultStrategy =
-      sentiments?.find(
-        (sentiment) =>
-          sentiment.tag?.toLowerCase() === selectedSentiment?.toLowerCase()
-      )?.items?.[0]?.name ??
-      sentiments?.[0]?.items?.[0]?.name ??
-      "";
+    const defaultStrategy = asset === "STX" ? sentiments?.find(
+      (sentiment) =>
+        sentiment.tag?.toLowerCase() === selectedSentiment?.toLowerCase()
+    )?.items?.[0]?.name ??
+    sentiments?.[0]?.items?.[0]?.name ??
+    "" : "Copy Trading";
 
     if (!defaultStrategy) return;
 
     handleStrategyChange(defaultStrategy);
-  }, [selectedSentiment]);
+  }, [selectedSentiment, asset]);
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 ">

@@ -16,20 +16,20 @@ export function AssetSelector({ selectedAsset }: AssetSelectorProps) {
       <h2 className="mb-2 text-sm text-[#ECECEC]">Asset</h2>
       <div className="flex w-full gap-2 *:w-full">
         <Button
-          variant={selectedAsset === "ETH" ? "gradient" : "default"}
-          className={`font-bold font-lato ${
-            selectedAsset === "ETH"
+          variant={selectedAsset === "STX" ? "gradient" : "default"}
+          className={`font-bold font-lato text-xs ${
+            selectedAsset === "STX"
               ? "text-[#090909]"
               : "text-[#ECECEC] border border-[#BDF738]"
           }`}
           onClick={() => handleAssetChange("STX")}
         >
           <Icons.eth className="w-4 h-4 mr-2" />
-          STX
+          Capital Sentiment
         </Button>
         <Button
           variant={selectedAsset === "BTC" ? "gradient" : "default"}
-          className={`font-bold font-lato ${
+          className={`font-bold font-lato text-xs ${
             selectedAsset === "BTC"
               ? "text-[#090909]"
               : "text-[#ECECEC] border border-[#BDF738]"
@@ -37,7 +37,7 @@ export function AssetSelector({ selectedAsset }: AssetSelectorProps) {
           onClick={() => handleAssetChange("BTC")}
         >
           <Icons.bitcoin className="w-4 h-4 mr-2" />
-          BTC
+          Social Sentiment
         </Button>
       </div>
     </div>
