@@ -11,19 +11,23 @@
 
 ### Step 1: Get Testnet STX (REQUIRED) ✅
 
-**Your Testnet Address:**
+**✅ DEPLOYED - Your Testnet Address:**
 ```
-ST1CS6D7VNBJD300QT2S2SKXG9C36TV1KAT63222S
+ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH
 ```
 
-**Get Free Testnet STX:**
-1. Go to: https://explorer.hiro.so/sandbox/faucet?chain=testnet
-2. Enter address: `ST1CS6D7VNBJD300QT2S2SKXG9C36TV1KAT63222S`
-3. Request STX (you'll get ~500 testnet STX)
-4. Wait 1-2 minutes for confirmation
+**✅ DEPLOYED - Contract Address:**
+```
+ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v1
+```
 
-**Verify Balance:**
-https://explorer.hiro.so/address/ST1CS6D7VNBJD300QT2S2SKXG9C36TV1KAT63222S?chain=testnet
+**Transaction ID:**
+```
+ee51046f5c0f9ce1003c000cda5ebb415b13736c5a5d811c94085df98cbdc6f2
+```
+
+**Verify Deployment:**
+https://explorer.hiro.so/txid/ee51046f5c0f9ce1003c000cda5ebb415b13736c5a5d811c94085df98cbdc6f2?chain=testnet
 
 ---
 

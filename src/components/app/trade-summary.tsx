@@ -83,19 +83,9 @@ export function TradeSummary() {
           if (confirmed) {
             setTxStatus("success");
             
-            // Call referral reward
-            try {
-              await axiosInstance.post("/referrals/reward", {
-                refereeAddress: address,
-                rewardAmount: parseFloat(amount) * 0.002,
-                transactionHash: data.txId,
-              });
-            } catch (rewardError) {
-              console.error("Referral reward failed:", rewardError);
-              toast.warning(
-                "Referral reward processing failed, but trade was successful"
-              );
-            }
+            // TODO: Implement on-chain referral rewards via smart contract
+            // For now, referrals are tracked on-chain via transaction events
+            console.log('Trade successful! TX:', data.txId);
           } else {
             setTxStatus("failed");
           }
@@ -106,10 +96,8 @@ export function TradeSummary() {
         },
       });
       
-      if (!result.success) {
-        setShowConfirmModal(false);
-        toast.error(result.error || "Failed to create option");
-      }
+      // createOption returns void and uses callbacks
+      // Success/failure is handled in onFinish/onCancel callbacks
     } catch (error) {
       console.error("Transaction failed:", error);
       setShowConfirmModal(false);

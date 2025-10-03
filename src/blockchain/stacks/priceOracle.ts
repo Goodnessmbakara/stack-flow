@@ -41,31 +41,38 @@ export async function getAssetPrice(asset: 'STX' | 'BTC'): Promise<number> {
   
   console.log(`[PriceOracle] Fetching fresh price for ${asset}...`);
   
-  // Fetch from multiple sources in parallel (race for fastest)
-  const sources = [
-    fetchFromCoinGecko(asset),
-    fetchFromBinance(asset),
-    fetchFromCoinCap(asset),
-  ];
+  // Try sources sequentially (more reliable than Promise.race for CORS issues)
+  let priceData: PriceData | null = null;
+  let lastError: Error | null = null;
   
   try {
-    // Race to get first successful result
-    // Note: Using Promise.race with error handling for broader compatibility
-    const priceData = await Promise.race(
-      sources.map(p => p.catch(err => {
-        console.warn(`[PriceOracle] Source failed:`, err.message);
-        return Promise.reject(err);
-      }))
-    );
-    
+    priceData = await fetchFromCoinGecko(asset);
+  } catch (error) {
+    lastError = error as Error;
+    console.warn(`[PriceOracle] CoinGecko failed, trying Binance...`);
+    try {
+      priceData = await fetchFromBinance(asset);
+    } catch (error2) {
+      lastError = error2 as Error;
+      console.warn(`[PriceOracle] Binance failed, trying CoinCap...`);
+      try {
+        priceData = await fetchFromCoinCap(asset);
+      } catch (error3) {
+        lastError = error3 as Error;
+        // All failed
+      }
+    }
+  }
+  
+  if (priceData) {
     // Cache the result
     priceCache.set(asset, priceData);
     
     console.log(`[PriceOracle] ✓ ${asset} price: $${priceData.price} (source: ${priceData.source})`);
     
     return priceData.price;
-  } catch (error) {
-    console.error(`[PriceOracle] ✗ All price sources failed for ${asset}:`, error);
+  } else {
+    console.error(`[PriceOracle] ✗ All price sources failed for ${asset}`, lastError);
     
     // Return last known price if available (stale price better than no price)
     if (cached) {
@@ -116,6 +123,8 @@ async function fetchFromCoinGecko(asset: string): Promise<PriceData> {
   
   try {
     const response = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
       headers: {
         'Accept': 'application/json',
       },
