@@ -1,5 +1,10 @@
 export const ENVIRONMENT = {
-  ARBISCAN_API_KEY: import.meta.env.VITE_ARBISCAN_API_KEY,
+  // Stacks Network Configuration
+  STACKS_NETWORK: import.meta.env.VITE_STACKS_NETWORK || 'testnet',
+  STACKS_API_URL: import.meta.env.VITE_STACKS_API_URL || 'https://api.testnet.hiro.so',
+  STACKS_CONTRACT_ADDRESS: import.meta.env.VITE_STACKS_CONTRACT_ADDRESS,
+  
+  // App Configuration
   PLATFORM_FEE_ADDRESS: import.meta.env.VITE_PLATFORM_FEE_ADDRESS,
   BASE_URL: import.meta.env.VITE_BASE_URL,
 };

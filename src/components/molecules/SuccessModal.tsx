@@ -11,7 +11,9 @@ interface SuccessModalProps {
 const SuccessModal = ({ isOpen, onClose, txHash }: SuccessModalProps) => {
   if (!isOpen) return null;
 
-  const viewOnArbiscan = `https://arbiscan.io/tx/${txHash}`;
+  // Get network from environment (testnet or mainnet)
+  const network = import.meta.env.VITE_STACKS_NETWORK || 'testnet';
+  const explorerUrl = `https://explorer.hiro.so/txid/${txHash}?chain=${network}`;
 
   return (
     <Modal>
@@ -28,8 +30,8 @@ const SuccessModal = ({ isOpen, onClose, txHash }: SuccessModalProps) => {
           Your transaction was confirmed successfully
         </p>
         <div className="flex items-center gap-3 font-bold">
-          <a href={viewOnArbiscan} target="_blank" rel="noopener noreferrer">
-            <Button variant="gradient">View on Arbiscan</Button>
+          <a href={explorerUrl} target="_blank" rel="noopener noreferrer">
+            <Button variant="gradient">View on Stacks Explorer</Button>
           </a>
           <Button onClick={onClose}>Close and Continue</Button>
         </div>

@@ -151,13 +151,19 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
       try {
         // Map strategy names to calculator format
-        const strategyMap: Record<string, 'CALL' | 'STRAP' | 'BCSP' | 'BPSP'> = {
+        const strategyMap: Record<string, 'CALL' | 'STRAP' | 'BCSP' | 'BPSP' | 'PUT' | 'STRIP' | 'BEPS' | 'BECS'> = {
           'CALL': 'CALL',
           'Call': 'CALL',
           'STRAP': 'STRAP',
           'Strap': 'STRAP',
           'Bull Call Spread': 'BCSP',
           'Bull Put Spread': 'BPSP',
+          'PUT': 'PUT',
+          'Put': 'PUT',
+          'STRIP': 'STRIP',
+          'Strip': 'STRIP',
+          'Bear Put Spread': 'BEPS',
+          'Bear Call Spread': 'BECS',
         };
 
         const mappedStrategy = strategyMap[state.strategy] || 'CALL';

@@ -5,7 +5,7 @@ authors = []
 telemetry = true
 cache_dir = './.cache'
 requirements = []
-[contracts.stackflow-options-v1]
+[contracts.stackflow-options-v2]
 path = 'contracts/stackflow-options-v1.clar'
 clarity_version = 3
 epoch = 'latest'

@@ -137,6 +137,90 @@ function getProfitZonesForBullPutSpread(
 }
 
 /**
+ * Calculate profit zones for STRIP options (2 Puts + 1 Call)
+ * 
+ * Strip has TWO profit zones (downside and upside)
+ * For bearish focus, we return downside zone
+ * 
+ * Downside profit zone = Strike - (Premium / 2)
+ * (Divided by 2 because of 2 puts providing 2x leverage)
+ * 
+ * Example:
+ * - Strike: $2.50
+ * - Premium: $0.14 (for 2 puts + 1 call)
+ * → Downside Profit Zone: $2.43
+ * → Upside Profit Zone: $2.64 (not returned here)
+ */
+function getProfitZonesForStrip(
+  premiums: number[],
+  strikePrice: number,
+  amount: number
+): number[] {
+  return premiums.map(premium => {
+    const premiumPerUnit = premium / amount;
+    // Downside break-even (2x leverage from 2 puts)
+    return strikePrice - (premiumPerUnit / 2);
+  });
+}
+
+/**
+ * Calculate profit zones for BEAR PUT SPREAD
+ * 
+ * Bear Put Spread:
+ * - Buy Put at Upper Strike (pay premium)
+ * - Sell Put at Lower Strike (receive premium)
+ * - Net cost: Upper Premium - Lower Premium (debit)
+ * 
+ * Profit zone = Upper Strike - Net Premium per unit
+ * 
+ * Example:
+ * - Upper Strike: $2.63, Premium: $0.10
+ * - Lower Strike: $2.50, Premium: $0.05
+ * - Net Premium: $0.05 (debit)
+ * → Profit Zone: $2.58 (profit when price < $2.58)
+ */
+function getProfitZonesForBearPutSpread(
+  premiums: number[],
+  upperStrike: number,
+  amount: number
+): number[] {
+  return premiums.map(netPremium => {
+    const netPremiumPerUnit = netPremium / amount;
+    return upperStrike - netPremiumPerUnit;
+  });
+}
+
+/**
+ * Calculate profit zones for BEAR CALL SPREAD
+ * 
+ * Bear Call Spread:
+ * - Sell Call at Lower Strike (receive premium)
+ * - Buy Call at Upper Strike (pay premium)
+ * - Net credit: Lower Premium - Upper Premium (credit!)
+ * 
+ * Profit zone = Lower Strike + Net Premium per unit
+ * 
+ * Example:
+ * - Lower Strike: $2.50, Premium received: $0.08
+ * - Upper Strike: $2.63, Premium paid: $0.03
+ * - Net Premium: $0.05 (credit)
+ * → Profit Zone: $2.55 (profit when price < $2.55)
+ * 
+ * Note: In premium calculator, premium is negative (you receive it)
+ * So we use Math.abs() here
+ */
+function getProfitZonesForBearCallSpread(
+  premiums: number[],
+  lowerStrike: number,
+  amount: number
+): number[] {
+  return premiums.map(netPremium => {
+    const netPremiumPerUnit = Math.abs(netPremium) / amount;
+    return lowerStrike + netPremiumPerUnit;
+  });
+}
+
+/**
  * Main profit zone calculator
  * 
  * Takes array of premiums and returns array of profit zones
@@ -187,6 +271,10 @@ export function getProfitZones(
       profitZones = getProfitZonesForStrap(premiumNumbers, strikePrice, amountNumber);
       break;
       
+    case 'STRIP':
+      profitZones = getProfitZonesForStrip(premiumNumbers, strikePrice, amountNumber);
+      break;
+      
     case 'BULL CALL SPREAD':
     case 'BULLCALLSPREAD':
     case 'BCSP':
@@ -197,6 +285,18 @@ export function getProfitZones(
     case 'BULLPUTSPREAD':
     case 'BPSP':
       profitZones = getProfitZonesForBullPutSpread(premiumNumbers, strikePrice, amountNumber);
+      break;
+      
+    case 'BEAR PUT SPREAD':
+    case 'BEARPUTSPREAD':
+    case 'BEPS':
+      profitZones = getProfitZonesForBearPutSpread(premiumNumbers, strikePrice, amountNumber);
+      break;
+      
+    case 'BEAR CALL SPREAD':
+    case 'BEARCALLSPREAD':
+    case 'BECS':
+      profitZones = getProfitZonesForBearCallSpread(premiumNumbers, strikePrice, amountNumber);
       break;
       
     default:
@@ -250,6 +350,15 @@ export function calculateProfitLoss(
         return ((strikePrice - currentPrice) * amount) - premium;
       }
       
+    case 'STRIP':
+      if (currentPrice < strikePrice) {
+        // 2x put profit (2 puts)
+        return (2 * (strikePrice - currentPrice) * amount) - premium;
+      } else {
+        // 1x call profit (1 call)
+        return ((currentPrice - strikePrice) * amount) - premium;
+      }
+      
     default:
       return 0;
   }
@@ -281,14 +390,19 @@ export function isInProfitZone(
 ): boolean {
   const strategyUpper = strategy.toUpperCase().trim();
   
-  if (strategyUpper.includes('CALL') || strategyUpper === 'STRAP') {
+  // Bullish strategies: profit when price rises
+  if (strategyUpper.includes('CALL') || strategyUpper === 'STRAP' || strategyUpper === 'BCSP') {
     return currentPrice > profitZone;
   }
   
-  if (strategyUpper.includes('PUT')) {
+  // Bearish strategies: profit when price falls
+  if (strategyUpper.includes('PUT') || strategyUpper === 'STRIP' || 
+      strategyUpper === 'BEPS' || strategyUpper === 'BECS') {
     return currentPrice < profitZone;
   }
   
   return false;
 }
+
+
 

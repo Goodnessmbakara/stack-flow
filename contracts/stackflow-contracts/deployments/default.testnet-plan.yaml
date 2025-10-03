@@ -9,9 +9,9 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: stackflow-options-v1
+            contract-name: stackflow-options-v2
             expected-sender: ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH
-            cost: 69830
+            cost: 121000
             path: contracts/stackflow-options-v1.clar
             anchor-block-only: true
             clarity-version: 3

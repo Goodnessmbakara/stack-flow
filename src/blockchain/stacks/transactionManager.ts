@@ -8,7 +8,7 @@ import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 // Contract configuration
 const TESTNET_CONTRACT = {
   address: 'ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH',
-  name: 'stackflow-options-v1',
+  name: 'stackflow-options-v2',
 };
 
 const NETWORK = import.meta.env.VITE_STACKS_NETWORK || 'testnet';
@@ -18,13 +18,13 @@ export const CONTRACT_ADDRESS = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS
   ? import.meta.env.VITE_STACKS_CONTRACT_ADDRESS.split('.')[0]
   : TESTNET_CONTRACT.address;
 
-export const CONTRACT_NAME = 'stackflow-options-v1';
+export const CONTRACT_NAME = 'stackflow-options-v2';
 
 export function getNetwork() {
   return NETWORK === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET;
 }
 
-export type StrategyType = 'CALL' | 'STRAP' | 'BCSP' | 'BPSP';
+export type StrategyType = 'CALL' | 'STRAP' | 'BCSP' | 'BPSP' | 'PUT' | 'STRIP' | 'BEPS' | 'BECS';
 
 export interface CreateOptionParams {
   strategy: StrategyType;
@@ -74,13 +74,30 @@ export async function createOption(params: CreateOptionParams): Promise<void> {
   
   if (strategy === 'STRAP') {
     functionName = 'create-strap-option';
-  } else if (strategy === 'BCSP' || strategy === 'BPSP') {
+  } else if (strategy === 'PUT') {
+    functionName = 'create-put-option';
+  } else if (strategy === 'STRIP') {
+    functionName = 'create-strip-option';
+  } else if (strategy === 'BCSP' || strategy === 'BPSP' || strategy === 'BEPS' || strategy === 'BECS') {
     // For spreads, use strike as lower, and calculate upper
     const upperStrike = strikeMicro + toMicroUnits(amount * 0.1);
-    functionArgs = strategy === 'BCSP'
-      ? [uintCV(amountMicro), uintCV(strikeMicro), uintCV(upperStrike), uintCV(premiumMicro), uintCV(expiryBlock)]
-      : [uintCV(amountMicro), uintCV(strikeMicro), uintCV(upperStrike), uintCV(premiumMicro), uintCV(expiryBlock)];
-    functionName = strategy === 'BCSP' ? 'create-bull-call-spread' : 'create-bull-put-spread';
+    functionArgs = [
+      uintCV(amountMicro), 
+      uintCV(strikeMicro), 
+      uintCV(upperStrike), 
+      uintCV(premiumMicro), 
+      uintCV(expiryBlock)
+    ];
+    
+    if (strategy === 'BCSP') {
+      functionName = 'create-bull-call-spread';
+    } else if (strategy === 'BPSP') {
+      functionName = 'create-bull-put-spread';
+    } else if (strategy === 'BEPS') {
+      functionName = 'create-bear-put-spread';
+    } else if (strategy === 'BECS') {
+      functionName = 'create-bear-call-spread';
+    }
   }
   
   await openContractCall({

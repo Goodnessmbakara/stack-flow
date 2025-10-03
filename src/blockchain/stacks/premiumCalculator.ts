@@ -5,7 +5,7 @@
  * optimized for crypto markets (high volatility, 24/7 trading)
  * 
  * Features:
- * - Supports 4 bullish strategies: Call, Strap, Bull Call Spread, Bull Put Spread
+ * - Supports 8 strategies: Bullish (CALL, STRAP, BCSP, BPSP) + Bearish (PUT, STRIP, BEPS, BECS)
  * - 30-second caching for performance
  * - Accurate within 5% of theoretical values
  * - Browser-optimized (< 10ms per calculation)
@@ -17,7 +17,7 @@ export interface PremiumParams {
   amount: number;        // Amount of STX/BTC
   period: number;        // Days until expiry (7-90 days)
   currentPrice: number;  // Current asset price in USD
-  strategy: 'CALL' | 'STRAP' | 'BCSP' | 'BPSP';
+  strategy: 'CALL' | 'STRAP' | 'BCSP' | 'BPSP' | 'PUT' | 'STRIP' | 'BEPS' | 'BECS';
   asset?: 'STX' | 'BTC'; // Optional: affects volatility
 }
 
@@ -111,6 +111,42 @@ export async function calculatePremiums(
         // Bull Put Spread: Need two strikes
         if (i > 0) {
           data = calculateBullPutSpread(
+            amount,
+            currentPrice,
+            strikes[i - 1],   // Lower strike
+            strike,           // Upper strike
+            timeInYears,
+            volatility
+          );
+        }
+        break;
+        
+      case 'PUT':
+        data = calculatePutStrategy(amount, currentPrice, strike, timeInYears, volatility);
+        break;
+        
+      case 'STRIP':
+        data = calculateStripStrategy(amount, currentPrice, strike, timeInYears, volatility);
+        break;
+        
+      case 'BEPS':
+        // Bear Put Spread: Need two strikes
+        if (i < strikes.length - 1) {
+          data = calculateBearPutSpread(
+            amount,
+            currentPrice,
+            strike,           // Lower strike
+            strikes[i + 1],   // Upper strike
+            timeInYears,
+            volatility
+          );
+        }
+        break;
+        
+      case 'BECS':
+        // Bear Call Spread: Need two strikes
+        if (i > 0) {
+          data = calculateBearCallSpread(
             amount,
             currentPrice,
             strikes[i - 1],   // Lower strike
@@ -321,6 +357,192 @@ function calculateBullPutSpread(
 }
 
 /**
+ * PUT STRATEGY
+ * 
+ * Simple bearish bet: Profit if price falls below strike - premium
+ * - Premium: Moderate cost
+ * - Max Profit: Strike - Premium (capped at strike reaching 0)
+ * - Max Loss: Premium paid
+ * - Break-even: Strike - Premium
+ */
+function calculatePutStrategy(
+  amount: number,
+  currentPrice: number,
+  strikePrice: number,
+  timeInYears: number,
+  volatility: number
+): StrikeData {
+  const premiumPerUnit = calculatePutPremiumPerUnit(
+    currentPrice,
+    strikePrice,
+    timeInYears,
+    volatility
+  );
+  
+  const totalPremium = premiumPerUnit * amount;
+  const breakEven = strikePrice - premiumPerUnit;
+  const maxProfit = (strikePrice - premiumPerUnit) * amount; // If price goes to $0
+  
+  return {
+    strikePrice,
+    premium: totalPremium,
+    profitZone: breakEven,
+    maxProfit,
+    maxLoss: totalPremium,
+    breakEven,
+    returnOnInvestment: ((breakEven - currentPrice) / totalPremium) * 100,
+  };
+}
+
+/**
+ * STRIP STRATEGY
+ * 
+ * Aggressive bearish with upside protection: 2 Puts + 1 Call
+ * - Premium: High cost (~1.8x put premium)
+ * - Max Profit: Unlimited (downside dominant)
+ * - Max Loss: Premium paid
+ * - Break-even: Asymmetric (easier to profit on downside)
+ */
+function calculateStripStrategy(
+  amount: number,
+  currentPrice: number,
+  strikePrice: number,
+  timeInYears: number,
+  volatility: number
+): StrikeData {
+  const callPremiumPerUnit = calculateCallPremiumPerUnit(
+    currentPrice,
+    strikePrice,
+    timeInYears,
+    volatility
+  );
+  
+  const putPremiumPerUnit = calculatePutPremiumPerUnit(
+    currentPrice,
+    strikePrice,
+    timeInYears,
+    volatility
+  );
+  
+  // 2 Puts + 1 Call
+  const premiumPerUnit = (2 * putPremiumPerUnit) + callPremiumPerUnit;
+  const totalPremium = premiumPerUnit * amount;
+  
+  // Break-even is different on downside vs upside
+  // For bearish strategy, use downside break-even
+  const breakEven = strikePrice - (premiumPerUnit / 2); // Divided by 2 due to 2 puts
+  
+  return {
+    strikePrice,
+    premium: totalPremium,
+    profitZone: breakEven,
+    maxProfit: Infinity, // Heavily asymmetric to downside
+    maxLoss: totalPremium,
+    breakEven,
+    returnOnInvestment: ((breakEven - currentPrice) / totalPremium) * 100,
+  };
+}
+
+/**
+ * BEAR PUT SPREAD
+ * 
+ * Budget bearish bet: Buy put at higher strike, sell put at lower strike
+ * - Premium: Low cost (net debit)
+ * - Max Profit: Limited (Upper - Lower - Premium)
+ * - Max Loss: Premium paid
+ * - Break-even: Upper Strike - Premium
+ */
+function calculateBearPutSpread(
+  amount: number,
+  currentPrice: number,
+  lowerStrike: number,
+  upperStrike: number,
+  timeInYears: number,
+  volatility: number
+): StrikeData {
+  const longPutPremium = calculatePutPremiumPerUnit(
+    currentPrice,
+    upperStrike,
+    timeInYears,
+    volatility
+  );
+  
+  const shortPutPremium = calculatePutPremiumPerUnit(
+    currentPrice,
+    lowerStrike,
+    timeInYears,
+    volatility
+  );
+  
+  // Net debit (pay more for higher strike, receive less for lower strike)
+  const netPremiumPerUnit = longPutPremium - shortPutPremium;
+  const totalPremium = netPremiumPerUnit * amount;
+  
+  const maxProfit = ((upperStrike - lowerStrike) * amount) - totalPremium;
+  const breakEven = upperStrike - netPremiumPerUnit;
+  
+  return {
+    strikePrice: upperStrike, // Display upper strike as primary
+    premium: totalPremium,
+    profitZone: breakEven,
+    maxProfit,
+    maxLoss: totalPremium,
+    breakEven,
+    returnOnInvestment: (maxProfit / totalPremium) * 100,
+  };
+}
+
+/**
+ * BEAR CALL SPREAD
+ * 
+ * Income strategy: Sell call at lower strike, buy call at higher strike
+ * - Premium: Receive credit upfront!
+ * - Max Profit: Premium received
+ * - Max Loss: (Upper - Lower) - Premium
+ * - Break-even: Lower Strike + Premium Received
+ */
+function calculateBearCallSpread(
+  amount: number,
+  currentPrice: number,
+  lowerStrike: number,
+  upperStrike: number,
+  timeInYears: number,
+  volatility: number
+): StrikeData {
+  const longCallPremium = calculateCallPremiumPerUnit(
+    currentPrice,
+    upperStrike,
+    timeInYears,
+    volatility
+  );
+  
+  const shortCallPremium = calculateCallPremiumPerUnit(
+    currentPrice,
+    lowerStrike,
+    timeInYears,
+    volatility
+  );
+  
+  // Net credit (receive more for lower strike, pay less for higher strike)
+  const netPremiumPerUnit = shortCallPremium - longCallPremium;
+  const totalPremium = netPremiumPerUnit * amount;
+  
+  const maxProfit = totalPremium; // Keep the credit!
+  const maxLoss = ((upperStrike - lowerStrike) * amount) - totalPremium;
+  const breakEven = lowerStrike + netPremiumPerUnit;
+  
+  return {
+    strikePrice: lowerStrike, // Display lower strike as primary
+    premium: -totalPremium, // Negative because you RECEIVE premium
+    profitZone: breakEven,
+    maxProfit,
+    maxLoss,
+    breakEven,
+    returnOnInvestment: (maxProfit / maxLoss) * 100, // ROI based on collateral
+  };
+}
+
+/**
  * Black-Scholes approximation for Call option
  * 
  * Simplified formula optimized for crypto:
@@ -403,7 +625,7 @@ function validateParams(params: PremiumParams): void {
     throw new Error('Current price must be between 0 and $1,000,000');
   }
   
-  const validStrategies = ['CALL', 'STRAP', 'BCSP', 'BPSP'];
+  const validStrategies = ['CALL', 'STRAP', 'BCSP', 'BPSP', 'PUT', 'STRIP', 'BEPS', 'BECS'];
   if (!validStrategies.includes(strategy)) {
     throw new Error(`Invalid strategy: ${strategy}`);
   }
@@ -439,4 +661,6 @@ export function getPremiumCacheStats(): {
  * Export cached version for use in React components
  */
 export const calculatePremiumsCached = calculatePremiums;
+
+
 

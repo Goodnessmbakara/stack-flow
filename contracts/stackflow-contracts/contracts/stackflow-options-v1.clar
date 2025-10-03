@@ -1,5 +1,6 @@
-;; StackFlow Options V1 - Bullish Strategies
+;; StackFlow Options V1 - Complete Options Strategies
 ;; Bitcoin-secured options trading on Stacks
+;; Supports: Bullish, Bearish, and Volatility strategies
 
 (define-constant contract-owner tx-sender)
 (define-constant ustx-per-stx u1000000)
@@ -33,7 +34,14 @@
 (define-private (fee (p uint)) (/ (* p (var-get protocol-fee-bps)) u10000))
 (define-private (valid-expiry (e uint)) (and (> e stacks-block-height) (>= (- e stacks-block-height) (var-get min-option-period)) (<= (- e stacks-block-height) (var-get max-option-period))))
 (define-private (add-user-option (u principal) (id uint)) (map-set user-options u (unwrap-panic (as-max-len? (append (default-to (list) (map-get? user-options u)) id) u500))))
+
+;; Payout calculators
 (define-private (call-payout (s uint) (a uint) (p uint) (c uint)) (if (> c s) (let ((d (- c s)) (g (/ (* d a) ustx-per-stx))) (if (> g p) (- g p) u0)) u0))
+(define-private (put-payout (s uint) (a uint) (p uint) (c uint)) (if (> s c) (let ((d (- s c)) (g (/ (* d a) ustx-per-stx))) (if (> g p) (- g p) u0)) u0))
+(define-private (strap-payout (s uint) (a uint) (p uint) (c uint)) (if (> c s) (let ((d (- c s)) (g (/ (* u2 d a) ustx-per-stx))) (if (> g p) (- g p) u0)) (if (> s c) (let ((d (- s c)) (g (/ (* d a) ustx-per-stx))) (if (> g p) (- g p) u0)) u0)))
+(define-private (strip-payout (s uint) (a uint) (p uint) (c uint)) (if (> s c) (let ((d (- s c)) (g (/ (* u2 d a) ustx-per-stx))) (if (> g p) (- g p) u0)) (if (> c s) (let ((d (- c s)) (g (/ (* d a) ustx-per-stx))) (if (> g p) (- g p) u0)) u0)))
+(define-private (bull-call-spread-payout (lo uint) (hi uint) (p uint) (c uint)) (if (> c lo) (let ((w (- hi lo)) (d (- c lo)) (m (if (< d w) d w)) (g (/ (* m ustx-per-stx) ustx-per-stx))) (if (> g p) (- g p) u0)) u0))
+(define-private (bear-put-spread-payout (lo uint) (hi uint) (p uint) (c uint)) (if (< c hi) (let ((w (- hi lo)) (d (- hi c)) (m (if (< d w) d w)) (g (/ (* m ustx-per-stx) ustx-per-stx))) (if (> g p) (- g p) u0)) u0))
 
 ;; Reads
 (define-read-only (get-option (id uint)) (map-get? options id))
@@ -97,13 +105,80 @@
       (print {event: "created", id: id, strategy: "BPSP"})
       (ok id))))
 
+;; Create PUT
+(define-public (create-put-option (amt uint) (strike uint) (prem uint) (exp uint))
+  (let ((id (+ (var-get option-nonce) u1)) (f (fee prem)) (tot (+ prem f)))
+    (asserts! (not (var-get paused)) err-protocol-paused)
+    (asserts! (and (> amt u0) (> prem u0) (> strike u0)) err-invalid-amount)
+    (asserts! (valid-expiry exp) err-invalid-expiry)
+    (try! (stx-transfer? tot tx-sender (as-contract tx-sender)))
+    (try! (as-contract (stx-transfer? f tx-sender (var-get protocol-wallet))))
+    (map-set options id {owner: tx-sender, strategy: "PUT_", amount-ustx: amt, strike-price: strike, premium-paid: prem, created-at: stacks-block-height, expiry-block: exp, is-exercised: false, is-settled: false})
+    (add-user-option tx-sender id)
+    (var-set option-nonce id)
+    (print {event: "created", id: id, strategy: "PUT_"})
+    (ok id)))
+
+;; Create STRIP
+(define-public (create-strip-option (amt uint) (strike uint) (prem uint) (exp uint))
+  (let ((id (+ (var-get option-nonce) u1)) (f (fee prem)) (tot (+ prem f)))
+    (asserts! (not (var-get paused)) err-protocol-paused)
+    (asserts! (and (> amt u0) (> prem u0) (> strike u0)) err-invalid-amount)
+    (asserts! (valid-expiry exp) err-invalid-expiry)
+    (try! (stx-transfer? tot tx-sender (as-contract tx-sender)))
+    (try! (as-contract (stx-transfer? f tx-sender (var-get protocol-wallet))))
+    (map-set options id {owner: tx-sender, strategy: "STRI", amount-ustx: amt, strike-price: strike, premium-paid: prem, created-at: stacks-block-height, expiry-block: exp, is-exercised: false, is-settled: false})
+    (add-user-option tx-sender id)
+    (var-set option-nonce id)
+    (print {event: "created", id: id, strategy: "STRI"})
+    (ok id)))
+
+;; Create Bear Put Spread
+(define-public (create-bear-put-spread (amt uint) (lo uint) (hi uint) (prem uint) (exp uint))
+  (let ((id (+ (var-get option-nonce) u1)) (f (fee prem)) (tot (+ prem f)))
+    (asserts! (not (var-get paused)) err-protocol-paused)
+    (asserts! (< lo hi) err-invalid-strikes)
+    (asserts! (valid-expiry exp) err-invalid-expiry)
+    (let ((w (- hi lo)))
+      (try! (stx-transfer? tot tx-sender (as-contract tx-sender)))
+      (try! (as-contract (stx-transfer? f tx-sender (var-get protocol-wallet))))
+      (map-set options id {owner: tx-sender, strategy: "BEPS", amount-ustx: w, strike-price: lo, premium-paid: prem, created-at: stacks-block-height, expiry-block: exp, is-exercised: false, is-settled: false})
+      (add-user-option tx-sender id)
+      (var-set option-nonce id)
+      (print {event: "created", id: id, strategy: "BEPS"})
+      (ok id))))
+
+;; Create Bear Call Spread
+(define-public (create-bear-call-spread (amt uint) (lo uint) (hi uint) (coll uint) (exp uint))
+  (let ((id (+ (var-get option-nonce) u1)))
+    (asserts! (not (var-get paused)) err-protocol-paused)
+    (asserts! (< lo hi) err-invalid-strikes)
+    (asserts! (valid-expiry exp) err-invalid-expiry)
+    (let ((w (- hi lo)))
+      (try! (stx-transfer? coll tx-sender (as-contract tx-sender)))
+      (map-set options id {owner: tx-sender, strategy: "BECS", amount-ustx: w, strike-price: lo, premium-paid: coll, created-at: stacks-block-height, expiry-block: exp, is-exercised: false, is-settled: false})
+      (add-user-option tx-sender id)
+      (var-set option-nonce id)
+      (print {event: "created", id: id, strategy: "BECS"})
+      (ok id))))
+
 ;; Exercise
 (define-public (exercise-option (id uint) (price uint))
   (let ((opt (unwrap! (map-get? options id) err-option-not-found)))
     (asserts! (is-eq (get owner opt) tx-sender) err-not-owner)
     (asserts! (not (get is-exercised opt)) err-already-exercised)
     (asserts! (< stacks-block-height (get expiry-block opt)) err-option-expired)
-    (let ((payout (call-payout (get strike-price opt) (get amount-ustx opt) (get premium-paid opt) price)))
+    (let ((strat (get strategy opt))
+          (strike (get strike-price opt))
+          (amt (get amount-ustx opt))
+          (prem (get premium-paid opt))
+          (payout (if (is-eq strat "CALL") (call-payout strike amt prem price)
+                  (if (is-eq strat "PUT_") (put-payout strike amt prem price)
+                  (if (is-eq strat "STRP") (strap-payout strike amt prem price)
+                  (if (is-eq strat "STRI") (strip-payout strike amt prem price)
+                  (if (is-eq strat "BCSP") (bull-call-spread-payout strike amt prem price)
+                  (if (is-eq strat "BEPS") (bear-put-spread-payout strike amt prem price)
+                  u0))))))))
       (asserts! (> payout u0) err-not-in-the-money)
       (map-set options id (merge opt {is-exercised: true}))
       (try! (as-contract (stx-transfer? payout tx-sender (get owner opt))))
@@ -115,4 +190,6 @@
 (define-public (unpause-protocol) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (var-set paused false) (ok true)))
 (define-public (set-protocol-fee (n uint)) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (asserts! (<= n u1000) (err u999)) (var-set protocol-fee-bps n) (ok true)))
 (define-public (set-protocol-wallet (w principal)) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (var-set protocol-wallet w) (ok true)))
+
+
 

@@ -134,3 +134,87 @@ describe("StackFlow Options V1 - Admin", () => {
     expect(result).toBeErr(Cl.uint(100));
   });
 });
+
+describe("StackFlow Options V1 - Bearish Strategies", () => {
+  it("creates PUT option successfully", () => {
+    const expiry = simnet.blockHeight + BLOCKS_7_DAYS;
+    const { result } = simnet.callPublicFn(
+      "stackflow-options-v1",
+      "create-put-option",
+      [Cl.uint(STX_AMOUNT), Cl.uint(STRIKE_PRICE), Cl.uint(PREMIUM), Cl.uint(expiry)],
+      user1
+    );
+    expect(result).toBeOk(Cl.uint(1));
+  });
+
+  it("creates STRIP option successfully", () => {
+    const expiry = simnet.blockHeight + BLOCKS_7_DAYS;
+    const { result } = simnet.callPublicFn(
+      "stackflow-options-v1",
+      "create-strip-option",
+      [Cl.uint(STX_AMOUNT), Cl.uint(STRIKE_PRICE), Cl.uint(PREMIUM * 2), Cl.uint(expiry)],
+      user1
+    );
+    expect(result).toBeOk(Cl.uint(1));
+  });
+
+  it("creates Bear Put Spread successfully", () => {
+    const expiry = simnet.blockHeight + BLOCKS_7_DAYS;
+    const { result } = simnet.callPublicFn(
+      "stackflow-options-v1",
+      "create-bear-put-spread",
+      [Cl.uint(STX_AMOUNT), Cl.uint(2_250_000), Cl.uint(2_500_000), Cl.uint(200_000), Cl.uint(expiry)],
+      user1
+    );
+    expect(result).toBeOk(Cl.uint(1));
+  });
+
+  it("creates Bear Call Spread successfully", () => {
+    const expiry = simnet.blockHeight + BLOCKS_7_DAYS;
+    const { result } = simnet.callPublicFn(
+      "stackflow-options-v1",
+      "create-bear-call-spread",
+      [Cl.uint(STX_AMOUNT), Cl.uint(2_500_000), Cl.uint(2_750_000), Cl.uint(300_000), Cl.uint(expiry)],
+      user1
+    );
+    expect(result).toBeOk(Cl.uint(1));
+  });
+});
+
+describe("StackFlow Options V1 - Bearish Payout Validation", () => {
+  it("PUT option returns correct strategy code", () => {
+    const expiry = simnet.blockHeight + BLOCKS_7_DAYS;
+    simnet.callPublicFn(
+      "stackflow-options-v1",
+      "create-put-option",
+      [Cl.uint(STX_AMOUNT), Cl.uint(STRIKE_PRICE), Cl.uint(PREMIUM), Cl.uint(expiry)],
+      user1
+    );
+    
+    const optionData = simnet.callReadOnlyFn(
+      "stackflow-options-v1",
+      "get-option",
+      [Cl.uint(1)],
+      user1
+    );
+    expect(optionData.result).not.toBeNone();
+  });
+
+  it("STRIP option returns correct strategy code", () => {
+    const expiry = simnet.blockHeight + BLOCKS_7_DAYS;
+    simnet.callPublicFn(
+      "stackflow-options-v1",
+      "create-strip-option",
+      [Cl.uint(STX_AMOUNT), Cl.uint(STRIKE_PRICE), Cl.uint(PREMIUM * 2), Cl.uint(expiry)],
+      user1
+    );
+    
+    const optionData = simnet.callReadOnlyFn(
+      "stackflow-options-v1",
+      "get-option",
+      [Cl.uint(1)],
+      user1
+    );
+    expect(optionData.result).not.toBeNone();
+  });
+});

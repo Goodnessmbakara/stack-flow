@@ -22,7 +22,7 @@
 ```env
 VITE_STACKS_NETWORK=testnet
 VITE_STACKS_API_URL=https://api.testnet.hiro.so
-VITE_STACKS_CONTRACT_ADDRESS=ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v1
+VITE_STACKS_CONTRACT_ADDRESS=ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v2
 VITE_APP_NAME=StackFlow
 VITE_APP_ICON=http://localhost:5173/stackflow-icon.svg
 VITE_BTC_NETWORK=testnet
@@ -120,7 +120,7 @@ const response = await fetch(`${API_URL}/v2/info`);
 #### 2. Contract Address Resolution
 ```typescript
 // From .env
-VITE_STACKS_CONTRACT_ADDRESS=ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v1
+VITE_STACKS_CONTRACT_ADDRESS=ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v2
 
 // In code
 const CONTRACT_ADDRESS = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS.split('.')[0];
@@ -167,7 +167,7 @@ import { openContractCall, type FinishedTxData } from '@stacks/connect';
 await openContractCall({
   network: STACKS_TESTNET,
   contractAddress: 'ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH',
-  contractName: 'stackflow-options-v1',
+  contractName: 'stackflow-options-v2',
   functionName: 'create-call-option',
   functionArgs: [uintCV(10000000), uintCV(623000), uintCV(700000), uintCV(1100)],
   postConditionMode: PostConditionMode.Allow,
@@ -244,18 +244,25 @@ pnpm dev
 
 ## 🎯 Contract Details
 
-**Deployed Contract:**
+**Deployed Contracts:**
+
+**V2 (Current - With Bearish Strategies):**
+```
+ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v2
+```
+- ✅ 8 Total Strategies (4 Bullish + 4 Bearish)
+- ✅ PUT, STRIP, Bear Put Spread, Bear Call Spread
+- ✅ Deployed: October 3, 2025
+
+**V1 (Legacy - Bullish Only):**
 ```
 ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v1
 ```
-
-**Transaction ID:**
-```
-ee51046f5c0f9ce1003c000cda5ebb415b13736c5a5d811c94085df98cbdc6f2
-```
+- Transaction ID: `ee51046f5c0f9ce1003c000cda5ebb415b13736c5a5d811c94085df98cbdc6f2`
+- 4 Bullish Strategies Only
 
 **Explorer:**
-https://explorer.hiro.so/txid/ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH.stackflow-options-v1?chain=testnet
+https://explorer.hiro.so/address/ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH?chain=testnet
 
 **Balance Available:**
 7,813 STX (testnet)
