@@ -1045,7 +1045,7 @@ export const dummyData = [
 ];
 
 // Add copy trading dummy data
-export const topTraders: TraderProfile[] = [
+export const topTraders = [
   {
     id: '1',
     address: 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5',

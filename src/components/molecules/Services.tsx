@@ -1,4 +1,3 @@
-import shape2_img from "../../assets/images/resource/shape2.png";
 
 const Services = () => {
   const features = [

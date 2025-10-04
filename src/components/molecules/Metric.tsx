@@ -1,4 +1,3 @@
-import shape_icon from "../../assets/images/resource/icon.png";
 
 const Metric = () => {
   const metrics = [

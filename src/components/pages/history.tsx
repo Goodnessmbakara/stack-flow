@@ -8,7 +8,7 @@ import closePositionLogo from "./../../assets/icons/closeHegic.svg";
 export default function HistoryPage() {
   const { address } = useWallet();
   const [isFetching, setIsFetching] = useState(false);
-  const [isError, setIsError] = useState<Error | null>(null);
+  // const [isError, setIsError] = useState<Error | null>(null);
   const [positions, setPositions] = useState<any[]>([]);
 
   useEffect(() => {
@@ -24,11 +24,11 @@ export default function HistoryPage() {
   return (
     <div className="bg-[#1D2215] h-fit rounded-lg py-7 px-6">
       {!address && <CustomConnectButton />}
-      {isError && (
+      {/* {isError && (
         <div className="font-semibold text-white">
           Error: {isError?.message}
         </div>
-      )}
+      )} */}
       {isFetching && (
         <div className="flex items-center justify-center h-full self-center">
           <div className="w-4 h-4 bg-white/80 rounded-full animate-[flash_0.5s_ease-out_infinite_alternate] delay-100" />

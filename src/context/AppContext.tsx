@@ -8,17 +8,19 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { TSentiment } from "../lib/types";
-import { getProfitZones } from "../blockchain/hegic/profitZoneCalculator";
 // TODO: Implement Stacks premium calculator
 // import calculatePremium, { TokenType } from "../blockchain/stacks/premiumCalculator";
 
 // Placeholder types and functions for now
-type TokenType = 'STX' | 'BTC';
-const calculatePremium = async (amount: number, period: string, asset: string): Promise<number[]> => {
+type TokenType = "STX" | "BTC";
+const calculatePremium = async (
+  _amount: number,
+  _period: string,
+  _asset: string
+): Promise<number[]> => {
   // Placeholder implementation
   return [100, 200, 300, 400, 500]; // Mock premiums
 };
-import { getAssetPrice } from "../blockchain/hegic/assetPrices";
 
 type AppContextState = {
   period: string;
@@ -131,19 +133,19 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const fetchAssetPrice = async () => {
       setState((prev) => ({ ...prev, isFetching: true }));
-      getAssetPrice(state.asset)
-        .then((data) => {
-          setState((prev) => ({
-            ...prev,
-            assetPrice: data,
-          }));
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          setState((prev) => ({ ...prev, isFetching: false }));
-        });
+      // getAssetPrice(state.asset)
+      // .then((data) => {
+      //   setState((prev) => ({
+      //     ...prev,
+      //     assetPrice: data,
+      //   }));
+      // })
+      // .catch((err) => {
+      //   console.log(err);
+      // })
+      // .finally(() => {
+      //   setState((prev) => ({ ...prev, isFetching: false }));
+      // });
     };
 
     fetchAssetPrice();
@@ -159,38 +161,34 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     const fetchPremium = async () => {
       setState((prev) => ({ ...prev, isFetchingPremiums: true }));
 
-      calculatePremium(
-        Number(state.amount),
-        state.period,
-        state.asset
-      )
-        .then((premiums) => {
-          const profitZones = getProfitZones(
-            premiums.map(p => p.toString()),
-            state.strategy,
-            state.assetPrice,
-            state.amount
-          );
+      calculatePremium(Number(state.amount), state.period, state.asset)
+        // .then((premiums) => {
+        //   const profitZones = getProfitZones(
+        //     premiums.map((p) => p.toString()),
+        //     state.strategy,
+        //     state.assetPrice,
+        //     state.amount
+        //   );
 
-          const combinedData = premiums.map((premium, index) => ({
-            premium: premium.toString(),
-            profitZone: profitZones[index],
-          }));
+        //   const combinedData = premiums.map((premium, index) => ({
+        //     premium: premium.toString(),
+        //     profitZone: profitZones[index],
+        //   }));
 
-          setState((prev) => ({
-            ...prev,
-            premiumAndProfitZone: combinedData,
-            selectedPremium: combinedData[0]?.premium || "0",
-            selectedProfitZone: combinedData[0]?.profitZone || 0,
-          }));
-        })
+        //   setState((prev) => ({
+        //     ...prev,
+        //     premiumAndProfitZone: combinedData,
+        //     selectedPremium: combinedData[0]?.premium || "0",
+        //     selectedProfitZone: combinedData[0]?.profitZone || 0,
+        //   }));
+        // })
 
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          setState((prev) => ({ ...prev, isFetchingPremiums: false }));
-        });
+        // .catch((err) => {
+        //   console.log(err);
+        // })
+        // .finally(() => {
+        //   setState((prev) => ({ ...prev, isFetchingPremiums: false }));
+        // });
     };
 
     fetchPremium();

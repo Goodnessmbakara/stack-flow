@@ -216,7 +216,7 @@ export function CopyTrading({ onTraderSelect }: CopyTradingProps) {
 
       {/* Traders grid */}
       <div className="grid grid-cols-1 gap-4">
-        {topTraders.map((trader) => (
+        {topTraders.map((trader:any) => (
           <div
             key={trader.id}
             onClick={() => handleTraderSelect(trader)}

@@ -22,7 +22,6 @@ export function PriceSelector() {
     premiumAndProfitZone,
     isFetchingPremiums,
     asset,
-    selectedPremium,
     selectedProfitZone,
   } = state;
 

@@ -15,8 +15,14 @@ export function TradeSummary() {
   const [txHash, setTxHash] = useState<string>("");
 
   const { state } = useAppContext();
-  const { asset, strategy, isFetching, selectedPremium, period, amount } =
-    state;
+  const {
+    asset,
+    strategy,
+    isFetching,
+    selectedPremium,
+    period: _period,
+    amount,
+  } = state;
 
   const { address } = useWallet();
 
