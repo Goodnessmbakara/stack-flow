@@ -5,11 +5,18 @@ import { SentimentSelector } from "../app/sentiment-selector";
 import { StrategySelector } from "../app/strategy-selector";
 import { TradeSummary } from "../app/trade-summary";
 import { TradingChart } from "../app/trading-chart";
+import { CopyTrading } from "../app/copy-trading";
+import { MemeInvesting } from "../app/meme-investing";
 import ReferralModal from "../molecules/ReferralModal";
 
 export default function DappPage() {
   const { state } = useAppContext();
   const { asset, sentiment, strategy } = state;
+
+  // Show social sentiment features when BTC asset is selected
+  const showCopyTrading = asset === "BTC" && strategy === "Copy Trading";
+  const showMemeInvesting = asset === "BTC" && strategy === "Meme-Driven Investing";
+  const showSocialFeatures = showCopyTrading || showMemeInvesting;
 
   return (
     <div className="p-0 m-0">
@@ -25,19 +32,20 @@ export default function DappPage() {
               selectedSentiment={sentiment}
               asset={asset}
             />
+            {!showSocialFeatures && <PriceSelector />}
           </div>
           <div className="w-full lg:max-w-[667px] bg-[#1D2215] p-7 rounded-lg">
-            <TradingChart asset={asset} />
+            {showCopyTrading && <CopyTrading />}
+            {showMemeInvesting && <MemeInvesting />}
+            {!showSocialFeatures && <TradingChart asset={asset} />}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <PriceSelector />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <TradeSummary />
-        </div>
+        {!showSocialFeatures && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            <TradeSummary />
+          </div>
+        )}
       </div>
     </div>
   );

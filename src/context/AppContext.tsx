@@ -122,6 +122,11 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     [navigate]
   );
 
+  // Check if current strategy is a social strategy
+  const isSocialStrategy = (strategy: string) => {
+    return strategy === "Copy Trading" || strategy === "Meme-Driven Investing";
+  };
+
   // fetch asset price
   useEffect(() => {
     const fetchAssetPrice = async () => {
@@ -144,8 +149,13 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     fetchAssetPrice();
   }, [state.asset]);
 
-  // calculate Strike (Cost) and premium
+  // calculate Strike (Cost) and premium - only for capital sentiment strategies
   useEffect(() => {
+    // Skip premium calculation for social strategies
+    if (isSocialStrategy(state.strategy)) {
+      return;
+    }
+
     const fetchPremium = async () => {
       setState((prev) => ({ ...prev, isFetchingPremiums: true }));
 
@@ -170,8 +180,8 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
           setState((prev) => ({
             ...prev,
             premiumAndProfitZone: combinedData,
-            selectedPremium: combinedData[0].premium,
-            selectedProfitZone: combinedData[0].profitZone,
+            selectedPremium: combinedData[0]?.premium || "0",
+            selectedProfitZone: combinedData[0]?.profitZone || 0,
           }));
         })
 
@@ -210,6 +220,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     </AppContext.Provider>
   );
 }
+
 export function useAppContext() {
   const context = useContext(AppContext);
   if (!context) {

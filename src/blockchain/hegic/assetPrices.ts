@@ -72,6 +72,29 @@ export const getBtcPrice = async (): Promise<number> => {
   }
 };
 
+export const getStxPrice = async (): Promise<number> => {
+  const cachedPrice = getCachedPrice("STX");
+  if (cachedPrice !== null) return cachedPrice;
+
+  try {
+    const response = await axios.get(
+      "https://min-api.cryptocompare.com/data/price?fsym=STX&tsyms=USD"
+    );
+
+    const price = response.data?.USD;
+    if (!price) throw new Error("Invalid API response format");
+
+    setCachedPrice("STX", price);
+    return price;
+  } catch (error) {
+    console.error("Error fetching STX price:", error);
+    const lastCachedPrice = priceCache["STX"]?.price;
+    if (lastCachedPrice) return lastCachedPrice;
+    // Return a fallback price if API fails
+    return 1.85; // Fallback STX price
+  }
+};
+
 export const getAssetPrice = async (asset: string): Promise<number> => {
   const upperAsset = asset.toUpperCase();
   switch (upperAsset) {
@@ -79,6 +102,8 @@ export const getAssetPrice = async (asset: string): Promise<number> => {
       return getEthPrice();
     case "BTC":
       return getBtcPrice();
+    case "STX":
+      return getStxPrice();
     default:
       throw new Error(`Unsupported asset: ${asset}`);
   }

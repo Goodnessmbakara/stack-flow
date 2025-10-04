@@ -26,18 +26,24 @@ export function PriceSelector() {
     selectedProfitZone,
   } = state;
 
+  // Add comprehensive safety checks for undefined values
+  const safeSelectedProfitZone = selectedProfitZone ?? 0;
+  const safePremiumAndProfitZone = Array.isArray(premiumAndProfitZone)
+    ? premiumAndProfitZone.filter(item => item && typeof item.profitZone === 'number')
+    : [];
+
   return (
     <>
       <div className="bg-[#1D2215] p-6 rounded-lg space-y-2">
         <p className="text-sm text-[#ECECEC]">Amount</p>
         <div className="space-y-2">
-          <div className="bg-gradient-to-r w-full h-[50px] from-[#37f741] rounded-lg to-[#FDEE61] overflow-hidden p-px">
+          <div className="bg-gradient-to-r w-full h-[50px] from-[#BDF738] rounded-lg to-[#FDEE61] overflow-hidden p-px">
             <div className="rounded-lg px-5  bg-[#171717] h-full flex justify-between items-center">
               <input
                 type="number"
                 className="h-full w-[70%] bg-transparent border-none outline-none text-sm text-[#D6D6D6]"
                 // placeholder="1"
-                value={state.amount && state.amount}
+                value={state.amount}
                 onChange={(value) => handleAmountChange(value.target.value)}
               />
               <p className="text-sm text-[#7A7A7A]">{asset}</p>
@@ -57,7 +63,12 @@ export function PriceSelector() {
 
         <Slider
           defaultValue={[+state.period]}
-          onValueChange={(value) => handlePeriodChange(value[0].toString())}
+          onValueChange={(value) => {
+            const newValue = value?.[0];
+            if (newValue !== undefined) {
+              handlePeriodChange(newValue.toString());
+            }
+          }}
           max={90}
           min={7}
           step={1}
@@ -71,40 +82,42 @@ export function PriceSelector() {
       <div className="bg-[#1D2215] p-6 rounded-lg space-y-2">
         <p className="text-sm text-[#ECECEC]">Profit Zone</p>
         <div className="space-y-2">
-          <div className="bg-gradient-to-r w-full h-[50px] from-[#37f741] rounded-lg to-[#FDEE61] overflow-hidden p-px">
+          <div className="bg-gradient-to-r w-full h-[50px] from-[#BDF738] rounded-lg to-[#FDEE61] overflow-hidden p-px">
             <Select
-              value={
-                selectedProfitZone !== undefined
-                  ? selectedProfitZone.toString()
-                  : "0"
-              }
+              value={safeSelectedProfitZone.toString()}
               onValueChange={handlePremiumSelect}
+              disabled={isFetchingPremiums || safePremiumAndProfitZone.length === 0}
             >
               <SelectTrigger className="w-full bg-[#171717] h-full border-none outline-none rounded-lg">
                 <SelectValue className="text-[#D6D6D6] text-sm">
                   {isFetchingPremiums ? (
                     <Loader />
-                  ) : (
-                    premiumAndProfitZone.length > 0 &&
+                  ) : safePremiumAndProfitZone.length > 0 ? (
                     formatNumber(
-                      (Number(selectedProfitZone) as unknown as number) ||
-                        premiumAndProfitZone[0]?.profitZone ||
-                        0
+                      safeSelectedProfitZone ||
+                        safePremiumAndProfitZone[0]?.profitZone || 0
                     )
+                  ) : (
+                    "No data available"
                   )}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="border border-[#666666]">
                 {!isFetchingPremiums &&
-                  premiumAndProfitZone &&
-                  premiumAndProfitZone.map((el) => (
-                    <SelectItem
-                      key={el.profitZone}
-                      value={el.profitZone ? el.profitZone.toString() : "0"}
-                    >
-                      {formatNumber(el.profitZone)}
-                    </SelectItem>
-                  ))}
+                  safePremiumAndProfitZone.length > 0 &&
+                  safePremiumAndProfitZone.map((el, index) => {
+                    // Additional safety check for each element
+                    if (!el || typeof el.profitZone !== 'number') return null;
+
+                    return (
+                      <SelectItem
+                        key={`${el.profitZone}-${index}`}
+                        value={el.profitZone.toString()}
+                      >
+                        {formatNumber(el.profitZone)}
+                      </SelectItem>
+                    );
+                  })}
               </SelectContent>
             </Select>
           </div>

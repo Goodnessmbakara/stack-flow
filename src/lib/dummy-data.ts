@@ -1043,3 +1043,140 @@ export const dummyData = [
     close: 193.59,
   },
 ];
+
+// Add copy trading dummy data
+export const topTraders: TraderProfile[] = [
+  {
+    id: '1',
+    address: 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5',
+    displayName: 'BitcoinBull',
+    avatar: '/assets/team/tom.png',
+    totalReturn: 234.5,
+    winRate: 78.2,
+    followers: 1247,
+    totalTrades: 156,
+    riskScore: 'Medium',
+    verified: true,
+    assets: ['BTC', 'STX', 'ETH'],
+    recentTrades: [
+      {
+        id: 't1',
+        asset: 'BTC',
+        action: 'BUY',
+        amount: 0.5,
+        price: 97420,
+        timestamp: new Date('2025-01-02T10:30:00Z'),
+        pnl: 1247.50,
+        status: 'CLOSED'
+      },
+      {
+        id: 't2',
+        asset: 'STX',
+        action: 'BUY',
+        amount: 1000,
+        price: 1.85,
+        timestamp: new Date('2025-01-01T15:45:00Z'),
+        pnl: 150.00,
+        status: 'OPEN'
+      }
+    ]
+  },
+  {
+    id: '2',
+    address: 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG',
+    displayName: 'StacksWhale',
+    avatar: '/assets/team/wiseman.png',
+    totalReturn: 187.3,
+    winRate: 82.1,
+    followers: 892,
+    totalTrades: 203,
+    riskScore: 'Low',
+    verified: true,
+    assets: ['STX', 'BTC'],
+    recentTrades: [
+      {
+        id: 't3',
+        asset: 'STX',
+        action: 'SELL',
+        amount: 2500,
+        price: 1.92,
+        timestamp: new Date('2025-01-02T08:15:00Z'),
+        pnl: -89.25,
+        status: 'CLOSED'
+      }
+    ]
+  },
+  {
+    id: '3',
+    address: 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP',
+    displayName: 'CryptoSage',
+    avatar: '/assets/team/mfoniso.jpg',
+    totalReturn: 412.8,
+    winRate: 71.5,
+    followers: 2156,
+    totalTrades: 89,
+    riskScore: 'High',
+    verified: true,
+    assets: ['BTC', 'STX', 'ETH'],
+    recentTrades: [
+      {
+        id: 't4',
+        asset: 'BTC',
+        action: 'BUY',
+        amount: 1.2,
+        price: 96800,
+        timestamp: new Date('2025-01-02T12:00:00Z'),
+        status: 'OPEN'
+      }
+    ]
+  },
+  {
+    id: '4',
+    address: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
+    displayName: 'DefiMaster',
+    avatar: '/assets/team/goodness.jpg',
+    totalReturn: 156.7,
+    winRate: 75.8,
+    followers: 643,
+    totalTrades: 124,
+    riskScore: 'Medium',
+    verified: false,
+    assets: ['STX', 'BTC'],
+    recentTrades: [
+      {
+        id: 't5',
+        asset: 'STX',
+        action: 'BUY',
+        amount: 800,
+        price: 1.88,
+        timestamp: new Date('2025-01-01T20:30:00Z'),
+        pnl: 96.00,
+        status: 'CLOSED'
+      }
+    ]
+  },
+  {
+    id: '5',
+    address: 'ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB',
+    displayName: 'VolatilityViper',
+    totalReturn: 89.4,
+    winRate: 68.3,
+    followers: 421,
+    totalTrades: 267,
+    riskScore: 'High',
+    verified: false,
+    assets: ['BTC', 'ETH'],
+    recentTrades: [
+      {
+        id: 't6',
+        asset: 'BTC',
+        action: 'SELL',
+        amount: 0.8,
+        price: 97100,
+        timestamp: new Date('2025-01-02T06:45:00Z'),
+        pnl: 240.00,
+        status: 'CLOSED'
+      }
+    ]
+  }
+];
