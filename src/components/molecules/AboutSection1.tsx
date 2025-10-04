@@ -1,6 +1,6 @@
 import Button from "../atoms/Button";
 import { IoCheckmarkDoneOutline } from "react-icons/io5";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 const AboutSection1 = () => {
   return (
