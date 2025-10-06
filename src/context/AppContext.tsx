@@ -8,6 +8,8 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { TSentiment } from "../lib/types";
+import { usePriceData } from "../hooks/useRealTimeData";
+
 // TODO: Implement Stacks premium calculator
 // import calculatePremium, { TokenType } from "../blockchain/stacks/premiumCalculator";
 
@@ -35,20 +37,21 @@ type AppContextState = {
     profitZone: number;
   }>;
   isFetching: boolean;
-  assetPrice: number;
   isFetchingPremiums: boolean;
+  assetPrice: number;
+  priceChange24h: number;
 };
 
-type AppContextType = {
+interface AppContextType {
   state: AppContextState;
   handlePeriodChange: (period: string) => void;
   handleAmountChange: (amount: string) => void;
-  handlePremiumSelect: (strike: string) => void;
+  handlePremiumSelect: (profitZone: string) => void;
   handleAssetChange: (asset: TokenType) => void;
   handleSentimentChange: (sentiment: TSentiment) => void;
   handleStrategyChange: (strategy: string) => void;
   formatNumber: (num: number) => string;
-};
+}
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -66,7 +69,21 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     isFetching: false,
     isFetchingPremiums: false,
     assetPrice: 0,
+    priceChange24h: 0,
   });
+
+  // Use real-time price data
+  const { price: realTimePrice, priceChange24h: realTimePriceChange, loading: priceLoading } = usePriceData(state.asset);
+
+  // Update state when real-time price changes
+  useEffect(() => {
+    setState(prev => ({
+      ...prev,
+      assetPrice: realTimePrice,
+      priceChange24h: realTimePriceChange,
+      isFetching: priceLoading
+    }));
+  }, [realTimePrice, realTimePriceChange, priceLoading]);
 
   const handlePeriodChange = useCallback(
     (period: string) => {
@@ -128,28 +145,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const isSocialStrategy = (strategy: string) => {
     return strategy === "Copy Trading" || strategy === "Meme-Driven Investing";
   };
-
-  // fetch asset price
-  useEffect(() => {
-    const fetchAssetPrice = async () => {
-      setState((prev) => ({ ...prev, isFetching: true }));
-      // getAssetPrice(state.asset)
-      // .then((data) => {
-      //   setState((prev) => ({
-      //     ...prev,
-      //     assetPrice: data,
-      //   }));
-      // })
-      // .catch((err) => {
-      //   console.log(err);
-      // })
-      // .finally(() => {
-      //   setState((prev) => ({ ...prev, isFetching: false }));
-      // });
-    };
-
-    fetchAssetPrice();
-  }, [state.asset]);
 
   // calculate Strike (Cost) and premium - only for capital sentiment strategies
   useEffect(() => {
