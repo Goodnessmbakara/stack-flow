@@ -22,28 +22,24 @@ const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "/",
-        element: <HomePage />,
-      },
-      {
         path: "/about",
         element: <WhitepaperPage />,
       },
-      // @DEV: Default /app route to /app/trade/new
+      // @DEV: Default /trade route to /trade/new
       {
         path: "/trade",
         element: <DashboardLayout />,
         children: [
           {
-            path: "/trade",
+            path: "", // Renders at /trade
             element: <NewTradePage />,
           },
           {
-            path: "/trade/history",
+            path: "history", // Renders at /trade/history
             element: <TradingHistoryPage />,
           },
           // {
-          //   path: "/app/trade/referrals",
+          //   path: "referrals",
           //   element: <ReferralPage />,
           // },
         ],
