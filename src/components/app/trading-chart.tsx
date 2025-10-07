@@ -5,26 +5,35 @@ import {
   ISeriesApi,
 } from "lightweight-charts";
 
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { Icons } from "../ui/icons";
 import TradingViewWidget from "./trading-widget";
 
 type Props = {
   asset: string;
+  visible: boolean; // Add visible prop
 };
 
-export function TradingChart({ asset }: Props) {
+export function TradingChart({ asset, visible }: Props) {
   const price = Math.random() * 1000;
   const { state, formatNumber } = useAppContext();
-  const { assetPrice, isFetching } = state;
+  const { assetPrice, isFetching, priceChange24h } = state;
 
   return (
     <div className="w-full h-full space-y-5">
       <div className="flex items-center justify-between">
         <div className="text-[#ECECEC] text-sm font-semibold flex items-center gap-2">
-          {asset === "ETH" ? <Icons.eth /> : <Icons.bitcoin />}
-          {asset === "ETH" ? "ETH" : "BTC"} / USD
+          {asset === "STX" ? <Icons.bitcoin /> : <Icons.bitcoin />}
+          {asset} / USD
+          <span
+            className={`text-xs font-bold ${
+              priceChange24h >= 0 ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            {priceChange24h >= 0 ? "+" : ""}
+            {priceChange24h.toFixed(2)}%
+          </span>
         </div>
         <div className="space-y-2">
           <p className="text-[#ECECEC] text-xs">Current Price</p>
@@ -33,6 +42,9 @@ export function TradingChart({ asset }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Pass the visible prop to the widget */}
+      <TradingViewWidget asset={asset} visible={visible} />
 
       <div className="flex items-center justify-between *:w-full">
         <div className="space-y-2">
@@ -53,15 +65,6 @@ export function TradingChart({ asset }: Props) {
             <span className="text-[#D6D6D6] font-bold text-sm">-100%</span>
           </p>
         </div>
-
-        <p className="text-[#7A7A7A] text-xs">
-          Choose the expected price level on the chart to calculate P&L
-        </p>
-      </div>
-
-      <div className="w-full h-[404px] relative overflow-hidden bg-gradient-to-r from-[#37f741] to-[#FDEE61] p-0.5 rounded-lg">
-        {/* <LightweightChart asset={asset} /> */}
-        <TradingViewWidget asset={asset} />
       </div>
     </div>
   );

@@ -5,15 +5,15 @@ import { SentimentSelector } from "../app/sentiment-selector";
 import { StrategySelector } from "../app/strategy-selector";
 import { TradeSummary } from "../app/trade-summary";
 import { TradingChart } from "../app/trading-chart";
-import { CopyTrading } from "../app/copy-trading";
-import { MemeInvesting } from "../app/meme-investing";
+import CopyTrading from "../app/copy-trading";
+import MemeInvesting from "../app/meme-investing";
 import ReferralModal from "../molecules/ReferralModal";
 
 export default function DappPage() {
   const { state } = useAppContext();
   const { asset, sentiment, strategy } = state;
 
-  // Show social sentiment features when BTC asset is selected
+  // "Social Sentiment" is the BTC asset button
   const showCopyTrading = asset === "BTC" && strategy === "Copy Trading";
   const showMemeInvesting =
     asset === "BTC" && strategy === "Meme-Driven Investing";
@@ -36,10 +36,10 @@ export default function DappPage() {
               asset={asset}
             />
           </div>
-          <div className="w-full lg:max-w-[667px] bg-[#1D2215] p-7 rounded-lg">
+          <div className="w-full lg:max-w-[667px] bg-[#1D2215] p-7 rounded-lg min-h-[400px]">
             {showCopyTrading && <CopyTrading />}
             {showMemeInvesting && <MemeInvesting />}
-            {!showSocialFeatures && <TradingChart asset={asset} />}
+            <TradingChart asset={asset} visible={!showSocialFeatures} />
           </div>
         </div>
 
