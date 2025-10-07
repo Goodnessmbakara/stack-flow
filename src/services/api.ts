@@ -1,29 +1,10 @@
 import axios from 'axios';
-import { axiosInstance } from '../utils/axios';
-import { ENVIRONMENT } from '../utils/environment';
 
 // Price data interfaces
 interface CoinGeckoPrice {
   [key: string]: {
     usd: number;
     usd_24h_change: number;
-  };
-}
-
-interface StacksApiResponse {
-  balances: {
-    stx: {
-      balance: string;
-      total_sent: string;
-      total_received: string;
-    };
-    fungible_tokens: {
-      [key: string]: {
-        balance: string;
-        total_sent: string;
-        total_received: string;
-      };
-    };
   };
 }
 
@@ -433,7 +414,23 @@ export class ApiService {
         this.getAllStacksTokens()
       ]);
       
-      const pools = [
+      const pools: Array<{
+        id: string;
+        meme: string;
+        description: string;
+        image: string;
+        totalPool: number;
+        participants: number;
+        timeLeft: string;
+        sentiment: string;
+        viralScore: number;
+        creator: string;
+        minimumEntry: number;
+        expectedReturn: string;
+        riskLevel: 'High' | 'Medium' | 'Low';
+        tokens: string[];
+        contractId?: string; // Add optional contractId property
+      }> = [
         {
           id: 'btc-moon-pool',
           meme: '🚀 Bitcoin to $150K',
@@ -442,7 +439,7 @@ export class ApiService {
           totalPool: Math.floor(Math.random() * 100000 + 50000),
           participants: Math.floor(Math.random() * 1000 + 200),
           timeLeft: `${Math.floor(Math.random() * 30 + 5)} days`,
-          sentiment: 'bullish' as const,
+          sentiment: 'bullish',
           viralScore: Math.floor(Math.random() * 30 + 70),
           creator: 'CryptoProphet',
           minimumEntry: 50,
@@ -458,7 +455,7 @@ export class ApiService {
           totalPool: Math.floor(Math.random() * 75000 + 25000),
           participants: Math.floor(Math.random() * 600 + 150),
           timeLeft: `${Math.floor(Math.random() * 25 + 3)} days`,
-          sentiment: 'bullish' as const,
+          sentiment: 'bullish',
           viralScore: Math.floor(Math.random() * 25 + 75),
           creator: 'StacksMaxi',
           minimumEntry: 25,
@@ -468,9 +465,9 @@ export class ApiService {
         }
       ];
 
-      // Add meme token pools
+      // Add meme token pools with fixed sentiment types
       tokens.slice(0, 12).forEach((token, index) => {
-        const sentiments = ['bullish', 'volatile', 'bearish'];
+        const sentiments: ('bullish' | 'volatile' | 'bearish')[] = ['bullish', 'volatile', 'bearish'];
         const sentiment = sentiments[Math.floor(Math.random() * sentiments.length)];
         
         pools.push({
@@ -481,7 +478,7 @@ export class ApiService {
           totalPool: Math.floor(Math.random() * 25000 + 5000),
           participants: Math.floor(Math.random() * 200 + 30),
           timeLeft: `${Math.floor(Math.random() * 20 + 2)} days`,
-          sentiment: sentiment as 'bullish' | 'volatile' | 'bearish',
+          sentiment: sentiment,
           viralScore: Math.floor(Math.random() * 60 + 20),
           creator: `${token.symbol}Gang`,
           minimumEntry: 10,
