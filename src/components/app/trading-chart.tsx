@@ -12,33 +12,48 @@ import TradingViewWidget from "./trading-widget";
 
 type Props = {
   asset: string;
+  visible: boolean;
 };
 
-export function TradingChart({ asset }: Props) {
+export function TradingChart({ asset, visible }: Props) {
   const price = Math.random() * 1000;
   const { state, formatNumber } = useAppContext();
-  const { assetPrice, isFetching } = state;
+  const { assetPrice, isFetching, priceChange24h } = state;
+
+  // Safe handling of priceChange24h
+  const safePriceChange24h = priceChange24h ?? 0;
 
   return (
     <div className="w-full h-full space-y-5">
       <div className="flex items-center justify-between">
         <div className="text-[#ECECEC] text-sm font-semibold flex items-center gap-2">
-          {asset === "ETH" ? <Icons.eth /> : <Icons.bitcoin />}
-          {asset === "ETH" ? "ETH" : "BTC"} / USD
+          {asset === "STX" ? <Icons.bitcoin /> : <Icons.bitcoin />}
+          {asset} / USD
+          <span
+            className={`text-xs font-bold ${
+              safePriceChange24h >= 0 ? "text-green-400" : "text-red-400"
+            }`}
+          >
+            {safePriceChange24h >= 0 ? "+" : ""}
+            {safePriceChange24h.toFixed(2)}%
+          </span>
         </div>
         <div className="space-y-2">
           <p className="text-[#ECECEC] text-xs">Current Price</p>
           <p className="text-[#D6D6D6] text-base font-bold">
-            {isFetching ? "..." : formatNumber(assetPrice)}
+            {isFetching ? "..." : formatNumber(assetPrice || 0)}
           </p>
         </div>
       </div>
+
+      {/* Pass the visible prop to the widget */}
+      <TradingViewWidget asset={asset} visible={visible} />
 
       <div className="flex items-center justify-between *:w-full">
         <div className="space-y-2">
           <p className="text-[#ECECEC] text-xs">Expected Price</p>
           <p className="text-[#D6D6D6] text-base font-bold">
-            {isFetching ? "..." : formatNumber(assetPrice)}
+            {isFetching ? "..." : formatNumber(assetPrice || 0)}
           </p>
         </div>
 
@@ -53,15 +68,6 @@ export function TradingChart({ asset }: Props) {
             <span className="text-[#D6D6D6] font-bold text-sm">-100%</span>
           </p>
         </div>
-
-        <p className="text-[#7A7A7A] text-xs">
-          Choose the expected price level on the chart to calculate P&L
-        </p>
-      </div>
-
-      <div className="w-full h-[404px] relative overflow-hidden bg-gradient-to-r from-[#37f741] to-[#FDEE61] p-0.5 rounded-lg">
-        {/* <LightweightChart asset={asset} /> */}
-        <TradingViewWidget asset={asset} />
       </div>
     </div>
   );
@@ -116,67 +122,45 @@ export const LightweightChart: React.FC<Props> = ({ asset }) => {
     const candleSeries = chart.addCandlestickSeries({
       wickUpColor: "#3aa67b",
       upColor: "#3aa67b",
-      wickDownColor: "#eb3333",
-      downColor: "#eb3333",
+      wickDownColor: "#e54560",
+      downColor: "#e54560",
       borderVisible: false,
+      priceFormat: {
+        type: "price",
+        precision: 2,
+        minMove: 0.01,
+      },
     });
 
     candleSeriesRef.current = candleSeries;
 
-    // Fetch historical data
-    const fetchHistoricalData = async () => {
-      try {
-        const response = await fetch(
-          `https://api.binance.com/api/v3/klines?symbol=${asset.toUpperCase()}USDT&interval=1m&limit=1000`
-        );
-
-        const data: Array<[number, string, string, string, string]> =
-          await response.json();
-
-        // @ts-expect-error time here not matching too
-        const formattedData: CandlestickData[] = data.map((k) => ({
-          time: k[0] / 1000, // Convert ms to seconds
-          open: parseFloat(k[1]),
-          high: parseFloat(k[2]),
-          low: parseFloat(k[3]),
-          close: parseFloat(k[4]),
-        }));
-
-        candleSeries.setData(formattedData);
-      } catch (error) {
-        console.error("Failed to fetch historical data:", error);
-      }
-    };
-
-    fetchHistoricalData();
-
-    // WebSocket for live updates
+    // WebSocket connection for real-time data
     const ws = new WebSocket(
       `wss://stream.binance.com:9443/ws/${asset.toLowerCase()}usdt@kline_1m`
     );
 
-    ws.onmessage = (event: MessageEvent) => {
+    let lastCandleTime: number | null = null;
+
+    ws.onmessage = (event) => {
       try {
         const message: BinanceKlineMessage = JSON.parse(event.data);
+        const kline = message.k;
 
-        if (message.k) {
-          const kline = message.k;
-
+        if (kline && candleSeriesRef.current) {
           const candlestickData: CandlestickData = {
-            // @ts-expect-error time wahala
-            time: kline.t / 1000,
+            time: Math.floor(kline.t / 1000) as any, // Convert to seconds
             open: parseFloat(kline.o),
             high: parseFloat(kline.h),
             low: parseFloat(kline.l),
             close: parseFloat(kline.c),
           };
 
-          const lastCandleTime = candleSeriesRef.current?.data()?.at(-1)?.time;
-
-          if (lastCandleTime === candlestickData.time) {
-            // Update the last candle
+          // Check if this is a new candle or an update to the existing one
+          if (!lastCandleTime || candlestickData.time === lastCandleTime) {
+            // Update the existing candle
+            lastCandleTime = candlestickData.time as number;
             candleSeriesRef.current?.update(candlestickData);
-          } else if (candlestickData.time > (lastCandleTime || 0)) {
+          } else if ((candlestickData.time as number) > (lastCandleTime || 0)) {
             // Add a new candle
             candleSeriesRef.current?.setData([
               ...(candleSeriesRef.current?.data() || []),
