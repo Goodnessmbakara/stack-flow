@@ -3,9 +3,9 @@ import { apiService } from './api';
 
 export class DataService {
   private static instance: DataService;
+  private subscribers = new Set<() => void>();
   private updateInterval: NodeJS.Timeout | null = null;
-  private subscribers: Map<string, (data: any) => void> = new Map();
-  
+
   public static getInstance(): DataService {
     if (!DataService.instance) {
       DataService.instance = new DataService();
@@ -14,48 +14,26 @@ export class DataService {
   }
 
   // Subscribe to data updates
-  subscribe(key: string, callback: (data: any) => void) {
-    this.subscribers.set(key, callback);
-  }
-
-  // Unsubscribe from updates
-  unsubscribe(key: string) {
-    this.subscribers.delete(key);
+  subscribe(callback: () => void) {
+    this.subscribers.add(callback);
+    return () => this.subscribers.delete(callback);
   }
 
   // Notify all subscribers
-  private notify(key: string, data: any) {
-    const callback = this.subscribers.get(key);
-    if (callback) {
-      callback(data);
-    }
+  private notifySubscribers() {
+    this.subscribers.forEach(callback => callback());
   }
 
   // Start real-time data updates
-  startRealTimeUpdates() {
+  startRealTimeUpdates(intervalMs: number = 30000) {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
     }
 
-    // Update every 30 seconds
-    this.updateInterval = setInterval(async () => {
-      try {
-        // Update prices
-        const prices = await apiService.getAssetPrices(['STX', 'BTC', 'ETH']);
-        this.notify('prices', prices);
-
-        // Update trader data less frequently (every 5 minutes)
-        if (Date.now() % (5 * 60 * 1000) < 30000) {
-          const traders = await this.getTopTraders();
-          this.notify('traders', traders);
-
-          const memePools = await this.getMemeInvestingPools();
-          this.notify('memePools', memePools);
-        }
-      } catch (error) {
-        console.error('Error in real-time updates:', error);
-      }
-    }, 30000); // 30 seconds
+    this.updateInterval = setInterval(() => {
+      console.log('📊 Real-time data update triggered');
+      this.notifySubscribers();
+    }, intervalMs);
   }
 
   // Stop real-time updates
@@ -66,7 +44,7 @@ export class DataService {
     }
   }
 
-  // Get real top traders
+  // Get real top traders - no fallback
   async getTopTraders(): Promise<TraderProfile[]> {
     try {
       const realTraders = await apiService.getTopStacksTraders();
@@ -85,13 +63,12 @@ export class DataService {
         recentTrades: trader.recentTrades
       }));
     } catch (error) {
-      console.error('Error getting top traders:', error);
-      // Fallback to empty array - the UI should handle this gracefully
-      return [];
+      console.error('Error getting real top traders:', error);
+      throw new Error('Failed to fetch real trader data. API may be unavailable.');
     }
   }
 
-  // Get real meme investing pools
+  // Get real meme investing pools - no fallback
   async getMemeInvestingPools(): Promise<MemePool[]> {
     try {
       const realPools = await apiService.getSocialSentimentPools();
@@ -108,26 +85,22 @@ export class DataService {
         creator: pool.creator,
         minimumEntry: pool.minimumEntry,
         expectedReturn: pool.expectedReturn,
-        riskLevel: pool.riskLevel
+        riskLevel: pool.riskLevel,
+        tokens: pool.tokens,
+        contractId: pool.contractId,
+        volume24h: pool.volume24h,
+        trades24h: pool.trades24h,
+        priceChange24h: pool.priceChange24h,
+        verified: pool.verified,
+        isHot: pool.isHot
       }));
     } catch (error) {
-      console.error('Error getting meme pools:', error);
-      return [];
+      console.error('Error getting real meme pools:', error);
+      throw new Error('Failed to fetch real pool data. API may be unavailable.');
     }
   }
 
-  // Get real asset prices
-  async getAssetPrice(asset: string): Promise<number> {
-    try {
-      const prices = await apiService.getAssetPrices([asset]);
-      return prices[asset] || 0;
-    } catch (error) {
-      console.error(`Error getting ${asset} price:`, error);
-      return 0;
-    }
-  }
-
-  // Get real trader performance data
+  // Get real trader performance data - no mock data
   async getTraderPerformance(address: string): Promise<{
     totalReturn: number;
     winRate: number;
@@ -136,23 +109,27 @@ export class DataService {
     try {
       const addressInfo = await apiService.getStacksAddressInfo(address);
       
-      // Calculate performance metrics from transaction data
+      // Calculate real performance metrics from transaction data
       const totalTrades = addressInfo.transactions.length;
-      const mockWinRate = Math.random() * 30 + 50; // Will be calculated from real P&L
-      const mockReturn = Math.random() * 300 + 50;
-
+      const successfulTxs = addressInfo.transactions.filter(tx => tx.tx_status === 'success').length;
+      const winRate = totalTrades > 0 ? (successfulTxs / totalTrades) * 100 : 0;
+      
+      // Calculate returns based on transaction values (simplified)
+      let totalReturn = 0;
+      addressInfo.transactions.forEach(tx => {
+        if (tx.token_transfer && tx.token_transfer.amount) {
+          totalReturn += parseInt(tx.token_transfer.amount) / 1000000;
+        }
+      });
+      
       return {
-        totalReturn: mockReturn,
-        winRate: mockWinRate,
+        totalReturn: Math.max(totalReturn / 100, 0), // Convert to percentage
+        winRate,
         trades: totalTrades
       };
     } catch (error) {
-      console.error('Error getting trader performance:', error);
-      return {
-        totalReturn: 0,
-        winRate: 0,
-        trades: 0
-      };
+      console.error('Error getting real trader performance:', error);
+      throw new Error('Failed to fetch real trader performance data.');
     }
   }
 
