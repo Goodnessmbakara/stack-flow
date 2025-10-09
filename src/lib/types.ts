@@ -53,4 +53,22 @@ export interface MemePool {
   minimumEntry: number;
   expectedReturn: string;
   riskLevel: 'Low' | 'Medium' | 'High' | string;
+  tokens?: string[];
+  contractId?: string;
+  // New real pool data fields
+  volume24h?: number;
+  trades24h?: number;
+  priceChange24h?: number;
+  verified?: boolean;
+  isHot?: boolean;
 }
+
+// Fix TokenType to match the actual usage in the app
+export type TokenType = "STX" | "BTC" | "ETH";
+
+// TokenData defines the structure of token information
+export type TokenData = {
+  accessToken: string;
+  refreshToken?: string;
+  expiresIn: number;
+};
