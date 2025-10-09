@@ -117,11 +117,11 @@ const CopyTrading = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <img
+                  {/* <img
                     src={trader.avatar}
                     alt={trader.displayName}
                     className="w-10 h-10 rounded-full"
-                  />
+                  /> */}
                   <div>
                     <div className="flex items-center space-x-2">
                       <span className="font-semibold text-white">{trader.displayName}</span>
