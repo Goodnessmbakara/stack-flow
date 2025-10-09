@@ -1,24 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TraderProfile } from '../lib/types';
+import { TraderProfile, MemePool } from '../lib/types';
 import { apiService } from '../services/api';
-
-interface MemePool {
-  id: string;
-  meme: string;
-  description: string;
-  image?: string;
-  totalPool: number;
-  participants: number;
-  timeLeft: string;
-  sentiment: 'bullish' | 'bearish' | 'volatile' | string;
-  viralScore: number;
-  creator: string;
-  minimumEntry: number;
-  expectedReturn: string;
-  riskLevel: 'Low' | 'Medium' | 'High' | string;
-  tokens?: string[];
-  contractId?: string;
-}
 
 interface UseRealTimeDataReturn {
   traders: TraderProfile[];
@@ -41,9 +23,9 @@ export function useRealTimeData(): UseRealTimeDataReturn {
       setLoading(true);
       setError(null);
 
-      console.log('🔄 Fetching data from APIs...');
+      console.log('🔄 Fetching real data from APIs...');
 
-      // Fetch all data with proper error handling
+      // Fetch all data with proper error handling - no fallbacks
       const results = await Promise.allSettled([
         apiService.getTopStacksTraders(),
         apiService.getSocialSentimentPools(),
@@ -53,73 +35,75 @@ export function useRealTimeData(): UseRealTimeDataReturn {
       // Handle traders result
       if (results[0].status === 'fulfilled') {
         setTraders(results[0].value);
-        console.log('✅ Traders loaded:', results[0].value.length);
+        console.log('✅ Real traders loaded:', results[0].value.length);
       } else {
-        console.error('❌ Failed to load traders:', results[0].reason);
+        console.error('❌ Traders API failed:', results[0].reason);
         setTraders([]);
       }
 
       // Handle meme pools result
       if (results[1].status === 'fulfilled') {
         setMemePools(results[1].value);
-        console.log('✅ Meme pools loaded:', results[1].value.length);
+        console.log('✅ Real meme pools loaded:', results[1].value.length);
       } else {
-        console.error('❌ Failed to load meme pools:', results[1].reason);
+        console.error('❌ Meme pools API failed:', results[1].reason);
         setMemePools([]);
       }
 
       // Handle prices result
       if (results[2].status === 'fulfilled') {
         setPrices(results[2].value);
-        console.log('✅ Prices loaded:', results[2].value);
+        console.log('✅ Real prices loaded:', Object.keys(results[2].value).length);
       } else {
-        console.error('❌ Failed to load prices:', results[2].reason);
-        setPrices({ STX: 1.85, BTC: 97420, ETH: 3840 });
+        console.error('❌ Prices API failed:', results[2].reason);
+        setPrices({});
       }
 
-      // Only set error if ALL requests failed
+      // Check if all APIs failed
       const allFailed = results.every(result => result.status === 'rejected');
       if (allFailed) {
-        setError('All API endpoints are currently unavailable. Using fallback data.');
+        setError('All APIs are currently unavailable. Please check your internet connection and try again later.');
+      } else {
+        // Set specific error message for what failed
+        const failedServices = [];
+        if (results[0].status === 'rejected') failedServices.push('trader data');
+        if (results[1].status === 'rejected') failedServices.push('pool data');
+        if (results[2].status === 'rejected') failedServices.push('price data');
+        
+        if (failedServices.length > 0) {
+          setError(`Some services are unavailable: ${failedServices.join(', ')}. Displaying available data only.`);
+        }
       }
 
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unexpected error occurred';
-      setError(errorMessage);
-      console.error('❌ Critical error in data initialization:', err);
+    } catch (error) {
+      console.error('❌ Data initialization failed:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
       
-      // Set minimal fallback data
+      // Clear all data on failure
       setTraders([]);
       setMemePools([]);
-      setPrices({ STX: 1.85, BTC: 97420, ETH: 3840 });
+      setPrices({});
     } finally {
       setLoading(false);
     }
   }, []);
 
   const refreshData = useCallback(async () => {
-    console.log('🔄 Manual refresh requested...');
+    console.log('🔄 Refreshing real-time data...');
     await initializeData();
   }, [initializeData]);
 
   useEffect(() => {
     initializeData();
+    
+    // Set up real-time updates every 5 minutes
+    const interval = setInterval(() => {
+      console.log('⏰ Auto-refreshing real data...');
+      refreshData();
+    }, 5 * 60 * 1000);
 
-    // Set up periodic updates with error handling
-    const priceInterval = setInterval(async () => {
-      try {
-        const newPrices = await apiService.getAssetPrices(['STX', 'BTC', 'ETH']);
-        setPrices(newPrices);
-        console.log('📈 Prices updated automatically');
-      } catch (error) {
-        console.error('Price update failed:', error);
-      }
-    }, 300000); // 5 minutes
-
-    return () => {
-      clearInterval(priceInterval);
-    };
-  }, [initializeData]);
+    return () => clearInterval(interval);
+  }, [initializeData, refreshData]);
 
   return {
     traders,
@@ -131,7 +115,7 @@ export function useRealTimeData(): UseRealTimeDataReturn {
   };
 }
 
-// Hook for individual trader data
+// Hook for individual trader data - no fallback data
 export function useTraderData(address: string) {
   const [traderData, setTraderData] = useState<{
     balance: number;
@@ -150,18 +134,21 @@ export function useTraderData(address: string) {
       
       try {
         setLoading(true);
+        setError(null);
+        
         const addressInfo = await apiService.getStacksAddressInfo(address);
         
         setTraderData({
           balance: addressInfo.balance,
           performance: {
-            totalReturn: Math.random() * 300 + 50,
-            winRate: Math.random() * 30 + 60,
+            totalReturn: 0, // Will be calculated from real P&L data
+            winRate: 0, // Will be calculated from successful vs failed transactions
             trades: addressInfo.transactions.length
           }
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load trader data');
+        setError(err instanceof Error ? err.message : 'Failed to load real trader data');
+        setTraderData(null);
       } finally {
         setLoading(false);
       }
@@ -173,31 +160,46 @@ export function useTraderData(address: string) {
   return { traderData, loading, error };
 }
 
-// Hook for real-time price updates
+// Hook for real-time price updates - now properly returns both price and priceChange24h
 export function usePriceData(asset: string) {
-  const [price, setPrice] = useState<number>(0);
+  const [price, setPrice] = useState<number | null>(null);
+  const [priceChange24h, setPriceChange24h] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  const [priceChange24h, setPriceChange24h] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPrice = async () => {
       try {
-        const priceData = await apiService.getAssetPrices([asset]);
-        setPrice(priceData[asset] || 0);
-        setPriceChange24h(Math.random() * 10 - 5);
-      } catch (error) {
-        console.error(`Error fetching ${asset} price:`, error);
-        const fallbackPrices = { STX: 1.85, BTC: 97420, ETH: 3840 };
-        setPrice(fallbackPrices[asset as keyof typeof fallbackPrices] || 0);
+        setLoading(true);
+        setError(null);
+        
+        // Use the new API method that returns both price and 24h change
+        const priceData = await apiService.getAssetPriceWithChange(asset);
+        
+        if (priceData) {
+          setPrice(priceData.price);
+          setPriceChange24h(priceData.priceChange24h);
+        } else {
+          setPrice(null);
+          setPriceChange24h(null);
+        }
+        
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch real price data');
+        setPrice(null);
+        setPriceChange24h(null);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPrice();
-    const interval = setInterval(fetchPrice, 300000); // 5 minutes
+    
+    // Update price every 30 seconds
+    const interval = setInterval(fetchPrice, 30 * 1000);
+    
     return () => clearInterval(interval);
   }, [asset]);
 
-  return { price, priceChange24h, loading };
+  return { price, priceChange24h, loading, error };
 }
