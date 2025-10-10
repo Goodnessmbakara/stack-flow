@@ -3,6 +3,8 @@
  * Provides consistent price data across the application
  */
 
+import { memeDataService, type MemeToken, type SocialSentimentData } from './memeDataService';
+
 export interface PriceData {
   price: number;
   timestamp: number;
@@ -203,3 +205,78 @@ class PriceService {
 
 // Export singleton instance
 export const priceService = new PriceService();
+
+/**
+ * Get enhanced price data with social sentiment
+ */
+export async function getEnhancedPriceData(symbol: string): Promise<{
+  price: number;
+  change24h: number;
+  sentiment: SocialSentimentData | null;
+  memeData?: MemeToken;
+}> {
+  try {
+    const [priceData, sentimentData, memeTokens] = await Promise.all([
+      getPrice(symbol),
+      symbol === 'BTC' ? memeDataService.getSBTCSentiment() : null,
+      memeDataService.getTrendingMemeCoins()
+    ]);
+
+    const memeData = memeTokens.find(token => token.symbol === symbol.toUpperCase());
+
+    return {
+      price: priceData.price,
+      change24h: priceData.change24h || 0,
+      sentiment: sentimentData,
+      memeData
+    };
+  } catch (error) {
+    console.error(`Failed to get enhanced price data for ${symbol}:`, error);
+    return {
+      price: 0,
+      change24h: 0,
+      sentiment: null
+    };
+  }
+}
+
+/**
+ * Get social sentiment dashboard data
+ */
+export async function getSocialSentimentDashboard(): Promise<{
+  sBTCSentiment: SocialSentimentData;
+  trendingMemes: MemeToken[];
+  memePools: any[];
+}> {
+  try {
+    const [sBTCSentiment, trendingMemes, memePools] = await Promise.all([
+      memeDataService.getSBTCSentiment(),
+      memeDataService.getTrendingMemeCoins(),
+      memeDataService.getMemeBasedPools()
+    ]);
+
+    return {
+      sBTCSentiment,
+      trendingMemes: trendingMemes.slice(0, 10),
+      memePools
+    };
+  } catch (error) {
+    console.error('Failed to get social sentiment dashboard:', error);
+    return {
+      sBTCSentiment: {
+        token: 'sBTC',
+        sentiment: 'neutral',
+        score: 50,
+        volume: 0,
+        social_mentions: 0,
+        price_momentum: 0
+      },
+      trendingMemes: [],
+      memePools: []
+    };
+  }
+}
+function getPrice(symbol: string): any {
+  throw new Error('Function not implemented.');
+}
+
