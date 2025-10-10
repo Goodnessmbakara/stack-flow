@@ -10,19 +10,25 @@
  * Uses @stacks/connect for wallet integration
  */
 
-import {
-  openContractCall,
-  FungibleConditionCode,
-  makeStandardSTXPostCondition,
-  type FinishedTxData,
-} from '@stacks/connect';
-import {
+import { 
   uintCV,
-  AnchorMode,
+  PostCondition,
+  makeSTXPostCondition,
+  FungibleConditionCode,
   PostConditionMode,
-  type PostCondition,
+  AnchorMode
 } from '@stacks/transactions';
-import { StacksTestnet, StacksMainnet, StacksDevnet } from '@stacks/network';
+
+import { 
+  openContractCall,
+  FinishedTxData 
+} from '@stacks/connect';
+
+import { 
+  StacksMainnet,
+  StacksTestnet,
+  StacksDevnet
+} from '@stacks/network';
 
 // Contract configuration
 const DEVNET_CONTRACT = {
@@ -141,15 +147,15 @@ export async function createCallOption(params: CreateOptionParams): Promise<Tran
     // Add post-condition: User must transfer premium + fee (0.1%)
     const totalCost = premiumMicro + Math.floor(premiumMicro * 0.001);
     const postConditions: PostCondition[] = [
-      makeStandardSTXPostCondition(
+      makeSTXPostCondition(
         userAddress,
         FungibleConditionCode.LessEqual,
         totalCost
       ),
     ];
     
-    // Open contract call
-    const txOptions = {
+    // Open contract call - returns void, transaction details come through callbacks
+    await openContractCall({
       network: getNetwork(),
       anchorMode: AnchorMode.Any,
       contractAddress: CONTRACT_ADDRESS,
@@ -166,12 +172,12 @@ export async function createCallOption(params: CreateOptionParams): Promise<Tran
         console.log('[TxManager] Transaction cancelled by user');
         onCancel?.();
       },
-    };
+    });
     
-    const result = await openContractCall(txOptions);
-    
+    // Note: The actual txId comes through the onFinish callback
+    // We return a placeholder here since the wallet interaction is async
     return {
-      txId: result.txId,
+      txId: 'pending',
       success: true,
     };
   } catch (error) {
@@ -221,7 +227,7 @@ export async function createStrapOption(params: CreateOptionParams): Promise<Tra
       ),
     ];
     
-    const txOptions = {
+    await openContractCall({
       network: getNetwork(),
       anchorMode: AnchorMode.Any,
       contractAddress: CONTRACT_ADDRESS,
@@ -238,12 +244,10 @@ export async function createStrapOption(params: CreateOptionParams): Promise<Tra
         console.log('[TxManager] Transaction cancelled');
         onCancel?.();
       },
-    };
-    
-    const result = await openContractCall(txOptions);
+    });
     
     return {
-      txId: result.txId,
+      txId: 'pending',
       success: true,
     };
   } catch (error) {
@@ -295,7 +299,7 @@ export async function createBullCallSpread(params: CreateOptionParams): Promise<
       ),
     ];
     
-    const txOptions = {
+    await openContractCall({
       network: getNetwork(),
       anchorMode: AnchorMode.Any,
       contractAddress: CONTRACT_ADDRESS,
@@ -312,12 +316,10 @@ export async function createBullCallSpread(params: CreateOptionParams): Promise<
         console.log('[TxManager] Transaction cancelled');
         onCancel?.();
       },
-    };
-    
-    const result = await openContractCall(txOptions);
+    });
     
     return {
-      txId: result.txId,
+      txId: 'pending',
       success: true,
     };
   } catch (error) {
@@ -361,14 +363,14 @@ export async function createBullPutSpread(params: CreateOptionParams): Promise<T
     ];
     
     const postConditions: PostCondition[] = [
-      makeStandardSTXPostCondition(
+      makeSTXPostCondition(
         userAddress,
         FungibleConditionCode.LessEqual,
         collateralMicro
       ),
     ];
     
-    const txOptions = {
+    await openContractCall({
       network: getNetwork(),
       anchorMode: AnchorMode.Any,
       contractAddress: CONTRACT_ADDRESS,
@@ -385,12 +387,10 @@ export async function createBullPutSpread(params: CreateOptionParams): Promise<T
         console.log('[TxManager] Transaction cancelled');
         onCancel?.();
       },
-    };
-    
-    const result = await openContractCall(txOptions);
+    });
     
     return {
-      txId: result.txId,
+      txId: 'pending',
       success: true,
     };
   } catch (error) {
@@ -455,7 +455,7 @@ export async function exerciseOption(params: ExerciseOptionParams): Promise<Tran
       uintCV(priceMicro),
     ];
     
-    const txOptions = {
+    await openContractCall({
       network: getNetwork(),
       anchorMode: AnchorMode.Any,
       contractAddress: CONTRACT_ADDRESS,
@@ -471,12 +471,10 @@ export async function exerciseOption(params: ExerciseOptionParams): Promise<Tran
         console.log('[TxManager] Exercise cancelled');
         onCancel?.();
       },
-    };
-    
-    const result = await openContractCall(txOptions);
+    });
     
     return {
-      txId: result.txId,
+      txId: 'pending',
       success: true,
     };
   } catch (error) {
@@ -546,107 +544,24 @@ export async function monitorTransaction(
     const status = await getTransactionStatus(txId);
     
     if (status.status === 'success') {
+      console.log('[TxManager] Transaction confirmed in block', status.blockHeight);
       onUpdate('confirmed');
-      console.log('[TxManager] ✓ Transaction confirmed at block:', status.blockHeight);
       return true;
     }
     
     if (status.status === 'failed') {
+      console.error('[TxManager] Transaction failed:', status.error);
       onUpdate('failed');
-      console.error('[TxManager] ✗ Transaction failed:', status.error);
       return false;
     }
     
     onUpdate('pending');
     
-    // Wait 5 seconds before next check
+    // Wait before next status check
     await new Promise(resolve => setTimeout(resolve, 5000));
   }
   
-  console.warn('[TxManager] Transaction monitoring timeout');
+  console.warn('[TxManager] Transaction monitoring timed out');
+  onUpdate('timeout');
   return false;
 }
-
-/**
- * Get option details
- */
-export async function getOptionDetails(optionId: number): Promise<any> {
-  const network = getNetwork();
-  
-  try {
-    const response = await fetch(
-      `${network.coreApiUrl}/v2/contracts/call-read/${CONTRACT_ADDRESS}/${CONTRACT_NAME}/get-option`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sender: CONTRACT_ADDRESS,
-          arguments: [uintCV(optionId).serialize().toString('hex')],
-        }),
-      }
-    );
-    
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('[TxManager] Failed to get option details:', error);
-    return null;
-  }
-}
-
-/**
- * Get user's option list
- */
-export async function getUserOptions(userAddress: string): Promise<number[]> {
-  const network = getNetwork();
-  
-  try {
-    const response = await fetch(
-      `${network.coreApiUrl}/v2/contracts/call-read/${CONTRACT_ADDRESS}/${CONTRACT_NAME}/get-user-options`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sender: userAddress,
-          arguments: [],
-        }),
-      }
-    );
-    
-    const data = await response.json();
-    // Parse the list from Clarity response
-    return data.result || [];
-  } catch (error) {
-    console.error('[TxManager] Failed to get user options:', error);
-    return [];
-  }
-}
-
-/**
- * Format Stacks Explorer URL
- */
-export function getExplorerUrl(txId: string): string {
-  const baseUrl = ENV === 'mainnet'
-    ? 'https://explorer.hiro.so'
-    : ENV === 'testnet'
-    ? 'https://explorer.hiro.so'
-    : 'http://localhost:3000'; // Devnet explorer
-  
-  const chain = ENV === 'mainnet' ? 'mainnet' : 'testnet';
-  
-  return ENV === 'devnet'
-    ? `${baseUrl}/txid/${txId}`
-    : `${baseUrl}/txid/${txId}?chain=${chain}`;
-}
-
-/**
- * Get contract address for current environment
- */
-export function getContractIdentifier(): string {
-  return `${CONTRACT_ADDRESS}.${CONTRACT_NAME}`;
-}
-
