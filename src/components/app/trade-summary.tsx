@@ -132,10 +132,19 @@ export function TradeSummary() {
           // Monitor transaction
           const confirmed = await monitorTransaction(
             data.txId,
-            (status) => {
-              console.log("Transaction status:", status);
-              if (status === "confirmed") setTxStatus("success");
-              else if (status === "failed") setTxStatus("failed");
+            (status, details) => {
+              console.log("Transaction status update:", status, details);
+              
+              if (status === "confirmed") {
+                setTxStatus("success");
+                toast.success(`Transaction confirmed! Block: ${details?.blockHeight}`);
+              } else if (status === "failed") {
+                setTxStatus("failed");
+                toast.error(`Transaction failed: ${details?.reason || 'Unknown error'}`);
+              } else {
+                // Update pending status with progress info
+                console.log(`Transaction pending... (${details?.attempts}/${details?.maxAttempts})`);
+              }
             }
           );
           
