@@ -45,7 +45,7 @@ export default function HistoryPage() {
       }
       
       const data = await response.json();
-      const contractAddress = "ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH";
+      // const contractAddress = "ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH";
       
       // Filter for our contract transactions
       const contractTxs = data.results?.filter((tx: any) => 

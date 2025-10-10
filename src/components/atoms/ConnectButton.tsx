@@ -16,7 +16,7 @@ const CustomConnectButton = ({
 
   // Fetch real STX balance from Stacks API
   const [stxBalance, setStxBalance] = useState<number>(0);
-  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+  const [, setIsLoadingBalance] = useState(false);
 
   useEffect(() => {
     const fetchStxBalance = async () => {

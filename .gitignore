@@ -30,3 +30,21 @@ todo.txt.playwright-mcp/
 .env
 .env.*
 !.env.example
+
+# Security - Prevent secret files from being committed
+**/settings/Devnet.toml
+**/settings/*.toml
+**/deployments/*.yaml
+**/deployments/*.yml
+**/private-keys/
+**/secrets/
+**/keys/
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+
+# Clarinet specific
+**/settings/
+**/deployments/
+**/Clarinet.toml

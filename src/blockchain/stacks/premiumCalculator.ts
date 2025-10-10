@@ -34,7 +34,7 @@ export interface StrikeData {
 // Market constants (calibrated for crypto markets)
 const VOLATILITY_STX = 0.65;  // 65% annualized volatility for STX
 const VOLATILITY_BTC = 0.50;  // 50% annualized volatility for BTC
-const RISK_FREE_RATE = 0.05;  // 5% annual risk-free rate
+// const RISK_FREE_RATE = 0.05;  // 5% annual risk-free rate
 const STRIKE_INTERVALS = [-0.10, -0.05, 0, 0.05, 0.10]; // ±10%, ±5%, ATM
 
 // Premium cache for performance

@@ -232,7 +232,7 @@ export const LightweightChart: React.FC<Props> = ({ asset, onPriceSelect }) => {
           
           // Convert Binance data to candlestick format
           data = binanceData.map((k) => ({
-            time: k[0] / 1000, // Convert ms to seconds
+            time: (k[0] / 1000) as any, // Convert ms to seconds
             open: parseFloat(k[1]),
             high: parseFloat(k[2]),
             low: parseFloat(k[3]),

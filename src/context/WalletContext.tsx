@@ -91,7 +91,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           const addressData = {
             address: addr.address,
             symbol: addr.symbol,
-            purpose: addr.purpose,
+            // purpose: addr.purpose, // Property doesn't exist on AddressEntry
           };
           
           // STX addresses start with 'S'

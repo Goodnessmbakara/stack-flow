@@ -8,7 +8,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { TSentiment } from "../lib/types";
-import { getProfitZones } from "../blockchain/stacks/profitZoneCalculator";
+// import { getProfitZones } from "../blockchain/stacks/profitZoneCalculator";
 import { calculatePremiumsCached, type StrikeData } from "../blockchain/stacks/premiumCalculator";
 import { getAssetPrice } from "../blockchain/stacks/assetPrices";
 

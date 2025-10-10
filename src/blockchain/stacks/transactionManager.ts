@@ -53,7 +53,7 @@ function toMicroUnits(value: number): number {
 }
 
 export async function createOption(params: CreateOptionParams): Promise<void> {
-  const { strategy, amount, strikePrice, premium, period, userAddress, onFinish, onCancel } = params;
+  const { strategy, amount, strikePrice, premium, period, onFinish, onCancel } = params;
   
   const currentBlock = await getCurrentBlockHeight();
   const blocksPerDay = 144;

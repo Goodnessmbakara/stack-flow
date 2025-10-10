@@ -41,7 +41,7 @@ const Nav = (): ReactElement => {
     navigate("/");
   };
 
-  const showToast = () => {};
+  // const showToast = () => {};
   return (
     <Fragment>
       <div className="fixed top-0 bg-[#0d120c] z-50 w-full py-4 hidden md:block">
