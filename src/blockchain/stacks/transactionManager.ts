@@ -55,98 +55,175 @@ function toMicroUnits(value: number): number {
 export async function createOption(params: CreateOptionParams): Promise<void> {
   const { strategy, amount, strikePrice, premium, period, onFinish, onCancel } = params;
   
-  const currentBlock = await getCurrentBlockHeight();
-  const blocksPerDay = 144;
-  const BLOCK_BUFFER = 10; // Safety margin for transaction confirmation time
-  const expiryBlock = currentBlock + (Math.floor(period) * blocksPerDay) + BLOCK_BUFFER;
-  
-  const amountMicro = toMicroUnits(amount);
-  const strikeMicro = toMicroUnits(strikePrice);
-  const premiumMicro = toMicroUnits(premium);
-  
-  let functionName = 'create-call-option';
-  let functionArgs = [
-    uintCV(amountMicro),
-    uintCV(strikeMicro),
-    uintCV(premiumMicro),
-    uintCV(expiryBlock),
-  ];
-  
-  if (strategy === 'STRAP') {
-    functionName = 'create-strap-option';
-  } else if (strategy === 'PUT') {
-    functionName = 'create-put-option';
-  } else if (strategy === 'STRIP') {
-    functionName = 'create-strip-option';
-  } else if (strategy === 'BCSP' || strategy === 'BPSP' || strategy === 'BEPS' || strategy === 'BECS') {
-    // For spreads, use strike as lower, and calculate upper
-    const upperStrike = strikeMicro + toMicroUnits(amount * 0.1);
-    functionArgs = [
-      uintCV(amountMicro), 
-      uintCV(strikeMicro), 
-      uintCV(upperStrike), 
-      uintCV(premiumMicro), 
-      uintCV(expiryBlock)
+  console.log('🚀 Creating option with params:', {
+    strategy,
+    amount,
+    strikePrice,
+    premium,
+    period,
+    contractAddress: CONTRACT_ADDRESS,
+    contractName: CONTRACT_NAME
+  });
+
+  // Validation
+  if (amount <= 0 || strikePrice <= 0 || premium <= 0 || period <= 0) {
+    throw new Error('Invalid parameters: all values must be positive');
+  }
+
+  try {
+    const currentBlock = await getCurrentBlockHeight();
+    if (currentBlock === 0) {
+      throw new Error('Unable to fetch current block height');
+    }
+
+    const blocksPerDay = 144; // Stacks blocks per day
+    const BLOCK_BUFFER = 20; // Increased safety margin
+    const expiryBlock = currentBlock + (Math.floor(period) * blocksPerDay) + BLOCK_BUFFER;
+    
+    console.log(`📅 Block calculation: current=${currentBlock}, expiry=${expiryBlock}, period=${period} days`);
+    
+    const amountMicro = toMicroUnits(amount);
+    const strikeMicro = toMicroUnits(strikePrice);
+    const premiumMicro = toMicroUnits(premium);
+    
+    console.log('🔢 Micro unit conversion:', {
+      amountMicro,
+      strikeMicro,
+      premiumMicro,
+      expiryBlock
+    });
+    
+    let functionName = 'create-call-option';
+    let functionArgs = [
+      uintCV(amountMicro),
+      uintCV(strikeMicro),
+      uintCV(premiumMicro),
+      uintCV(expiryBlock),
     ];
     
-    if (strategy === 'BCSP') {
-      functionName = 'create-bull-call-spread';
-    } else if (strategy === 'BPSP') {
-      functionName = 'create-bull-put-spread';
-    } else if (strategy === 'BEPS') {
-      functionName = 'create-bear-put-spread';
-    } else if (strategy === 'BECS') {
-      functionName = 'create-bear-call-spread';
+    // Map strategy to contract function
+    switch (strategy) {
+      case 'STRAP':
+        functionName = 'create-strap-option';
+        break;
+      case 'PUT':
+        functionName = 'create-put-option';
+        break;
+      case 'STRIP':
+        functionName = 'create-strip-option';
+        break;
+      case 'BCSP':
+        functionName = 'create-bull-call-spread';
+        const upperStrikeBCSP = strikeMicro + toMicroUnits(strikePrice * 0.1); // 10% spread
+        functionArgs = [uintCV(amountMicro), uintCV(strikeMicro), uintCV(upperStrikeBCSP), uintCV(premiumMicro), uintCV(expiryBlock)];
+        break;
+      case 'BPSP':
+        functionName = 'create-bull-put-spread';
+        const upperStrikeBPSP = strikeMicro + toMicroUnits(strikePrice * 0.1);
+        functionArgs = [uintCV(amountMicro), uintCV(strikeMicro), uintCV(upperStrikeBPSP), uintCV(premiumMicro), uintCV(expiryBlock)];
+        break;
+      case 'BEPS':
+        functionName = 'create-bear-put-spread';
+        const upperStrikeBEPS = strikeMicro + toMicroUnits(strikePrice * 0.1);
+        functionArgs = [uintCV(amountMicro), uintCV(strikeMicro), uintCV(upperStrikeBEPS), uintCV(premiumMicro), uintCV(expiryBlock)];
+        break;
+      case 'BECS':
+        functionName = 'create-bear-call-spread';
+        const upperStrikeBECS = strikeMicro + toMicroUnits(strikePrice * 0.1);
+        functionArgs = [uintCV(amountMicro), uintCV(strikeMicro), uintCV(upperStrikeBECS), uintCV(premiumMicro), uintCV(expiryBlock)];
+        break;
+      case 'CALL':
+      default:
+        functionName = 'create-call-option';
+        break;
     }
+    
+    console.log(`📞 Calling contract function: ${functionName}`);
+    console.log(`📋 Function args:`, functionArgs.map(arg => arg.value.toString()));
+    
+    await openContractCall({
+      network: getNetwork(),
+      anchorMode: AnchorMode.Any,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName,
+      functionArgs,
+      postConditionMode: PostConditionMode.Allow, // Using Allow for testing
+      onFinish: (data: FinishedTxData) => {
+        console.log('✅ Transaction successfully broadcast:', data.txId);
+        console.log('🔗 Explorer URL:', getExplorerUrl(data.txId));
+        onFinish?.(data);
+      },
+      onCancel: () => {
+        console.log('❌ Transaction cancelled by user');
+        onCancel?.();
+      },
+    });
+    
+  } catch (error) {
+    console.error('💥 Error creating option:', error);
+    throw error;
   }
-  
-  await openContractCall({
-    network: getNetwork(),
-    anchorMode: AnchorMode.Any,
-    contractAddress: CONTRACT_ADDRESS,
-    contractName: CONTRACT_NAME,
-    functionName,
-    functionArgs,
-    postConditionMode: PostConditionMode.Allow,
-    onFinish: (data: FinishedTxData) => {
-      console.log('Transaction broadcast:', data.txId);
-      onFinish?.(data);
-    },
-    onCancel: () => {
-      console.log('Transaction cancelled');
-      onCancel?.();
-    },
-  });
 }
 
 export async function monitorTransaction(
   txId: string,
-  onUpdate: (status: string) => void,
-  maxAttempts = 30
+  onUpdate: (status: string, details?: any) => void,
+  maxAttempts = 60
 ): Promise<boolean> {
+  console.log(`🔍 Starting transaction monitoring for ${txId}`);
+  
   for (let i = 0; i < maxAttempts; i++) {
     try {
       const response = await fetch(`${API_URL}/extended/v1/tx/${txId}`);
+      
+      if (!response.ok) {
+        console.warn(`API response not OK: ${response.status}`);
+        onUpdate('pending');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        continue;
+      }
+      
       const data = await response.json();
+      console.log(`📊 Transaction ${txId} status: ${data.tx_status} (attempt ${i + 1}/${maxAttempts})`);
       
       if (data.tx_status === 'success') {
-        onUpdate('confirmed');
+        console.log(`✅ Transaction confirmed: ${txId}`);
+        onUpdate('confirmed', { 
+          blockHeight: data.block_height,
+          blockHash: data.block_hash 
+        });
         return true;
       }
       
       if (data.tx_status === 'abort_by_response' || data.tx_status === 'abort_by_post_condition') {
-        onUpdate('failed');
+        console.error(`❌ Transaction failed: ${txId}`, data);
+        onUpdate('failed', { 
+          reason: data.tx_result?.repr || 'Unknown error',
+          errorCode: data.tx_status 
+        });
         return false;
       }
       
-      onUpdate('pending');
+      // Still pending
+      onUpdate('pending', { 
+        attempts: i + 1,
+        maxAttempts,
+        nonce: data.nonce 
+      });
+      
     } catch (error) {
-      console.error('Failed to check transaction:', error);
+      console.error(`⚠️ Error checking transaction ${txId}:`, error);
+      onUpdate('pending');
     }
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Progressive backoff: start with 2s, increase to 5s after 15 attempts
+    const delay = i < 15 ? 2000 : 5000;
+    await new Promise(resolve => setTimeout(resolve, delay));
   }
   
+  console.warn(`⏰ Transaction monitoring timeout for ${txId}`);
+  onUpdate('failed', { reason: 'Monitoring timeout' });
   return false;
 }
 
