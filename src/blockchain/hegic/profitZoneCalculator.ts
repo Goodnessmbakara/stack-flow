@@ -5,8 +5,9 @@ const getProfitZonesForCall = (
 ) => {
   const profitZones: Array<number> = [];
   for (const premium of premiums) {
-    // Formula for Call
-    const zone = strikePrice + Number(premium) + Number(amount);
+    // Formula for Call: Breakeven = Strike Price + Premium per unit
+    const premiumPerUnit = Number(premium) / Number(amount);
+    const zone = strikePrice + premiumPerUnit;
     profitZones.push(zone);
   }
 
@@ -20,7 +21,9 @@ const getProfitZonesForPut = (
 ) => {
   const profitZones: Array<number> = [];
   for (const premium of premiums) {
-    const zone = strikePrice - (Number(premium) + Number(amount));
+    // Formula for Put: Breakeven = Strike Price - Premium per unit
+    const premiumPerUnit = Number(premium) / Number(amount);
+    const zone = strikePrice - premiumPerUnit;
     profitZones.push(zone);
   }
   return profitZones;
@@ -33,7 +36,9 @@ const getProfitZonesForStrap = (
 ) => {
   const profitZones: Array<number> = [];
   for (const premium of premiums) {
-    const zone = strikePrice + (Number(premium) + Number(amount));
+    // STRAP: 2 calls + 1 put, simplified breakeven calculation
+    const premiumPerUnit = Number(premium) / Number(amount);
+    const zone = strikePrice + (premiumPerUnit / 2); // Simplified for STRAP
     profitZones.push(zone);
   }
   return profitZones;

@@ -8,6 +8,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { Icons } from "../ui/icons";
+import { calculatePnL, formatPnL, getPnLColorClass } from "../../services/pnlCalculator";
+import { priceService } from "../../services/priceService";
 // import TradingViewWidget from "./trading-widget";
 
 type Props = {
@@ -17,19 +19,49 @@ type Props = {
 
 export function TradingChart({ asset }: Props) {
   const { state, formatNumber } = useAppContext();
-  const { assetPrice, isFetching } = state;
+  const { assetPrice, isFetching, strategy, amount, selectedPremium, selectedProfitZone } = state;
   const [expectedPrice, setExpectedPrice] = useState<number>(assetPrice);
+  const [currentPrice, setCurrentPrice] = useState<number>(assetPrice);
 
   // Update expected price when asset price changes
   useEffect(() => {
     if (assetPrice > 0) {
       setExpectedPrice(assetPrice);
+      setCurrentPrice(assetPrice);
     }
   }, [assetPrice]);
+
+  // Subscribe to real-time price updates
+  useEffect(() => {
+    const assetType = asset as 'STX' | 'BTC' | 'ETH';
+    const unsubscribe = priceService.subscribe(assetType, (priceData) => {
+      setCurrentPrice(priceData.price);
+    });
+
+    return unsubscribe;
+  }, [asset]);
 
   // Handle chart click for price selection
   const handleChartClick = (price: number) => {
     setExpectedPrice(price);
+  };
+
+  // Calculate projected P&L using proper options pricing
+  const calculateProjectedPnL = (): number => {
+    if (!strategy || !amount || !selectedPremium || !currentPrice) {
+      return 0;
+    }
+
+    const pnlResult = calculatePnL({
+      strategy: strategy as any,
+      currentPrice,
+      strikePrice: currentPrice, // For projected P&L, we use current price as strike
+      amount: parseFloat(amount),
+      premium: parseFloat(selectedPremium),
+      expectedPrice
+    }, true); // isProjected = true
+
+    return pnlResult.pnl;
   };
 
   return (
@@ -42,7 +74,7 @@ export function TradingChart({ asset }: Props) {
         <div className="space-y-2">
           <p className="text-[#ECECEC] text-xs">Current Price</p>
           <p className="text-[#D6D6D6] text-base font-bold">
-            {isFetching ? "..." : formatNumber(assetPrice)}
+            {isFetching ? "..." : formatNumber(currentPrice)}
           </p>
         </div>
       </div>
@@ -57,16 +89,12 @@ export function TradingChart({ asset }: Props) {
 
         <div className="space-y-2">
           <p className="text-[#ECECEC] text-xs">Your Net P&L</p>
-          <p
-            className={`flex items-baseline gap-2 text-[#D6D6D6] font-bold ${
-              expectedPrice > assetPrice ? "text-lime-400" : "text-red-400"
-            }`}
-          >
+          <p className={`flex items-baseline gap-2 text-[#D6D6D6] font-bold ${getPnLColorClass(calculateProjectedPnL())}`}>
             <span className="text-base">
-              ${((expectedPrice - assetPrice) * parseFloat(state.amount || '1')).toFixed(2)}
+              {formatPnL(calculateProjectedPnL())}
             </span>
             <span className="text-[#D6D6D6] font-bold text-sm">
-              {assetPrice > 0 ? (((expectedPrice - assetPrice) / assetPrice) * 100).toFixed(1) : '0.0'}%
+              {currentPrice > 0 ? (((expectedPrice - currentPrice) / currentPrice) * 100).toFixed(1) : '0.0'}%
             </span>
           </p>
         </div>

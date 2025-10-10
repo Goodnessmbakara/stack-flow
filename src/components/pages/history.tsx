@@ -3,6 +3,8 @@ import CustomConnectButton from "../atoms/ConnectButton";
 import { useWallet } from "../../context/WalletContext";
 import closePositionLogo from "./../../assets/icons/closeHegic.svg";
 import { getExplorerUrl } from "../../blockchain/stacks/transactionManager";
+import { calculatePnL, formatPnL, getPnLColorClass } from "../../services/pnlCalculator";
+import { priceService } from "../../services/priceService";
 
 interface TradePosition {
   id: string;
@@ -25,6 +27,16 @@ export default function HistoryPage() {
   const [isFetching, setIsFetching] = useState(false);
   const [isError, setIsError] = useState<Error | null>(null);
   const [positions, setPositions] = useState<TradePosition[]>([]);
+  const [currentPrice, setCurrentPrice] = useState<number>(0.58);
+
+  // Subscribe to real-time price updates
+  useEffect(() => {
+    const unsubscribe = priceService.subscribe('STX', (priceData) => {
+      setCurrentPrice(priceData.price);
+    });
+
+    return unsubscribe;
+  }, []);
 
   const fetchUserPositions = async () => {
     if (!address) return;
@@ -95,9 +107,17 @@ export default function HistoryPage() {
           status = 'expired';
         }
         
-        // Calculate P&L (simplified)
-        const markPrice = strikePrice * 0.95; // Simplified current price
-        const pnl = (markPrice - strikePrice) * amount - premium;
+        // Calculate P&L using unified calculator
+        const pnlResult = calculatePnL({
+          strategy: strategy as any,
+          currentPrice,
+          strikePrice,
+          amount,
+          premium
+        }, false); // isProjected = false for actual positions
+        
+        const pnl = pnlResult.pnl;
+        console.log(`${strategy} P&L calculation: currentPrice=${currentPrice}, strikePrice=${strikePrice}, amount=${amount}, premium=${premium}, pnl=${pnl}`);
         
         return {
           id: tx.tx_id,
@@ -112,7 +132,7 @@ export default function HistoryPage() {
           txId: tx.tx_id,
           createdAt: new Date(tx.burn_block_time * 1000).toISOString(),
           pnl,
-          markPrice
+          markPrice: currentPrice
         };
       }).filter((pos: any) => pos.amount > 0); // Only include valid positions
       
@@ -164,8 +184,8 @@ export default function HistoryPage() {
 
               <div>
                 <div className="text-gray-400 text-sm">Net P&L</div>
-                <div className={position.pnl && position.pnl > 0 ? "text-green-400" : "text-red-400"}>
-                  ${position.pnl?.toFixed(2) || '0.00'}
+                <div className={getPnLColorClass(position.pnl || 0)}>
+                  {formatPnL(position.pnl || 0)}
                 </div>
               </div>
 
