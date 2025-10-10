@@ -86,6 +86,33 @@ export function TradeSummary() {
       
       const mappedStrategy = strategyMap[strategy] || 'CALL';
       
+      // Debug logging
+      console.log('Transaction parameters:', {
+        strategy: mappedStrategy,
+        amount: parseFloat(amount),
+        strikePrice: state.assetPrice,
+        premium: parseFloat(selectedPremium),
+        period: parseFloat(period),
+        amountString: amount,
+        assetPrice: state.assetPrice
+      });
+
+      // Validate parameters
+      if (parseFloat(amount) <= 0) {
+        toast.error("Please enter a valid amount greater than 0");
+        return;
+      }
+
+      if (state.assetPrice <= 0) {
+        toast.error("Asset price not loaded. Please wait and try again.");
+        return;
+      }
+
+      if (parseFloat(selectedPremium) <= 0) {
+        toast.error("Please select a valid premium");
+        return;
+      }
+
       // Create option on blockchain
         await createOption({
         strategy: mappedStrategy,

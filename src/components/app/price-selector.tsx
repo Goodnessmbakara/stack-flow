@@ -36,9 +36,11 @@ export function PriceSelector() {
               <input
                 type="number"
                 className="h-full w-[70%] bg-transparent border-none outline-none text-sm text-[#D6D6D6]"
-                // placeholder="1"
-                value={state.amount && state.amount}
+                placeholder="1"
+                value={state.amount || ""}
                 onChange={(value) => handleAmountChange(value.target.value)}
+                min="0.01"
+                step="0.01"
               />
               <p className="text-sm text-[#7A7A7A]">{asset}</p>
             </div>

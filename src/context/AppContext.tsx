@@ -69,7 +69,9 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
   const handleAmountChange = useCallback(
     (amount: string) => {
-      setState((prev) => ({ ...prev, amount }));
+      // Ensure amount is never empty or zero
+      const validAmount = amount === "" || parseFloat(amount) <= 0 ? "1" : amount;
+      setState((prev) => ({ ...prev, amount: validAmount }));
     },
     [navigate]
   );
