@@ -7,7 +7,6 @@ const NewTradePage = lazy(() => import("./components/pages/new"));
 const TradingHistoryPage = lazy(() => import("./components/pages/history"));
 const WhitepaperPage = lazy(() => import("./components/pages/whitepaper"));
 import { AppContextProvider } from "./context/AppContext";
-import "@turnkey/react-wallet-kit/styles.css";
 
 const router = createBrowserRouter([
   {
