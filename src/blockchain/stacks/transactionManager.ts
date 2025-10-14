@@ -1,5 +1,5 @@
 import { makeContractCall, broadcastTransaction } from '@stacks/transactions';
-import { uintCV, AnchorMode, PostConditionMode } from '@stacks/transactions';
+import { uintCV, PostConditionMode } from '@stacks/transactions';
 import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
 
 // Contract configuration
