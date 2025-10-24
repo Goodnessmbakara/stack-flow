@@ -3,16 +3,16 @@ id: 0
 name: Testnet deployment
 network: testnet
 stacks-node: "https://api.testnet.hiro.so"
-bitcoin-node: "http://USERNAME:PASSWORD@bitcoind.testnet.stacks.co:18332"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
 plan:
   batches:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: stackflow-options-v2
+            contract-name: stackflow-options-m1
             expected-sender: ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH
-            cost: 121000
-            path: contracts/stackflow-options-v1.clar
+            cost: 96150
+            path: contracts/stackflow-options-m1.clar
             anchor-block-only: true
             clarity-version: 3
       epoch: "3.2"

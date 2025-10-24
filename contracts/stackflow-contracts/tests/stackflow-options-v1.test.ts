@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Cl } from "@stacks/transactions";
 
+// Get accounts from simnet
 const accounts = simnet.getAccounts();
 const deployer = accounts.get("deployer")!;
 const user1 = accounts.get("wallet_1")!;

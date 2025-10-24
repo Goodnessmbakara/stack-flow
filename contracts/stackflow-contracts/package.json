@@ -8,7 +8,9 @@
   "scripts": {
     "test": "vitest run",
     "test:report": "vitest run -- --coverage --costs",
-    "test:watch": "chokidar \"tests/**/*.ts\" \"contracts/**/*.clar\" -c \"npm run test:report\""
+    "test:watch": "chokidar \"tests/**/*.ts\" \"contracts/**/*.clar\" -c \"npm run test:report\"",
+    "simulate": "node run-simulation.cjs",
+    "simulate:quick": "node -e \"const {M1Simulator} = require('./simulation/m1-simulation.ts'); const sim = new M1Simulator({strategies:['CALL','BPSP'], tradeCount:200, gasCostPerTrade:0.15}); sim.runSimulation().then(r => console.log('Quick simulation:', r.length, 'trades,', r.filter(t => t.isProfitable).length, 'profitable'));\""
   },
   "author": "",
   "license": "ISC",
