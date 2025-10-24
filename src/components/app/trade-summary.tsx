@@ -27,8 +27,7 @@ export function TradeSummary() {
   const [explorerUrl, setExplorerUrl] = useState<string>("");
 
   const { state } = useAppContext();
-  const { strategy, isFetching, selectedPremium, period, amount } =
-    state;
+  const { strategy, isFetching, selectedPremium, period, amount } = state;
 
   // Turnkey hooks
   const { signTransaction, wallets } = useTurnkey();
@@ -320,7 +319,7 @@ export function TradeSummary() {
             // disabled={!walletAddress}
           /> */}
 
-          <Button onClick={callStrategy}>BUy strategy</Button>
+          <Button onClick={callStrategy}>Buy strategy</Button>
         </div>
       </div>
     </>
