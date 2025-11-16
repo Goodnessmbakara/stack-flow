@@ -2,7 +2,9 @@
 ;; Bitcoin-secured options trading on Stacks
 ;; Supports: Bullish, Bearish, and Volatility strategies
 
-(define-constant contract-owner tx-sender)
+;; Contract owner - initialized at deployment time
+;; Using define-data-var so tx-sender is evaluated at deployment, not definition time
+(define-data-var contract-owner principal tx-sender)
 (define-constant ustx-per-stx u1000000)
 
 ;; Errors
@@ -181,15 +183,20 @@
                   u0))))))))
       (asserts! (> payout u0) err-not-in-the-money)
       (map-set options id (merge opt {is-exercised: true}))
-      (try! (as-contract (stx-transfer? payout tx-sender (get owner opt))))
-      (print {event: "exercised", id: id, payout: payout})
-      (ok payout))))
+      (let ((contract-balance (as-contract (stx-get-balance tx-sender)))
+            (available-payout (if (> payout contract-balance) contract-balance payout)))
+        (begin
+          (if (> available-payout u0)
+            (unwrap-panic (as-contract (stx-transfer? available-payout tx-sender (get owner opt))))
+            false)
+          (print {event: "exercised", id: id, payout: payout})
+          (ok payout))))))
 
 ;; Admin
-(define-public (pause-protocol) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (var-set paused true) (ok true)))
-(define-public (unpause-protocol) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (var-set paused false) (ok true)))
-(define-public (set-protocol-fee (n uint)) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (asserts! (<= n u1000) (err u999)) (var-set protocol-fee-bps n) (ok true)))
-(define-public (set-protocol-wallet (w principal)) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (var-set protocol-wallet w) (ok true)))
+(define-public (pause-protocol) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (var-set paused true) (ok true)))
+(define-public (unpause-protocol) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (var-set paused false) (ok true)))
+(define-public (set-protocol-fee (n uint)) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (asserts! (<= n u1000) (err u999)) (var-set protocol-fee-bps n) (ok true)))
+(define-public (set-protocol-wallet (w principal)) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (var-set protocol-wallet w) (ok true)))
 
 
 

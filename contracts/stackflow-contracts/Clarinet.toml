@@ -9,6 +9,11 @@ requirements = []
 path = 'contracts/stackflow-options-m1.clar'
 clarity_version = 3
 epoch = 'latest'
+
+[contracts.stackflow-options-v1]
+path = 'contracts/stackflow-options-v1.clar'
+clarity_version = 3
+epoch = 'latest'
 [repl.analysis]
 passes = ['check_checker']
 
@@ -21,3 +26,15 @@ callee_filter = false
 [repl.remote_data]
 enabled = false
 api_url = 'https://api.hiro.so'
+
+[accounts.deployer]
+mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+balance = 1000000000000000
+
+[accounts.wallet_1]
+mnemonic = "legal winner thank year wave sausage worth useful legal winner thank yellow"
+balance = 1000000000000000
+
+[accounts.wallet_2]
+mnemonic = "letter advice cage absurd amount doctor acoustic avoid letter advice cage above"
+balance = 1000000000000000

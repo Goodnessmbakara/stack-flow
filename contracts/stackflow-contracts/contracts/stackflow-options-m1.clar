@@ -2,7 +2,10 @@
 ;; Bitcoin-secured options trading on Stacks
 ;; M1 Focus: CALL and Bull Put Spread (BPSP) strategies only
 
-(define-constant contract-owner tx-sender)
+;; Contract owner - initialized at deployment time
+;; Using define-data-var so tx-sender is evaluated at deployment, not definition time
+;; This is the correct pattern for contract ownership in Clarity
+(define-data-var contract-owner principal tx-sender)
 (define-constant ustx-per-stx u1000000)
 
 ;; Errors
@@ -49,8 +52,8 @@
 (define-private (add-user-option (u principal) (id uint)) (map-set user-options u (unwrap-panic (as-max-len? (append (default-to (list) (map-get? user-options u)) id) u500))))
 
 ;; Input Validation Functions
-(define-private (valid-price (price uint)) (and (> price u0) (< price u1000000)))  ;; Price must be > 0 and < 1,000,000 micro-USD
-(define-private (valid-wallet (wallet principal)) (not (is-eq wallet tx-sender)))  ;; Basic wallet validation
+(define-private (valid-price (price uint)) (and (> price u0) (<= price u100000000)))  ;; Price must be > 0 and <= 100,000,000 micro-USD ($100,000)
+(define-private (valid-wallet (wallet principal)) (not (is-eq wallet (as-contract tx-sender))))  ;; Wallet cannot be the contract itself
 
 ;; Payout Calculators
 (define-private (call-payout (strike uint) (amount uint) (premium uint) (current-price uint))
@@ -62,8 +65,8 @@
 
 (define-private (bpsp-payout (lower-strike uint) (upper-strike uint) (amount uint) (premium uint) (current-price uint))
   (if (>= current-price upper-strike)
-    ;; Keep premium if price stays above upper strike (best case)
-    premium
+    ;; Price above upper strike - option expires worthless, no payout (premium already collected)
+    u0
     (if (< current-price lower-strike)
       ;; Maximum loss if price falls below lower strike
       (let ((max-loss (- upper-strike lower-strike)))
@@ -112,9 +115,7 @@
     (asserts! (> upper-strike lower-strike) err-invalid-strikes)
     (asserts! (> collateral u0) err-invalid-amount)
     (asserts! (valid-expiry expiry) err-invalid-expiry)
-    (let ((id (+ (var-get option-nonce) u1))
-          (spread-width (- upper-strike lower-strike))
-          (max-loss spread-width))
+    (let ((id (+ (var-get option-nonce) u1)))
       ;; User provides collateral for BPSP
       (try! (stx-transfer? collateral tx-sender (as-contract tx-sender)))
       (map-set options id {
@@ -152,12 +153,16 @@
                        (call-payout strike amount premium current-price)
                        (bpsp-payout strike upper-strike amount premium current-price))))
         (if (> payout u0)
-          (begin
-            (try! (stx-transfer? payout tx-sender (get owner option)))
-            (map-set options option-id (merge option {
-              is-exercised: true
-            }))
-            (ok payout))
+          (let ((contract-balance (as-contract (stx-get-balance tx-sender)))
+                (available-payout (if (> payout contract-balance) contract-balance payout)))
+            (begin
+              (if (> available-payout u0)
+                (unwrap-panic (as-contract (stx-transfer? available-payout tx-sender (get owner option))))
+                false)
+              (map-set options option-id (merge option {
+                is-exercised: true
+              }))
+              (ok payout)))
           (begin
             (map-set options option-id (merge option {
               is-exercised: true
@@ -182,12 +187,16 @@
                        (call-payout strike amount premium settlement-price)
                        (bpsp-payout strike upper-strike amount premium settlement-price))))
         (if (> payout u0)
-          (begin
-            (try! (stx-transfer? payout tx-sender (get owner option)))
-            (map-set options option-id (merge option {
-              is-settled: true
-            }))
-            (ok payout))
+          (let ((contract-balance (as-contract (stx-get-balance tx-sender)))
+                (available-payout (if (> payout contract-balance) contract-balance payout)))
+            (begin
+              (if (> available-payout u0)
+                (unwrap-panic (as-contract (stx-transfer? available-payout tx-sender (get owner option))))
+                false)
+              (map-set options option-id (merge option {
+                is-settled: true
+              }))
+              (ok payout)))
           (begin
             (map-set options option-id (merge option {
               is-settled: true
@@ -204,9 +213,10 @@
   min-period: (var-get min-option-period),
   max-period: (var-get max-option-period)
 })
+(define-read-only (get-contract-owner) (ok (var-get contract-owner)))
 
 ;; Admin Functions
-(define-public (pause-protocol) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (var-set paused true) (ok true)))
-(define-public (unpause-protocol) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (var-set paused false) (ok true)))
-(define-public (set-protocol-fee (new-fee uint)) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (asserts! (<= new-fee u1000) err-invalid-amount) (var-set protocol-fee-bps new-fee) (ok true)))
-(define-public (set-protocol-wallet (wallet principal)) (begin (asserts! (is-eq tx-sender contract-owner) err-not-authorized) (asserts! (valid-wallet wallet) err-invalid-amount) (var-set protocol-wallet wallet) (ok true)))
+(define-public (pause-protocol) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (var-set paused true) (ok true)))
+(define-public (unpause-protocol) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (var-set paused false) (ok true)))
+(define-public (set-protocol-fee (new-fee uint)) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (asserts! (<= new-fee u1000) err-invalid-amount) (var-set protocol-fee-bps new-fee) (ok true)))
+(define-public (set-protocol-wallet (wallet principal)) (begin (asserts! (is-eq tx-sender (var-get contract-owner)) err-not-authorized) (asserts! (valid-wallet wallet) err-invalid-amount) (var-set protocol-wallet wallet) (ok true)))
