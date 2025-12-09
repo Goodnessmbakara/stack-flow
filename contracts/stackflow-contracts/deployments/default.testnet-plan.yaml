@@ -11,43 +11,57 @@ plan:
         - contract-publish:
             contract-name: price-oracle-trait
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 1000
+            cost: 2110
             path: contracts/price-oracle-trait.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: sip-010-trait-ft-standard
+            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            cost: 4370
+            path: contracts/sip-010-trait-ft-standard.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: stackflow-options-m1
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 109380
+            cost: 104900
             path: contracts/stackflow-options-m1.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: stackflow-options-m2
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 110927
+            cost: 271390
             path: contracts/stackflow-options-m2.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: stackflow-options-v1
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 109556
+            cost: 125550
             path: contracts/stackflow-options-v1.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: stackflow-oracle-mock
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 108949
+            cost: 60130
             path: contracts/stackflow-oracle-mock.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
             contract-name: stackflow-pyth-oracle
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 108695
+            cost: 31900
             path: contracts/stackflow-pyth-oracle.clar
+            anchor-block-only: true
+            clarity-version: 3
+        - contract-publish:
+            contract-name: stackflow-sbtc-mock
+            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            cost: 24920
+            path: contracts/stackflow-sbtc-mock.clar
             anchor-block-only: true
             clarity-version: 3
       epoch: "3.2"

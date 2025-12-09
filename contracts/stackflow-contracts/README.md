@@ -70,16 +70,16 @@ pnpm run simulate:quick
 
 ### **Deploy Contract**
 ```bash
-# Deploy M1 contract to testnet (recommended method)
-node deploy-m1-node.js
-
-# Alternative: Use Clarinet deployment
+# Deploy all contracts using Clarinet (recommended)
 clarinet deployments apply --testnet
+
+# Manually deploy M1 contract (Legacy)
+node deploy-m1-node.js
 ```
 
 **Note**: Deployment requires:
-- STX for gas fees (~0.15 STX for M1 contract)
-- Valid mnemonic in `settings/Testnet.toml`
+- STX for gas fees (~0.6 STX total)
+- Valid mnemonic in `settings/Testnet.toml` or environment
 - Testnet network access
 
 ### **Install Dependencies**
@@ -145,27 +145,23 @@ The simulation framework demonstrates:
 
 ### **All Contracts Successfully Deployed! ✅**
 
-Deployed to Stacks Testnet on **December 9, 2025**
+**Updated Deployment Plan**: Includes unified `price-oracle-trait`.
 
-| Contract | Status | Transaction ID | Address |
-|----------|--------|----------------|----------|
-| **M1 Options** | ✅ Live | [0x59f127f...](https://explorer.hiro.so/txid/0x59f127f?chain=testnet) | `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-m1` |
-| **M2 Options** | ✅ Live | [0xa4471b7...](https://explorer.hiro.so/txid/0xa4471b7?chain=testnet) | `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-m2` |
-| **V1 Wrapper** | ✅ Live | [0xcd68976...](https://explorer.hiro.so/txid/0xcd68976?chain=testnet) | `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-v1` |
-| **Mock Oracle** | ✅ Live | [0x437db3c...](https://explorer.hiro.so/txid/0x437db3c?chain=testnet) | `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-oracle-mock` |
-| **Pyth Oracle** | ✅ Live | [0x2176b27...](https://explorer.hiro.so/txid/0x2176b27?chain=testnet) | `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-pyth-oracle` |
+| Contract | Status | Description |
+|----------|--------|-------------|
+| **Price Oracle Trait** | ✅ New | Shared trait for oracle interoperability |
+| **M1 Options** | ✅ Live | Legacy implementation (CALL/BPSP) |
+| **M2 Options** | ✅ Live | Advanced strategies with Oracle Trait support |
+| **V1 Wrapper** | ✅ Live | Comprehensive wrapper |
+| **Mock Oracle** | ✅ Live | Testing oracle implementing the trait |
+| **Pyth Oracle** | ✅ Live | Production oracle implementing the trait |
 
-**Deployer Address**: `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7`
+**Global Deployer Address**: `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7`
 
-**Deployment Cost**: ~0.56 STX total (breakdown: M1=0.10, M2=0.27, V1=0.13, Mock=0.06, Pyth=0.03)
+**Deployment Cost**: ~0.60 STX total
 
 ### **View on Explorer**
-- 🔗 [All Contracts](https://explorer.hiro.so/address/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7?chain=testnet)
-- 🔗 [M1 Contract](https://explorer.hiro.so/txid/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-m1?chain=testnet)
-- 🔗 [M2 Contract](https://explorer.hiro.so/txid/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-m2?chain=testnet)
-- 🔗 [V1 Wrapper](https://explorer.hiro.so/txid/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-v1?chain=testnet)
-- 🔗 [Mock Oracle](https://explorer.hiro.so/txid/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-oracle-mock?chain=testnet)
-- 🔗 [Pyth Oracle](https://explorer.hiro.so/txid/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-pyth-oracle?chain=testnet)
+- 🔗 [Contracts by Deployer](https://explorer.hiro.so/address/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7?chain=testnet)
 
 ## 🎉 **Milestone 2 Complete!**
 
