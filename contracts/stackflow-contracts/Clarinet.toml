@@ -4,40 +4,45 @@ description = ''
 authors = []
 telemetry = true
 cache_dir = './.cache'
-requirements = []
-[contracts.price-oracle-trait]
-path = 'contracts/price-oracle-trait.clar'
+requirements = [
+    { contract_id = "ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.price-oracle-trait-v2" },
+    { contract_id = "ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.sip-010-trait-ft-standard" },
+    { contract_id = "ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-m1" },
+    { contract_id = "ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-v1" }
+]
+#[contracts.price-oracle-trait-v2]
+#path = 'contracts/price-oracle-trait-v2.clar'
+#clarity_version = 3
+#epoch = 'latest'
+
+#[contracts.sip-010-trait-ft-standard]
+#path = 'contracts/sip-010-trait-ft-standard.clar'
+#clarity_version = 3
+#epoch = 'latest'
+
+#[contracts.stackflow-options-m1]
+#path = 'contracts/stackflow-options-m1.clar'
+#clarity_version = 3
+#epoch = 'latest'
+
+[contracts.stackflow-options-m2-v2]
+path = 'contracts/stackflow-options-m2-v2.clar'
 clarity_version = 3
 epoch = 'latest'
 
-[contracts.sip-010-trait-ft-standard]
-path = 'contracts/sip-010-trait-ft-standard.clar'
+
+#[contracts.stackflow-options-v1]
+#path = 'contracts/stackflow-options-v1.clar'
+#clarity_version = 3
+#epoch = 'latest'
+
+[contracts.stackflow-oracle-mock-v2]
+path = 'contracts/stackflow-oracle-mock-v2.clar'
 clarity_version = 3
 epoch = 'latest'
 
-[contracts.stackflow-options-m1]
-path = 'contracts/stackflow-options-m1.clar'
-clarity_version = 3
-epoch = 'latest'
-
-[contracts.stackflow-options-m2]
-path = 'contracts/stackflow-options-m2.clar'
-clarity_version = 3
-epoch = 'latest'
-
-
-[contracts.stackflow-options-v1]
-path = 'contracts/stackflow-options-v1.clar'
-clarity_version = 3
-epoch = 'latest'
-
-[contracts.stackflow-oracle-mock]
-path = 'contracts/stackflow-oracle-mock.clar'
-clarity_version = 3
-epoch = 'latest'
-
-[contracts.stackflow-pyth-oracle]
-path = 'contracts/stackflow-pyth-oracle.clar'
+[contracts.stackflow-pyth-oracle-v2]
+path = 'contracts/stackflow-pyth-oracle-v2.clar'
 clarity_version = 3
 epoch = 'latest'
 

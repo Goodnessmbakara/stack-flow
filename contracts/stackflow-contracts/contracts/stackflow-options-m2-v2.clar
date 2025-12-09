@@ -88,7 +88,7 @@
 
 ;; M2 New Configuration
 ;; M2 New Configuration
-(use-trait price-oracle-trait .price-oracle-trait.price-oracle-trait)
+(use-trait price-oracle-trait .price-oracle-trait-v2.price-oracle-trait)
 (define-data-var oracle-contract (optional principal) none)
 (define-data-var sbtc-contract (optional principal) none)
 (define-data-var margin-requirement-pct uint u150)  ;; 150% of position value

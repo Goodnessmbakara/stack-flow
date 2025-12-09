@@ -4,7 +4,7 @@
 
 ;; Trait Definition
 ;; Trait Definition
-(impl-trait .price-oracle-trait.price-oracle-trait)
+(impl-trait .price-oracle-trait-v2.price-oracle-trait)
 
 
 ;; Contract Owner

@@ -2,7 +2,7 @@
 ;; Integrates with Pyth Network for reliable STX/USD and BTC/USD price feeds
 
 ;; Pyth Oracle Interface (simplified for Stacks integration)
-(impl-trait .price-oracle-trait.price-oracle-trait)
+(impl-trait .price-oracle-trait-v2.price-oracle-trait)
 
 ;; Based on Pyth's Stacks integration pattern
 

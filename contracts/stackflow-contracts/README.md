@@ -149,12 +149,12 @@ The simulation framework demonstrates:
 
 | Contract | Status | Description |
 |----------|--------|-------------|
-| **Price Oracle Trait** | ✅ New | Shared trait for oracle interoperability |
+| **Price Oracle Trait** | ✅ Live | `price-oracle-trait-v2` (Shared Interface) |
 | **M1 Options** | ✅ Live | Legacy implementation (CALL/BPSP) |
-| **M2 Options** | ✅ Live | Advanced strategies with Oracle Trait support |
+| **M2 Options** | ✅ Live | `stackflow-options-m2-v2` (Advanced strategies) |
 | **V1 Wrapper** | ✅ Live | Comprehensive wrapper |
-| **Mock Oracle** | ✅ Live | Testing oracle implementing the trait |
-| **Pyth Oracle** | ✅ Live | Production oracle implementing the trait |
+| **Mock Oracle** | ✅ Live | `stackflow-oracle-mock-v2` |
+| **Pyth Oracle** | ✅ Live | `stackflow-pyth-oracle-v2` |
 
 **Global Deployer Address**: `ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7`
 

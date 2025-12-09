@@ -46,18 +46,18 @@ function randomPrice(): number {
 // Initialize oracle prices before each test
 beforeEach(() => {
   // Initialize oracle with test prices
-  const initResult = simnet.callPublicFn("stackflow-oracle-mock", "initialize-test-prices", [], deployer);
+  const initResult = simnet.callPublicFn("stackflow-oracle-mock-v2", "initialize-test-prices", [], deployer);
   
   // Also set prices for immediate use
   simnet.callPublicFn(
-    "stackflow-oracle-mock",
+    "stackflow-oracle-mock-v2",
     "update-price",
     [Cl.stringAscii("STX"), Cl.uint(2_500_000), Cl.uint(5)],
     deployer
   );
   
   simnet.callPublicFn(
-    "stackflow-oracle-mock",
+    "stackflow-oracle-mock-v2",
     "update-price",
     [Cl.stringAscii("BTC"), Cl.uint(45_000_000_000), Cl.uint(5)],
     deployer
@@ -81,16 +81,16 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         const expiry = randomExpiry();
         
         const { result } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-strap-option",
-          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
         if (result.type === "ok") {
           const strapId = (result.value as any).value;
           const components = simnet.callReadOnlyFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "get-strap-components",
             [Cl.uint(strapId)],
             user1
@@ -126,9 +126,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Create STRAP
         const { result: createResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-strap-option",
-          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -138,7 +138,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           // Set price significantly above strike
           const currentPrice = strike + Math.floor(Math.random() * 5_000_000) + 1_000_000;
           simnet.callPublicFn(
-            "stackflow-oracle-mock",
+            "stackflow-oracle-mock-v2",
             "update-price",
             [Cl.stringAscii("STX"), Cl.uint(currentPrice), Cl.uint(5)],
             deployer
@@ -146,9 +146,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           
           // Exercise STRAP
           const { result: exerciseResult } = simnet.callPublicFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "exercise-option",
-            [Cl.uint(strapId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+            [Cl.uint(strapId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
             user1
           );
           
@@ -176,9 +176,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         const expiry = randomExpiry();
         
         const { result: createResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-strap-option",
-          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -188,16 +188,16 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           // Set price below strike
           const currentPrice = strike - Math.floor(Math.random() * 1_500_000) - 100_000;
           simnet.callPublicFn(
-            "stackflow-oracle-mock",
+            "stackflow-oracle-mock-v2",
             "update-price",
             [Cl.stringAscii("STX"), Cl.uint(currentPrice), Cl.uint(5)],
             deployer
           );
           
           const { result: exerciseResult } = simnet.callPublicFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "exercise-option",
-            [Cl.uint(strapId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+            [Cl.uint(strapId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
             user1
           );
           
@@ -270,9 +270,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Valid case: lower < upper
         const { result: validResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-bull-call-spread",
-          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -282,9 +282,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Invalid case: lower >= upper (should fail)
         const { result: invalidResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-bull-call-spread",
-          [Cl.uint(amount), Cl.uint(upperStrike), Cl.uint(lowerStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(upperStrike), Cl.uint(lowerStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -310,9 +310,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         const expiry = randomExpiry();
         
         const { result: createResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-bull-call-spread",
-          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -322,16 +322,16 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           // Set price above upper strike
           const currentPrice = upperStrike + Math.floor(Math.random() * 2_000_000) + 500_000;
           simnet.callPublicFn(
-            "stackflow-oracle-mock",
+            "stackflow-oracle-mock-v2",
             "update-price",
             [Cl.stringAscii("STX"), Cl.uint(currentPrice), Cl.uint(5)],
             deployer
           );
           
           const { result: exerciseResult } = simnet.callPublicFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "exercise-option",
-            [Cl.uint(spreadId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+            [Cl.uint(spreadId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
             user1
           );
           
@@ -362,9 +362,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         const expiry = randomExpiry();
         
         const { result: createResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-bull-call-spread",
-          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -377,16 +377,16 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           
           if (currentPrice > lowerStrike && currentPrice < upperStrike) {
             simnet.callPublicFn(
-              "stackflow-oracle-mock",
+              "stackflow-oracle-mock-v2",
               "update-price",
               [Cl.stringAscii("STX"), Cl.uint(currentPrice), Cl.uint(5)],
               deployer
             );
             
             const { result: exerciseResult } = simnet.callPublicFn(
-              "stackflow-options-m2",
+              "stackflow-options-m2-v2",
               "exercise-option",
-              [Cl.uint(spreadId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+              [Cl.uint(spreadId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
               user1
             );
             
@@ -419,9 +419,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         const expiry = randomExpiry();
         
         const { result: createResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-bull-call-spread",
-          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -431,16 +431,16 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           // Set price below lower strike
           const currentPrice = lowerStrike - Math.floor(Math.random() * 1_000_000) - 100_000;
           simnet.callPublicFn(
-            "stackflow-oracle-mock",
+            "stackflow-oracle-mock-v2",
             "update-price",
             [Cl.stringAscii("STX"), Cl.uint(currentPrice), Cl.uint(5)],
             deployer
           );
           
           const { result: exerciseResult } = simnet.callPublicFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "exercise-option",
-            [Cl.uint(spreadId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+            [Cl.uint(spreadId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
             user1
           );
           
@@ -469,16 +469,16 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         const expiry = randomExpiry();
         
         const { result } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-bull-call-spread",
-          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(lowerStrike), Cl.uint(upperStrike), Cl.uint(netPremium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
         if (result.type === "ok") {
           const spreadId = (result.value as any).value;
           const spread = simnet.callReadOnlyFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "get-bull-call-spread",
             [Cl.uint(spreadId)],
             user1
@@ -508,7 +508,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
       for (let i = 0; i < MIN_ITERATIONS; i++) {
         const validPrice = Math.floor(Math.random() * 99_999_999_999) + 1;
         const { result: validResult } = simnet.callPublicFn(
-          "stackflow-oracle-mock",
+          "stackflow-oracle-mock-v2",
           "update-price",
           [Cl.stringAscii("STX"), Cl.uint(validPrice), Cl.uint(5)],
           deployer
@@ -520,7 +520,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Test zero price (should fail)
         const { result: invalidResult } = simnet.callPublicFn(
-          "stackflow-oracle-mock",
+          "stackflow-oracle-mock-v2",
           "update-price",
           [Cl.stringAscii("STX"), Cl.uint(0), Cl.uint(5)],
           deployer
@@ -544,7 +544,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         const price = randomPrice();
         
         const { result } = simnet.callPublicFn(
-          "stackflow-oracle-mock",
+          "stackflow-oracle-mock-v2",
           "update-price",
           [Cl.stringAscii("STX"), Cl.uint(price), Cl.uint(sourceCount)],
           deployer
@@ -552,7 +552,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         if (result.type === "ok") {
           const priceData = simnet.callReadOnlyFn(
-            "stackflow-oracle-mock",
+            "stackflow-oracle-mock-v2",
             "get-price",
             [Cl.stringAscii("STX")],
             deployer
@@ -583,9 +583,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Create option
         const { result: createResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-call-option",
-          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -595,7 +595,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           // Update oracle price
           const settlementPrice = randomPrice();
           simnet.callPublicFn(
-            "stackflow-oracle-mock",
+            "stackflow-oracle-mock-v2",
             "update-price",
             [Cl.stringAscii("STX"), Cl.uint(settlementPrice), Cl.uint(5)],
             deployer
@@ -603,16 +603,16 @@ describe("StackFlow M2 - Property-Based Tests", () => {
           
           // Exercise should use oracle price
           const { result: exerciseResult } = simnet.callPublicFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "exercise-option",
-            [Cl.uint(optionId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+            [Cl.uint(optionId), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
             user1
           );
           
           if (exerciseResult.type === "ok") {
             // Verify settlement used oracle price
             const option = simnet.callReadOnlyFn(
-              "stackflow-options-m2",
+              "stackflow-options-m2-v2",
               "get-option",
               [Cl.uint(optionId)],
               user1
@@ -635,7 +635,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
     it("should reject stale price data older than threshold", () => {
       // Test staleness detection
       const { result: updateResult } = simnet.callPublicFn(
-        "stackflow-oracle-mock",
+        "stackflow-oracle-mock-v2",
         "update-price",
         [Cl.stringAscii("TEST"), Cl.uint(1_000_000), Cl.uint(3)],
         deployer
@@ -645,7 +645,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
       
       // Immediately after update, should be fresh
       const { result: freshnessResult } = simnet.callReadOnlyFn(
-        "stackflow-oracle-mock",
+        "stackflow-oracle-mock-v2",
         "is-price-fresh",
         [Cl.stringAscii("TEST"), Cl.uint(300)],
         deployer
@@ -678,7 +678,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         if (mintResult.type === "ok") {
           // Attempt deposit
           const { result: depositResult } = simnet.callPublicFn(
-            "stackflow-options-m2",
+            "stackflow-options-m2-v2",
             "deposit-sbtc-collateral",
             [Cl.uint(amount)],
             user1
@@ -703,7 +703,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Update sBTC price
         const { result: priceUpdate } = simnet.callPublicFn(
-          "stackflow-oracle-mock",
+          "stackflow-oracle-mock-v2",
           "update-price",
           [Cl.stringAscii("sBTC"), Cl.uint(sbtcPrice), Cl.uint(5)],
           deployer
@@ -712,7 +712,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         if (priceUpdate.type === "ok") {
           // Verify price is retrievable
           const { result: priceQuery } = simnet.callReadOnlyFn(
-            "stackflow-oracle-mock",
+            "stackflow-oracle-mock-v2",
             "get-price",
             [Cl.stringAscii("sBTC")],
             deployer
@@ -747,7 +747,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         );
         
         simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "deposit-sbtc-collateral",
           [Cl.uint(depositAmount)],
           user1
@@ -755,7 +755,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Attempt withdrawal
         const { result: withdrawResult } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "withdraw-sbtc-collateral",
           [Cl.uint(withdrawAmount)],
           user1
@@ -778,7 +778,7 @@ describe("StackFlow M2 - Property-Based Tests", () => {
       
       for (let i = 0; i < MIN_ITERATIONS; i++) {
         const { result } = simnet.callReadOnlyFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "get-margin-requirements",
           [Cl.principal(user1)],
           deployer
@@ -829,17 +829,17 @@ describe("StackFlow M2 - Property-Based Tests", () => {
       
       // Create CALL
       const call = simnet.callPublicFn(
-        "stackflow-options-m2",
+        "stackflow-options-m2-v2",
         "create-call-option",
-        [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+        [Cl.uint(amount), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
         user1
       );
       
       // Create BPSP
       const bpsp = simnet.callPublicFn(
-        "stackflow-options-m2",
+        "stackflow-options-m2-v2",
         "create-bull-put-spread",
-        [Cl.uint(amount), Cl.uint(strike), Cl.uint(strike + 1000000), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+        [Cl.uint(amount), Cl.uint(strike), Cl.uint(strike + 1000000), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
         user1
       );
       
@@ -860,9 +860,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
 
         // Test zero amount
         const { result: zeroAmount } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-call-option",
-          [Cl.uint(0), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(0), Cl.uint(strike), Cl.uint(premium), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -872,9 +872,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
         
         // Test zero premium
         const { result: zeroPremium } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-call-option",
-          [Cl.uint(amount), Cl.uint(strike), Cl.uint(0), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(amount), Cl.uint(strike), Cl.uint(0), Cl.uint(expiry), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         
@@ -891,9 +891,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
     it("should emit detailed events for monitoring and analytics", () => {
       // Event emission tested through successful contract calls
       const { result } = simnet.callPublicFn(
-        "stackflow-options-m2",
+        "stackflow-options-m2-v2",
         "create-call-option",
-        [Cl.uint(10_000_000), Cl.uint(2_500_000), Cl.uint(500_000), Cl.uint(randomExpiry()), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+        [Cl.uint(10_000_000), Cl.uint(2_500_000), Cl.uint(500_000), Cl.uint(randomExpiry()), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
         user1
       );
       
@@ -908,9 +908,9 @@ describe("StackFlow M2 - Property-Based Tests", () => {
       
       for (let i = 0; i < iterations; i++) {
         const { result } = simnet.callPublicFn(
-          "stackflow-options-m2",
+          "stackflow-options-m2-v2",
           "create-call-option",
-          [Cl.uint(randomAmount()), Cl.uint(randomStrike()), Cl.uint(randomPremium()), Cl.uint(randomExpiry()), Cl.contractPrincipal(deployer, "stackflow-oracle-mock")],
+          [Cl.uint(randomAmount()), Cl.uint(randomStrike()), Cl.uint(randomPremium()), Cl.uint(randomExpiry()), Cl.contractPrincipal(deployer, "stackflow-oracle-mock-v2")],
           user1
         );
         

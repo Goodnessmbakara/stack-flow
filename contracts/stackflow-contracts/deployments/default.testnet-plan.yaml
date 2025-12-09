@@ -8,53 +8,57 @@ plan:
   batches:
     - id: 0
       transactions:
-        - contract-publish:
-            contract-name: price-oracle-trait
-            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+        - requirement-publish:
+            contract-id: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.price-oracle-trait-v2
+            remap-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            remap-principals:
+              ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
             cost: 2110
-            path: contracts/price-oracle-trait.clar
-            anchor-block-only: true
+            path: "./.cache/requirements/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.price-oracle-trait-v2.clar"
             clarity-version: 3
-        - contract-publish:
-            contract-name: sip-010-trait-ft-standard
-            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+        - requirement-publish:
+            contract-id: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.sip-010-trait-ft-standard
+            remap-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            remap-principals:
+              ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
             cost: 4370
-            path: contracts/sip-010-trait-ft-standard.clar
-            anchor-block-only: true
+            path: "./.cache/requirements/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.sip-010-trait-ft-standard.clar"
             clarity-version: 3
-        - contract-publish:
-            contract-name: stackflow-options-m1
-            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 104900
-            path: contracts/stackflow-options-m1.clar
-            anchor-block-only: true
+        - requirement-publish:
+            contract-id: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-m1
+            remap-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            remap-principals:
+              ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            cost: 96220
+            path: "./.cache/requirements/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-m1.clar"
             clarity-version: 3
-        - contract-publish:
-            contract-name: stackflow-options-m2
-            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 271390
-            path: contracts/stackflow-options-m2.clar
-            anchor-block-only: true
-            clarity-version: 3
-        - contract-publish:
-            contract-name: stackflow-options-v1
-            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+        - requirement-publish:
+            contract-id: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-v1
+            remap-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            remap-principals:
+              ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
             cost: 125550
-            path: contracts/stackflow-options-v1.clar
+            path: "./.cache/requirements/ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7.stackflow-options-v1.clar"
+            clarity-version: 3
+        - contract-publish:
+            contract-name: stackflow-options-m2-v2
+            expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
+            cost: 271420
+            path: contracts/stackflow-options-m2-v2.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
-            contract-name: stackflow-oracle-mock
+            contract-name: stackflow-oracle-mock-v2
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 60130
-            path: contracts/stackflow-oracle-mock.clar
+            cost: 60160
+            path: contracts/stackflow-oracle-mock-v2.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
-            contract-name: stackflow-pyth-oracle
+            contract-name: stackflow-pyth-oracle-v2
             expected-sender: ST3F4WEX90KZQ6D25TWP09J90D6CSYGW1JX8WH3Y7
-            cost: 31900
-            path: contracts/stackflow-pyth-oracle.clar
+            cost: 31930
+            path: contracts/stackflow-pyth-oracle-v2.clar
             anchor-block-only: true
             clarity-version: 3
         - contract-publish:
