@@ -20,9 +20,8 @@ export function DashboardLayout() {
         <div className="flex items-center gap-5">
           <Link
             to={"/trade"}
-            className={`text-[#666666] relative font-semibold ${
-              path === "/trade" ? "text-[#ececec]" : ""
-            }`}
+            className={`text-[#666666] relative font-semibold ${path === "/trade" ? "text-[#ececec]" : ""
+              }`}
           >
             New Strategy
             {path === "/trade" ? (
@@ -31,12 +30,31 @@ export function DashboardLayout() {
           </Link>
           <Link
             to={"/trade/history"}
-            className={`text-[#666666] relative font-semibold ${
-              path === "/trade/history" ? "text-[#ececec]" : ""
-            }`}
+            className={`text-[#666666] relative font-semibold ${path === "/trade/history" ? "text-[#ececec]" : ""
+              }`}
           >
             My Strategies
             {path === "/trade/history" ? (
+              <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-[#37f741] transition-all duration-300 group-hover:h-full"></span>
+            ) : null}
+          </Link>
+          <Link
+            to={"/trade/copy"}
+            className={`text-[#666666] relative font-semibold ${path === "/trade/copy" ? "text-[#ececec]" : ""
+              }`}
+          >
+            Copy Trading
+            {path === "/trade/copy" ? (
+              <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-[#37f741] transition-all duration-300 group-hover:h-full"></span>
+            ) : null}
+          </Link>
+          <Link
+            to={"/trade/sentiment"}
+            className={`text-[#666666] relative font-semibold ${path === "/trade/sentiment" ? "text-[#ececec]" : ""
+              }`}
+          >
+            Sentiment
+            {path === "/trade/sentiment" ? (
               <span className="absolute -bottom-2 left-0 w-full h-0.5 bg-[#37f741] transition-all duration-300 group-hover:h-full"></span>
             ) : null}
           </Link>
