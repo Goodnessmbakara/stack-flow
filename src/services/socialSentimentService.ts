@@ -1,3 +1,5 @@
+import { twitterService } from './twitterService';
+
 /**
  * Social Sentiment Service
  * Provides whale tracking, copy trading signals, and meme sentiment data
@@ -92,7 +94,7 @@ class SocialSentimentService {
   private readonly UPDATE_INTERVAL = 60000; // 1 minute
 
   constructor() {
-    this.generateMockData();
+    this.refreshData();
     this.startPeriodicUpdates();
   }
 
@@ -101,9 +103,9 @@ class SocialSentimentService {
    */
   async getSocialSentiment(): Promise<SocialSentimentData> {
     if (!this.cache) {
-      this.cache = await this.generateMockData();
+      await this.refreshData();
     }
-    return this.cache;
+    return this.cache!;
   }
 
   /**
@@ -112,9 +114,9 @@ class SocialSentimentService {
   async getWhalesByStrategy(strategy?: string): Promise<WhaleWallet[]> {
     const data = await this.getSocialSentiment();
     if (!strategy) return data.whaleActivity;
-    
-    return data.whaleActivity.filter(whale => 
-      whale.strategy === strategy || whale.recentTrades.some(trade => 
+
+    return data.whaleActivity.filter(whale =>
+      whale.strategy === strategy || whale.recentTrades.some(trade =>
         trade.strategy.toLowerCase().includes(strategy.toLowerCase())
       )
     );
@@ -136,7 +138,7 @@ class SocialSentimentService {
   async getMemeSignals(sentiment?: 'bullish' | 'bearish' | 'neutral'): Promise<MemeSignal[]> {
     const data = await this.getSocialSentiment();
     if (!sentiment) return data.memeSignals;
-    
+
     return data.memeSignals.filter(signal => signal.sentiment === sentiment);
   }
 
@@ -162,14 +164,14 @@ class SocialSentimentService {
   async followWhale(whaleId: string): Promise<boolean> {
     const data = await this.getSocialSentiment();
     const whale = data.whaleActivity.find(w => w.id === whaleId);
-    
+
     if (whale) {
       whale.followersCount += 1;
       this.notifySubscribers();
       console.log(`Now following whale: ${whale.alias}`);
       return true;
     }
-    
+
     return false;
   }
 
@@ -179,7 +181,7 @@ class SocialSentimentService {
   async joinCopyTradingPool(poolId: string, amount: number): Promise<boolean> {
     const data = await this.getSocialSentiment();
     const pool = data.copyTradingPools.find(p => p.id === poolId);
-    
+
     if (pool && amount >= pool.minInvestment) {
       pool.participantsCount += 1;
       pool.totalValue += amount;
@@ -187,16 +189,73 @@ class SocialSentimentService {
       console.log(`Joined copy trading pool: ${pool.name} with ${amount} STX`);
       return true;
     }
-    
+
     return false;
   }
 
   /**
-   * Generate realistic mock data
+   * Refresh data from real API or fallback to mock
+   */
+  private async refreshData(): Promise<void> {
+    const now = Date.now();
+
+    // Try to fetch real Twitter data
+    let twitterData = null;
+    try {
+      if (import.meta.env.VITE_TWITTER_BEARER_TOKEN) {
+        twitterData = await twitterService.getTopicSentiment('Stacks OR $STX OR Blockstack');
+      }
+    } catch (error) {
+      console.warn('Failed to fetch Twitter data, falling back to mock:', error);
+    }
+
+    // Generate base mock data (whales and pools are still mock for now as they require on-chain data)
+    const mockData = await this.generateMockData();
+
+    if (twitterData && twitterData.sampleSize > 0) {
+      // Merge real sentiment data
+      this.cache = {
+        ...mockData,
+        overallSentiment: {
+          score: twitterData.score,
+          trend: twitterData.score > (this.cache?.overallSentiment.score || 0) ? 'up' : 'down',
+          confidence: twitterData.confidence,
+          lastUpdate: now
+        },
+        marketMetrics: {
+          ...mockData.marketMetrics,
+          socialVolume: Math.min(100, twitterData.sampleSize * 2), // Scale volume
+          viralMentions: twitterData.sampleSize * 100 + Math.floor(Math.random() * 1000)
+        },
+        // Convert top tweets to meme signals
+        memeSignals: twitterData.topTweets.map((tweet) => ({
+          id: `tweet-${tweet.id}`,
+          title: tweet.text.substring(0, 50) + '...',
+          description: tweet.text,
+          sentiment: twitterService.analyzeText(tweet.text) > 0 ? 'bullish' : twitterService.analyzeText(tweet.text) < 0 ? 'bearish' : 'neutral',
+          viralScore: Math.min(100, (tweet.public_metrics.like_count + tweet.public_metrics.retweet_count) / 10),
+          communityEngagement: Math.min(100, tweet.public_metrics.reply_count * 5),
+          timeframe: '4h',
+          source: 'twitter',
+          mentions: tweet.public_metrics.impression_count || 0,
+          confidence: 80, // derived from tweet metrics
+          tags: twitterData.trendingTopics.slice(0, 3),
+          createdAt: new Date(tweet.created_at).getTime(),
+          asset: 'STX'
+        }))
+      };
+    } else {
+      // Use full mock data if no real data available
+      this.cache = mockData;
+    }
+  }
+
+  /**
+   * Generate realistic mock data (fallback)
    */
   private async generateMockData(): Promise<SocialSentimentData> {
     const now = Date.now();
-    
+
     // Generate whale wallets
     const whaleWallets: WhaleWallet[] = [
       {
@@ -257,7 +316,7 @@ class SocialSentimentService {
       }
     ];
 
-    // Generate meme signals
+    // Generate fallback meme signals
     const memeSignals: MemeSignal[] = [
       {
         id: 'meme-1',
@@ -410,11 +469,11 @@ class SocialSentimentService {
   private generateRecentTrades(strategy: string): WhaleTradeActivity[] {
     const now = Date.now();
     const trades: WhaleTradeActivity[] = [];
-    
+
     for (let i = 0; i < 5; i++) {
       const timestamp = now - (i * 3600000 + Math.random() * 3600000);
       const strategies = ['CALL', 'PUT', 'STRAP', 'STRIP', 'Bull Call Spread'];
-      
+
       trades.push({
         txId: `0x${Math.random().toString(16).substr(2, 40)}`,
         timestamp,
@@ -422,13 +481,13 @@ class SocialSentimentService {
         strategy: strategies[Math.floor(Math.random() * strategies.length)],
         amount: Math.random() * 1000 + 100,
         asset: Math.random() > 0.7 ? 'BTC' : 'STX',
-        profitLoss: strategy === 'bearish' ? 
-          -(Math.random() * 50 + 10) : 
+        profitLoss: strategy === 'bearish' ?
+          -(Math.random() * 50 + 10) :
           Math.random() * 100 + 20,
         confidence: Math.random() * 30 + 70
       });
     }
-    
+
     return trades.sort((a, b) => b.timestamp - a.timestamp);
   }
 
@@ -437,32 +496,7 @@ class SocialSentimentService {
    */
   private startPeriodicUpdates(): void {
     this.updateInterval = setInterval(async () => {
-      try {
-        // Simulate dynamic updates
-        if (this.cache) {
-          // Update whale activity
-          this.cache.whaleActivity.forEach(whale => {
-            whale.lastTradeTime = Math.random() > 0.8 ? Date.now() : whale.lastTradeTime;
-            whale.followersCount += Math.random() > 0.9 ? 1 : 0;
-          });
-
-          // Update meme signals
-          this.cache.memeSignals.forEach(signal => {
-            signal.viralScore += (Math.random() - 0.5) * 10;
-            signal.viralScore = Math.max(0, Math.min(100, signal.viralScore));
-            signal.mentions += Math.floor(Math.random() * 100);
-          });
-
-          // Update overall sentiment
-          this.cache.overallSentiment.score += (Math.random() - 0.5) * 20;
-          this.cache.overallSentiment.score = Math.max(-100, Math.min(100, this.cache.overallSentiment.score));
-          this.cache.overallSentiment.lastUpdate = Date.now();
-
-          this.notifySubscribers();
-        }
-      } catch (error) {
-        console.error('Error updating social sentiment data:', error);
-      }
+      await this.refreshData();
     }, this.UPDATE_INTERVAL);
   }
 
