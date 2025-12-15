@@ -105,15 +105,15 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 5 }: WhaleTrackerProps
 
   if (loading) {
     return (
-      <div className="bg-[#1D2215] rounded-lg p-6">
+      <div className="card p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Icons.users className="w-5 h-5 text-[#bbf838]" />
+          <Icons.users className="w-5 h-5" style={{ color: 'var(--accent-green-strong)' }} />
           <h3 className="text-lg font-bold text-white">Whale Tracker</h3>
         </div>
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-16 bg-gray-700 rounded-lg"></div>
+            <div key={i} className="animate-pulse card p-3">
+              <div className="h-14 bg-gray-700 rounded-md"></div>
             </div>
           ))}
         </div>
@@ -122,10 +122,10 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 5 }: WhaleTrackerProps
   }
 
   return (
-    <div className="bg-[#1D2215] rounded-lg p-6">
+    <div className="card p-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Icons.users className="w-5 h-5 text-[#bbf838]" />
+          <Icons.users className="w-5 h-5" style={{ color: 'var(--accent-green-strong)' }} />
           <h3 className="text-lg font-bold text-white">Whale Tracker</h3>
         </div>
         
@@ -147,7 +147,7 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 5 }: WhaleTrackerProps
         {whales.map((whale) => (
           <div
             key={whale.id}
-            className="bg-[#121412] rounded-lg p-4 border border-white/5 hover:border-[#bbf838]/20 transition-colors cursor-pointer"
+            className="card p-4 cursor-pointer"
             onClick={() => {
               setSelectedWhale(selectedWhale?.id === whale.id ? null : whale);
               onWhaleSelect?.(whale);
@@ -155,8 +155,8 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 5 }: WhaleTrackerProps
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-linear-to-r from-[#37f741] to-[#FDEE61] flex items-center justify-center">
-                  <span className="text-black font-bold text-sm">
+                <div className="w-10 h-10 rounded-full bg-[#131712] flex items-center justify-center border border-white/5" style={{ boxShadow: '0 8px 24px rgba(55,247,65,0.06)' }}>
+                  <span className="text-white font-bold text-sm">
                     {whale.alias.slice(0, 2).toUpperCase()}
                   </span>
                 </div>
@@ -165,7 +165,7 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 5 }: WhaleTrackerProps
                   <div className="flex items-center gap-2">
                     <span className="text-white font-medium">{whale.alias}</span>
                     {whale.isVerified && (
-                      <Icons.check className="w-4 h-4 text-[#bbf838]" />
+                      <Icons.check className="w-4 h-4 text-[var(--accent-green)]" />
                     )}
                     <div className={`flex items-center gap-1 ${getStrategyColor(whale.strategy)}`}>
                       {getStrategyIcon(whale.strategy)}
@@ -181,7 +181,7 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 5 }: WhaleTrackerProps
               </div>
 
               <div className="text-right">
-                <div className={`text-sm font-bold ${whale.avgProfitLoss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                <div className={`text-sm font-bold ${whale.avgProfitLoss >= 0 ? 'text-[var(--accent-green)]' : 'text-red-400'}`}>
                   {whale.avgProfitLoss >= 0 ? '+' : ''}{whale.avgProfitLoss.toFixed(1)}%
                 </div>
                 <div className="text-xs text-gray-400">
@@ -200,7 +200,8 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 5 }: WhaleTrackerProps
                       e.stopPropagation();
                       handleFollowWhale(whale.id);
                     }}
-                    className="px-3 py-1.5 bg-linear-to-r from-[#37f741] to-[#FDEE61] text-black text-xs font-bold rounded-lg hover:opacity-90 transition-opacity"
+                    className="px-3 py-1.5 text-xs font-bold rounded-lg"
+                    style={{ backgroundColor: 'var(--accent-green)', color: '#000', boxShadow: '0 8px 30px rgba(55,247,65,0.08)' }}
                   >
                     Follow Whale
                   </button>

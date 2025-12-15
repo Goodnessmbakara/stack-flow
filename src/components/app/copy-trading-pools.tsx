@@ -46,14 +46,8 @@ export function CopyTradingPools({ maxPools = 3, onPoolJoin }: CopyTradingPoolsP
     return unsubscribe;
   }, [maxPools]);
 
-  const getRiskColor = (riskLevel: string) => {
-    switch (riskLevel) {
-      case 'low': return 'text-green-400 bg-green-500/20';
-      case 'medium': return 'text-yellow-400 bg-yellow-500/20';
-      case 'high': return 'text-red-400 bg-red-500/20';
-      default: return 'text-gray-400 bg-gray-500/20';
-    }
-  };
+  
+
 
   const getRiskIcon = (riskLevel: string) => {
     switch (riskLevel) {
@@ -102,15 +96,15 @@ export function CopyTradingPools({ maxPools = 3, onPoolJoin }: CopyTradingPoolsP
 
   if (loading) {
     return (
-      <div className="bg-[#1D2215] rounded-lg p-6">
+      <div className="card p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Icons.trending className="w-5 h-5 text-[#bbf838]" />
+          <Icons.trending className="w-5 h-5" style={{ color: 'var(--accent-green-strong)' }} />
           <h3 className="text-lg font-bold text-white">Copy Trading Pools</h3>
         </div>
         <div className="space-y-4">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="h-32 bg-gray-700 rounded-lg"></div>
+            <div key={i} className="animate-pulse card p-4">
+              <div className="h-28 bg-gray-700 rounded-md"></div>
             </div>
           ))}
         </div>
@@ -119,9 +113,9 @@ export function CopyTradingPools({ maxPools = 3, onPoolJoin }: CopyTradingPoolsP
   }
 
   return (
-    <div className="bg-[#1D2215] rounded-lg p-6">
+    <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <Icons.trending className="w-5 h-5 text-[#bbf838]" />
+        <Icons.trending className="w-5 h-5" style={{ color: 'var(--accent-green-strong)' }} />
         <h3 className="text-lg font-bold text-white">Copy Trading Pools</h3>
       </div>
 
@@ -129,14 +123,15 @@ export function CopyTradingPools({ maxPools = 3, onPoolJoin }: CopyTradingPoolsP
         {pools.map((pool) => (
           <div
             key={pool.id}
-            className="bg-[#121412] rounded-lg p-4 border border-white/5 hover:border-[#bbf838]/20 transition-colors"
+            className="card p-4"
+            style={{ borderLeft: `4px solid ${pool.riskLevel === 'high' ? '#ff4d4d' : pool.riskLevel === 'medium' ? '#f5c542' : 'var(--accent-green)'}` }}
           >
             {/* Header */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <h4 className="text-white font-bold text-sm">{pool.name}</h4>
-                  <div className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${getRiskColor(pool.riskLevel)}`}>
+                  <div className={`px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1`} style={{ background: pool.riskLevel === 'high' ? 'rgba(255,77,77,0.12)' : pool.riskLevel === 'medium' ? 'rgba(245,197,66,0.12)' : 'rgba(55,247,65,0.12)', color: pool.riskLevel === 'high' ? '#ff4d4d' : pool.riskLevel === 'medium' ? '#f5c542' : 'var(--accent-green)' }}>
                     {getRiskIcon(pool.riskLevel)}
                     {pool.riskLevel.toUpperCase()} RISK
                   </div>
@@ -201,7 +196,8 @@ export function CopyTradingPools({ maxPools = 3, onPoolJoin }: CopyTradingPoolsP
             {/* Action Button */}
             <button
               onClick={() => handleJoinPool(pool)}
-              className="w-full py-2 px-4 bg-linear-to-r from-[#37f741] to-[#FDEE61] text-black text-sm font-bold rounded-lg hover:opacity-90 transition-opacity"
+              className="w-full py-2 px-4 text-sm font-bold rounded-lg"
+              style={{ backgroundColor: 'var(--accent-green-strong)', color: '#000', boxShadow: '0 10px 30px rgba(55,247,65,0.08)' }}
             >
               Join Pool (Min: {pool.minInvestment} STX)
             </button>

@@ -151,7 +151,7 @@ export function JoinPoolModal({ isOpen, onClose, pool, onSuccess }: JoinPoolModa
         <div className="bg-[#121412] rounded-lg p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <h4 className="text-white font-bold">{pool.name}</h4>
-            <div className="px-2 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400">
+            <div className="px-2 py-1 rounded-full text-xs font-bold" style={{ background: pool.riskLevel === 'high' ? 'rgba(255,77,77,0.12)' : pool.riskLevel === 'medium' ? 'rgba(245,197,66,0.12)' : 'rgba(55,247,65,0.12)', color: pool.riskLevel === 'high' ? '#ff4d4d' : pool.riskLevel === 'medium' ? '#f5c542' : 'var(--accent-green)' }}>
               {pool.riskLevel.toUpperCase()} RISK
             </div>
           </div>
@@ -185,7 +185,8 @@ export function JoinPoolModal({ isOpen, onClose, pool, onSuccess }: JoinPoolModa
               min={pool.minInvestment}
               max={balance}
               step="0.01"
-              className="w-full bg-[#121412] border border-white/10 rounded-lg p-3 text-white placeholder-gray-400 focus:border-[#bbf838] focus:outline-hidden disabled:opacity-50"
+              className="w-full bg-[#121412] border border-white/10 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-hidden disabled:opacity-50"
+              style={{ borderColor: 'rgba(255,255,255,0.06)' }}
               placeholder={`Min: ${pool.minInvestment} STX`}
             />
             <div className="absolute right-3 top-3 text-gray-400 text-sm">STX</div>
@@ -211,7 +212,7 @@ export function JoinPoolModal({ isOpen, onClose, pool, onSuccess }: JoinPoolModa
         </div>
 
         {/* Cost Breakdown */}
-        <div className="bg-[#121412] rounded-lg p-4 mb-6 space-y-2">
+          <div className="bg-[#121412] rounded-lg p-4 mb-6 space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Investment Amount</span>
             <span className="text-white">{investAmount.toFixed(2)} STX</span>
@@ -223,7 +224,7 @@ export function JoinPoolModal({ isOpen, onClose, pool, onSuccess }: JoinPoolModa
           <div className="border-t border-white/10 pt-2">
             <div className="flex justify-between text-sm font-bold">
               <span className="text-white">Total Cost</span>
-              <span className="text-[#bbf838]">{totalCost.toFixed(4)} STX</span>
+              <span style={{ color: 'var(--accent-green-strong)', fontWeight: 700 }}>{totalCost.toFixed(4)} STX</span>
             </div>
           </div>
         </div>
@@ -240,7 +241,8 @@ export function JoinPoolModal({ isOpen, onClose, pool, onSuccess }: JoinPoolModa
           <button
             onClick={handleJoinPool}
             disabled={isProcessing || !isValidAmount || !address}
-            className="flex-1 py-3 px-4 bg-linear-to-r from-[#37f741] to-[#FDEE61] text-black font-bold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 py-3 px-4 text-black font-bold rounded-lg disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ backgroundColor: 'var(--accent-green)', color: '#000', boxShadow: '0 10px 30px rgba(55,247,65,0.08)' }}
           >
             {isProcessing ? (
               <>

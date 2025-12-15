@@ -96,19 +96,20 @@ export default function SentimentDashboard() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Overall Sentiment */}
-                <div className="bg-[#131712] border border-white/10 rounded-2xl p-8 mb-8">
+                <div className="card p-8 mb-8 relative">
                     <div className="text-center">
                         <div className="text-sm text-slate-400 mb-2">Overall Market Sentiment</div>
-                        <div className={`text-6xl font-bold mb-2 ${sentiment.color}`}>
+                        <div className={`text-6xl font-bold mb-2 ${sentiment.color} sentiment-score`}>
                             {sentimentData.overallSentiment.score > 0 ? '+' : ''}{sentimentData.overallSentiment.score}
                         </div>
-                        <div className={`text-2xl font-semibold mb-4 ${sentiment.color}`}>
-                            {sentiment.label}
+                        <div className="flex items-center justify-center gap-3 mb-4">
+                            <div className="neon-badge">{sentiment.label}</div>
                         </div>
                         <div className="flex items-center justify-center gap-2 text-sm text-slate-400">
                             <TrendingUp className="w-4 h-4" style={{ color: sentimentData.overallSentiment.trend === 'up' ? '#37F741' : sentimentData.overallSentiment.trend === 'down' ? '#ff4d4d' : '#94a3b8' }} />
                             Confidence: {sentimentData.overallSentiment.confidence}%
-                        </div>            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Sentiment Bar */}
@@ -135,33 +136,33 @@ export default function SentimentDashboard() {
 
                 {/* Market Metrics */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="card p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <Activity className="w-5 h-5 text-[#37f741]" />
+                            <Activity className="w-5 h-5" style={{ color: 'var(--accent-green)' }} />
                             <div className="text-xs text-slate-400">Whale Activity</div>
                         </div>
                         <div className="text-2xl font-bold">{sentimentData.marketMetrics.whaleActivityLevel}%</div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="card p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <MessageCircle className="w-5 h-5 text-[#FDEE61]" />
+                            <MessageCircle className="w-5 h-5" style={{ color: 'var(--accent-green-strong)' }} />
                             <div className="text-xs text-slate-400">Social Volume</div>
                         </div>
                         <div className="text-2xl font-bold">{sentimentData.marketMetrics.socialVolume}%</div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="card p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <TrendingUp className="w-5 h-5 text-blue-400" />
+                            <TrendingUp className="w-5 h-5" style={{ color: '#7cc6ff' }} />
                             <div className="text-xs text-slate-400">Viral Mentions</div>
                         </div>
                         <div className="text-2xl font-bold">{formatNumber(sentimentData.marketMetrics.viralMentions)}</div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="card p-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <Users className="w-5 h-5 text-[#37f741]" />
+                            <Users className="w-5 h-5" style={{ color: 'var(--accent-green)' }} />
                             <div className="text-xs text-slate-400">Engagement</div>
                         </div>
                         <div className="text-2xl font-bold">{sentimentData.marketMetrics.communityEngagement}%</div>
@@ -219,8 +220,10 @@ export default function SentimentDashboard() {
                                     href={signal.source === 'twitter' ? `https://x.com/i/web/status/${signal.id.replace('tweet-', '')}` : '#'}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="block bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-[#37f741]/50 transition-all group cursor-pointer"
+                                    className="block card p-6 transition-all group cursor-pointer relative overflow-hidden"
                                 >
+                                    {/* left accent */}
+                                    <div style={{ left: 0 }} className={`absolute top-0 bottom-0 w-1`} />
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="flex-1">
                                             <h3 className="text-lg font-semibold mb-2 group-hover:text-[#37f741] transition-colors">{signal.title}</h3>
@@ -263,7 +266,7 @@ export default function SentimentDashboard() {
                                         {signal.tags.map((tag) => (
                                             <span
                                                 key={tag}
-                                                className="px-2 py-1 bg-[#37f741]/10 text-[#37f741] text-xs rounded-full"
+                                                className="tag-pill"
                                             >
                                                 #{tag}
                                             </span>

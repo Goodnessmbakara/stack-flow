@@ -88,13 +88,13 @@ export default function CopyTradingDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 text-white">
+        <div className="min-h-screen bg-[#1D2215] text-white">
             {/* Header */}
             <div className="border-b border-white/10 bg-black/20 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            <h1 className="text-3xl font-bold text-[#40F749] accent-glow">
                                 Copy Trading Dashboard
                             </h1>
                             <p className="text-slate-400 mt-2">
@@ -103,17 +103,17 @@ export default function CopyTradingDashboard() {
                         </div>
                         {isConnected && (
                             <div className="hidden md:flex items-center gap-4">
-                                <div className="bg-white/5 rounded-lg px-4 py-2 border border-white/10">
+                                <div className="card px-4 py-2">
                                     <div className="text-xs text-slate-400">Total Invested</div>
                                     <div className="text-lg font-bold">{formatCurrency(stats.totalInvested)} STX</div>
                                 </div>
-                                <div className="bg-white/5 rounded-lg px-4 py-2 border border-white/10">
+                                <div className="card px-4 py-2">
                                     <div className="text-xs text-slate-400">Current Value</div>
                                     <div className="text-lg font-bold">{formatCurrency(stats.totalValue)} STX</div>
                                 </div>
-                                <div className="bg-white/5 rounded-lg px-4 py-2 border border-white/10">
+                                <div className="card px-4 py-2">
                                     <div className="text-xs text-slate-400">Avg Performance</div>
-                                    <div className={`text-lg font-bold ${stats.avgPerformance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                    <div className={`text-lg font-bold ${stats.avgPerformance >= 0 ? 'text-[#37F741]' : 'text-red-400'}`}>
                                         {formatPercentage(stats.avgPerformance)}
                                     </div>
                                 </div>
@@ -124,13 +124,13 @@ export default function CopyTradingDashboard() {
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-white/10 bg-black/10 backdrop-blur-sm sticky top-0 z-10">
+                <div className="border-b border-white/10 bg-black/10 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex gap-8">
                         <button
                             onClick={() => setActiveTab('pools')}
                             className={`py-4 px-2 border-b-2 transition-colors font-medium ${activeTab === 'pools'
-                                ? 'border-purple-400 text-purple-400'
+                                ? 'border-[var(--accent-green)] text-[var(--accent-green)]'
                                 : 'border-transparent text-slate-400 hover:text-white'
                                 }`}
                         >
@@ -154,7 +154,7 @@ export default function CopyTradingDashboard() {
                         <button
                             onClick={() => setActiveTab('positions')}
                             className={`py-4 px-2 border-b-2 transition-colors font-medium ${activeTab === 'positions'
-                                ? 'border-purple-400 text-purple-400'
+                                ? 'border-[var(--accent-green)] text-[var(--accent-green)]'
                                 : 'border-transparent text-slate-400 hover:text-white'
                                 }`}
                         >
@@ -213,9 +213,10 @@ export default function CopyTradingDashboard() {
                                 <p className="text-slate-400 mb-6">
                                     You haven't joined any copy trading pools yet. Start by exploring available pools!
                                 </p>
-                                <button
+                                    <button
                                     onClick={() => setActiveTab('pools')}
-                                    className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all"
+                                    className="px-6 py-3 rounded-lg font-semibold"
+                                    style={{ backgroundColor: 'var(--accent-green)', color: '#000', boxShadow: '0 10px 30px rgba(55,247,65,0.08)' }}
                                 >
                                     Browse Pools
                                 </button>
@@ -224,7 +225,7 @@ export default function CopyTradingDashboard() {
                             <div className="space-y-4">
                                 {/* Stats Cards - Mobile */}
                                 <div className="md:hidden grid grid-cols-2 gap-4 mb-6">
-                                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                    <div className="card p-4">
                                         <div className="text-xs text-slate-400 mb-1">Invested</div>
                                         <div className="text-lg font-bold">{formatCurrency(stats.totalInvested)} STX</div>
                                     </div>
@@ -237,7 +238,7 @@ export default function CopyTradingDashboard() {
                                 {userPositions.map((position) => (
                                     <div
                                         key={position.poolId}
-                                        className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all"
+                                        className="card p-6"
                                     >
                                         <div className="flex items-start justify-between mb-4">
                                             <div>
@@ -246,8 +247,8 @@ export default function CopyTradingDashboard() {
                                                     Joined {new Date(position.joinedAt).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                            <div className={`px-3 py-1 rounded-full text-sm font-medium ${position.performance >= 0
-                                                ? 'bg-green-500/20 text-green-300'
+                                                <div className={`px-3 py-1 rounded-full text-sm font-medium ${position.performance >= 0
+                                                ? 'bg-[#37F741]/20 text-[#37F741]'
                                                 : 'bg-red-500/20 text-red-300'
                                                 }`}>
                                                 {formatPercentage(position.performance)}
