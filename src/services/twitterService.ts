@@ -59,37 +59,86 @@ class TwitterService {
      * Search for recent tweets about a query
      */
     async searchTweets(query: string, maxResults: number = 20): Promise<Tweet[]> {
-        if (!this.bearerToken) {
-            console.warn('⚠️ [TwitterService] Cannot search tweets - no bearer token');
-            return [];
+        // Prefer native Bearer Token if provided
+        if (this.bearerToken) {
+            try {
+                const url = `${this.baseUrl}/tweets/search/recent`;
+                const response = await axios.get(url, {
+                    params: {
+                        query: `${query} -is:retweet lang:en`,
+                        max_results: maxResults,
+                        'tweet.fields': 'created_at,public_metrics,author_id',
+                        sort_order: 'recency'
+                    },
+                    headers: {
+                        'Authorization': `Bearer ${this.bearerToken}`
+                    }
+                });
+                return response.data.data || [];
+            } catch (error) {
+                    const status = (error as any)?.response?.status;
+                    console.error('Error fetching tweets with bearer token:', error);
+                    if (status === 403) {
+                        console.warn('⚠️ [TwitterService] Received 403 from Twitter API. Check VITE_TWITTER_BEARER_TOKEN or RapidAPI key.');
+                    }
+            }
         }
 
-        console.log('🐦 [TwitterService] Searching tweets for:', query);
-        console.log('🔐 [TwitterService] Using token (first 20 chars):', this.bearerToken.substring(0, 20) + '...');
+            // Try server-side RapidAPI proxy first (avoids exposing the key to the client and CORS)
+            try {
+                console.log('🔁 [TwitterService] Attempting server-side RapidAPI proxy...');
+                const resp = await axios.get(`/api/rapid/twitter/tweets/search/recent`, {
+                    params: {
+                        query: `${query} -is:retweet lang:en`,
+                        max_results: maxResults,
+                        'tweet.fields': 'created_at,public_metrics,author_id'
+                    }
+                });
 
-        try {
-            // Note: In production, this call should go through a backend to protect the key.
-            // We are using Vite proxy in dev to handle CORS and inject the header.
-            const url = `${this.baseUrl}/tweets/search/recent`;
-            console.log('📡 [TwitterService] API URL:', url);
-
-            const response = await axios.get(url, {
-                params: {
-                    query: `${query} -is:retweet lang:en`,
-                    max_results: maxResults,
-                    'tweet.fields': 'created_at,public_metrics,author_id',
-                    sort_order: 'recency'
-                },
-                headers: {
-                    'Authorization': `Bearer ${this.bearerToken}`
+                const data = resp.data?.data || [];
+                if (data && data.length) {
+                    console.log('✅ [TwitterService] Received tweets from server-side RapidAPI proxy');
+                    return data.map((t: any) => ({
+                        id: t.id || t.tweet_id || String(Math.random()),
+                        text: t.text || t.full_text || '',
+                        created_at: t.created_at || t.createdAt || new Date().toISOString(),
+                        author_id: t.author_id || t.user?.id || '',
+                        public_metrics: {
+                            retweet_count: (t.public_metrics?.retweet_count) || (t.retweet_count) || 0,
+                            reply_count: (t.public_metrics?.reply_count) || (t.reply_count) || 0,
+                            like_count: (t.public_metrics?.like_count) || (t.like_count) || 0,
+                            quote_count: (t.public_metrics?.quote_count) || 0,
+                            impression_count: (t.public_metrics?.impression_count) || 0
+                        }
+                    }));
                 }
-            });
+            } catch (err) {
+                console.warn('⚠️ [TwitterService] Server-side RapidAPI proxy failed or unavailable:', err);
+            }
 
-            return response.data.data || [];
-        } catch (error) {
-            console.error('Error fetching tweets:', error);
-            return [];
-        }
+            // Fallback to client-side RapidAPI provider if server proxy is not available
+            try {
+                const { searchTweetsRapid } = await import('./rapidapiTwitterProvider');
+                const rapidTweets = await searchTweetsRapid(query, maxResults);
+                if (rapidTweets && rapidTweets.length) return rapidTweets;
+            } catch (err) {
+                console.warn('⚠️ [TwitterService] RapidAPI fallback failed:', err);
+            }
+
+            // Fallback to generative (Gemini) provider to synthesize tweets when live sources fail
+            try {
+                const { generateTweetsGemini } = await import('./generativeTwitterProvider');
+                const genTweets = await generateTweetsGemini(query, Math.min(20, maxResults));
+                if (genTweets && genTweets.length) {
+                    console.log('🔮 [TwitterService] Using generative Gemini fallback with', genTweets.length, 'tweets');
+                    return genTweets;
+                }
+            } catch (err) {
+                console.warn('⚠️ [TwitterService] Generative fallback failed:', err);
+            }
+
+        console.warn('⚠️ [TwitterService] No tweet provider available or no results');
+        return [];
     }
 
     /**
