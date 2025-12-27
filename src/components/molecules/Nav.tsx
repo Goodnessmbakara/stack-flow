@@ -26,19 +26,37 @@ const Nav = (): ReactElement => {
   }, []);
 
   const handleNavClick = (section: string) => {
-    if (location.pathname === "/") {
-      const element = document.getElementById(section);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    } else {
-      navigate(`/#${section}`);
-      setTimeout(() => {
-        const element = document.getElementById(section);
+    // Standardize section keys
+    let targetPath = "/";
+    let targetHash = section;
+
+    if (section === "about") {
+      targetPath = "/about";
+      targetHash = ""; // scroll to top of about page
+    } else if (section === "the team") {
+      targetPath = "/about";
+      targetHash = "team";
+    }
+
+    if (location.pathname === targetPath) {
+      if (targetHash) {
+        const element = document.getElementById(targetHash);
         if (element) {
           element.scrollIntoView({ behavior: "smooth" });
         }
-      }, 100);
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else {
+      navigate(`${targetPath}${targetHash ? `#${targetHash}` : ""}`);
+      if (targetHash) {
+        setTimeout(() => {
+          const element = document.getElementById(targetHash);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 300); // Increased timeout for page load
+      }
     }
   };
 

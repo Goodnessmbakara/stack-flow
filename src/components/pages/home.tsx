@@ -5,7 +5,6 @@ import Hero from "../molecules/Hero";
 import Metric from "../molecules/Metric";
 import Options from "../molecules/OptionSection";
 import Services from "../molecules/Services";
-import { TeamSection } from "../molecules/team-section";
 
 export default function HomePage() {
   return (
@@ -16,7 +15,6 @@ export default function HomePage() {
       <AboutSection1 />
       <AboutSection2 />
       <Metric />
-      <TeamSection />
       <Options />
     </>
   );
