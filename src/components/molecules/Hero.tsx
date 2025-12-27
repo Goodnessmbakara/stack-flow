@@ -49,7 +49,7 @@ const Hero = (): ReactElement => {
                   <FaRocket /> Launch App
                 </Link>
               </Button>
-              <Button variant="outline" className="px-8 py-4 text-lg border-white/20 hover:bg-white/5 backdrop-blur-sm">
+              <Button className="px-8 py-4 text-lg border-white/20 hover:bg-white/5 backdrop-blur-sm">
                  <Link to={"/services"} className="flex items-center gap-2">
                    Explore Strategy
                  </Link>

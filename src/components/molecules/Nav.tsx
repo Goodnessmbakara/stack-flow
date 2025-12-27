@@ -1,5 +1,5 @@
 import { Fragment, ReactElement, useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { IoCloseOutline } from "react-icons/io5";
 import { MdOutlineMenu } from "react-icons/md";
 import CustomConnectButton from "../atoms/ConnectButton";
