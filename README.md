@@ -9,8 +9,46 @@ StackFlow is a Bitcoin-secured DeFi and sentiment trading platform built on Stac
 - 🐋 **Copy Trading** - Automatically mirror successful whale and efficient trader wallets
 - 🎯 **Capital Sentiment Strategies** - 12 proven strategies for bullish, bearish, volatile, and stable markets
 - 🎪 **Meme-Driven Investing** - Community pools driven by viral content and social sentiment
+- 🌊 **FLOW Token Ecosystem** - Native token with staking, governance, and fee discounts
 - 🔐 **Self-Custody** - Your assets never leave your wallet
 - ⚡ **Bitcoin Security** - Built on Stacks, secured by Bitcoin
+
+## FLOW Token
+
+**FLOW** is the native utility and governance token of StackFlow with a fixed supply of **100M tokens**.
+
+### Token Utility
+
+1. **🎯 Fee Discounts**: Stake FLOW to earn up to 75% discount on trading fees
+   - Ripple Tier (1K FLOW): 10% discount
+   - Wave Tier (5K FLOW): 25% discount
+   - Current Tier (20K FLOW): 50% discount
+   - Ocean Tier (100K FLOW): 75% discount
+
+2. **🗳️ Governance**: Vote on protocol changes, new strategies, and treasury allocation
+   - 1 FLOW = 1 Vote
+   - 5,000 FLOW minimum to submit proposals
+
+3. **💰 Whale Rewards**: Verified traders earn FLOW for providing copy trading signals
+
+4. **🌊 Liquidity Mining**: Stake capital in copy trading pools to earn FLOW rewards
+
+5. **🔓 Premium Access**: Hold FLOW to unlock advanced features
+   - 500+ FLOW: Premium analytics
+   - 2,000+ FLOW: AI sentiment reports
+   - 10,000+ FLOW: Early access to strategies
+   - 50,000+ FLOW: Private whale signals
+
+### Distribution
+- 40% Community Rewards (vested over 4 years)
+- 25% Ecosystem Development (vested over 5 years)
+- 20% Team (4-year vesting, 1-year cliff)
+- 10% Liquidity Provision
+- 5% Public Distribution
+
+**Contract**: `SP3F4WEX90KZQ6D25TWP09J90D6CSYGW1JWXN5YF4.stackflow-flow-token`
+
+Learn more in our [FLOW Token Narrative](./FLOW_NARRATIVE.md) and [Tokenomics Document](./FLOW_TOKENOMICS.md).
 
 ## Documentation
 
