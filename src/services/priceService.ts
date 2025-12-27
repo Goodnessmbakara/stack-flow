@@ -64,7 +64,7 @@ class PriceService {
    */
   private async fetchPrice(asset: AssetType): Promise<PriceData> {
     const assetMap: Record<AssetType, { coingecko: string; coincap: string; binance: string }> = {
-      STX: { coingecko: 'blockstack', coincap: 'blockstack', binance: 'STXUSDT' },
+      STX: { coingecko: 'blockstack', coincap: 'stacks', binance: 'STXUSDT' },
       BTC: { coingecko: 'bitcoin', coincap: 'bitcoin', binance: 'BTCUSDT' },
       ETH: { coingecko: 'ethereum', coincap: 'ethereum', binance: 'ETHUSDT' },
     };

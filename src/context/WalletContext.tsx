@@ -6,17 +6,12 @@ import {
   useEffect,
 } from "react";
 import {
-  AppConfig,
-  UserSession,
-  showConnect,
+  connect,
+  disconnect,
+  isConnected,
+  request,
 } from "@stacks/connect";
 import { projectId } from "../lib/wallet-config";
-
-// Configure the app - only request necessary permissions
-const appConfig = new AppConfig(["store_write"]);
-
-// Create a single user session instance
-const userSession = new UserSession({ appConfig });
 
 interface AddressData {
   address: string;
@@ -25,7 +20,6 @@ interface AddressData {
 }
 
 interface WalletContextType {
-  userSession: UserSession;
   isLoading: boolean;
   isConnecting: boolean;
   isConnected: boolean;
@@ -49,56 +43,73 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }>({ stx: [], btc: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   // Check if user is already authenticated on mount
   useEffect(() => {
-    if (userSession.isUserSignedIn()) {
-      const userData = userSession.loadUserData();
-      const stxAddr = userData.profile.stxAddress;
-      const mainnetAddr = stxAddr.mainnet;
-      const testnetAddr = stxAddr.testnet;
-      
-      setAddresses({
-        stx: [
-          { address: mainnetAddr, symbol: 'STX', purpose: 'mainnet' },
-          { address: testnetAddr, symbol: 'STX', purpose: 'testnet' }
-        ],
-        btc: [] // BTC addresses can be added if available
-      });
-    }
-    setIsLoading(false);
+    const checkConnection = async () => {
+      try {
+        const connectionStatus = isConnected();
+        setConnected(connectionStatus);
+        
+        if (connectionStatus) {
+          // Fetch addresses if connected
+          const result = await request('getAddresses');
+          if (result?.addresses && Array.isArray(result.addresses)) {
+            setAddresses({
+              stx: result.addresses.map((addr: any) => ({
+                address: addr.address,
+                symbol: addr.symbol || 'STX',
+                purpose: addr.type || 'mainnet'
+              })),
+              btc: [] // BTC addresses can be added if available
+            });
+          }
+        }
+      } catch (error) {
+        console.error('[WalletContext] Error checking connection:', error);
+        setConnected(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkConnection();
   }, []);
 
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      showConnect({
+      await connect({
         appDetails: {
           name: import.meta.env.VITE_APP_NAME || 'StackFlow',
           icon: import.meta.env.VITE_APP_ICON || window.location.origin + '/icon.svg',
         },
-        onFinish: () => {
+        walletConnectProjectId: projectId,
+        onFinish: async () => {
           setIsConnecting(false);
-          if (userSession.isUserSignedIn()) {
-            const userData = userSession.loadUserData();
-            const stxAddr = userData.profile.stxAddress;
-            const mainnetAddr = stxAddr.mainnet;
-            const testnetAddr = stxAddr.testnet;
-            
-            setAddresses({
-              stx: [
-                { address: mainnetAddr, symbol: 'STX', purpose: 'mainnet' },
-                { address: testnetAddr, symbol: 'STX', purpose: 'testnet' }
-              ],
-              btc: []
-            });
+          setConnected(true);
+          
+          // Fetch addresses after successful connection
+          try {
+            const result = await request('getAddresses');
+            if (result?.addresses && Array.isArray(result.addresses)) {
+              setAddresses({
+                stx: result.addresses.map((addr: any) => ({
+                  address: addr.address,
+                  symbol: addr.symbol || 'STX',
+                  purpose: addr.type || 'mainnet'
+                })),
+                btc: []
+              });
+            }
+          } catch (error) {
+            console.error('[WalletContext] Error fetching addresses:', error);
           }
         },
         onCancel: () => {
           setIsConnecting(false);
         },
-        userSession,
-        walletConnectProjectId: projectId,
       });
     } catch (error) {
       console.error("Error opening Stacks Connect modal:", error);
@@ -108,7 +119,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const handleDisconnect = () => {
     try {
-      userSession.signUserOut();
+      disconnect();
+      setConnected(false);
       setAddresses({ stx: [], btc: [] });
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
@@ -116,17 +128,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   };
 
   // Primary address (mainnet by default)
-  const isConnected = userSession.isUserSignedIn();
   const stxAddress = addresses.stx.find(a => a.purpose === 'mainnet')?.address || addresses.stx[0]?.address || null;
   const btcAddress = addresses.btc.length > 0 ? addresses.btc[0].address : null;
 
   return (
     <WalletContext.Provider
       value={{
-        userSession,
         isLoading,
         isConnecting,
-        isConnected,
+        isConnected: connected,
         connectWallet: handleConnect,
         disconnect: handleDisconnect,
         address: stxAddress,
@@ -147,4 +157,3 @@ export function useWallet() {
   }
   return context;
 }
-
