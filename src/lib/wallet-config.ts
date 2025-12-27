@@ -1,7 +1,11 @@
 import { createAppKit } from '@reown/appkit/react';
 
 // Get Project ID from environment
-export const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || '8e390c8b668d2a65a2977727e0256860';
+export const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || '5423def4a6d894310da27a68b0f97ab5';
+
+if (projectId === '8e390c8b668d2a65a2977727e0256860') {
+  console.warn('[WalletConfig] Using default Reown Project ID. Please set VITE_REOWN_PROJECT_ID in your .env for better reliability.');
+}
 
 // Define Stacks networks for Reown
 export const stacksMainnet = {
