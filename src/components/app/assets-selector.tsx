@@ -1,6 +1,6 @@
 "use client";
 
-// import { Icons } from "../ui/icons";
+import { Icons } from "../ui/icons";
 import Button from "../atoms/Button";
 import { useAppContext } from "../../context/AppContext";
 
@@ -12,32 +12,32 @@ export function AssetSelector({ selectedAsset }: AssetSelectorProps) {
   const { handleAssetChange } = useAppContext();
 
   return (
-    <div className="p-4 h-[113px] rounded-lg px-6 py-5 bg-[#1D2215]">
-      <h2 className="mb-2 text-sm text-[#ECECEC]">Asset</h2>
-      <div className="flex w-full gap-2 *:w-full">
+    <div className="p-5 rounded-lg bg-[#1D2215] border border-white/5 shadow-lg">
+      <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-[#37f741]/70">Asset Type</h2>
+      <div className="grid grid-cols-2 gap-3">
         <Button
           variant={selectedAsset === "STX" ? "gradient" : "default"}
-          className={`font-bold font-lato text-[1rem] ${
+          className={`h-auto py-3 px-2 flex-col items-center justify-center text-center transition-all duration-300 ${
             selectedAsset === "STX"
-              ? "text-[#090909]"
-              : "text-[#ECECEC] border border-[#37f741]"
+              ? "text-[#090909] scale-[1.02]"
+              : "text-[#ECECEC] border-[#37f741]/30 hover:border-[#37f741]/60"
           }`}
           onClick={() => handleAssetChange("STX")}
         >
-          {/* <Icons.eth className="w-4 h-4 mr-2" /> */}
-          Capital Sentiment
+          <Icons.trending className={`w-5 h-5 mb-1 ${selectedAsset === "STX" ? "text-black" : "text-[#37f741]"}`} />
+          <span className="text-xs font-bold leading-tight">Capital Sentiment</span>
         </Button>
         <Button
           variant={selectedAsset === "BTC" ? "gradient" : "default"}
-          className={`font-bold font-lato text-[1rem] ${
+          className={`h-auto py-3 px-2 flex-col items-center justify-center text-center transition-all duration-300 ${
             selectedAsset === "BTC"
-              ? "text-[#090909]"
-              : "text-[#ECECEC] border border-[#37f741]"
+              ? "text-[#090909] scale-[1.02]"
+              : "text-[#ECECEC] border-[#37f741]/30 hover:border-[#37f741]/60"
           }`}
           onClick={() => handleAssetChange("BTC")}
         >
-          {/* <Icons.bitcoin className="w-4 h-4 mr-2" /> */}
-          Social Sentiment
+          <Icons.users className={`w-5 h-5 mb-1 ${selectedAsset === "BTC" ? "text-black" : "text-[#bbf838]"}`} />
+          <span className="text-xs font-bold leading-tight">Social Sentiment</span>
         </Button>
       </div>
     </div>
