@@ -41,7 +41,7 @@ export class TokenService {
   private apiUrl: string;
   private address: string | null = null;
 
-  constructor(address: string | null, network: 'testnet' | 'mainnet' = 'testnet') {
+  constructor(address: string | null, network: 'testnet' | 'mainnet' = 'mainnet') {
     this.address = address;
     this.apiUrl = network === 'testnet' 
       ? 'https://api.testnet.hiro.so' 

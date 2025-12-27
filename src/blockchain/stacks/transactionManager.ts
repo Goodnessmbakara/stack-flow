@@ -11,12 +11,17 @@ const TESTNET_CONTRACT = {
   name: 'stackflow-options-v2',
 };
 
-const NETWORK = import.meta.env.VITE_STACKS_NETWORK || 'testnet';
-const API_URL = import.meta.env.VITE_STACKS_API_URL || 'https://api.testnet.hiro.so';
+const MAINNET_CONTRACT = {
+  address: 'SP2ZNGJ85ENDY6QRHQ5P2D4FXKGZWCKTB2T0Z55KS', // Example mainnet address provided by user/analysis
+  name: 'stackflow-options-v2',
+};
+
+const NETWORK = import.meta.env.VITE_STACKS_NETWORK || 'mainnet';
+const API_URL = import.meta.env.VITE_STACKS_API_URL || 'https://api.mainnet.hiro.so';
 
 export const CONTRACT_ADDRESS = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS 
   ? import.meta.env.VITE_STACKS_CONTRACT_ADDRESS.split('.')[0]
-  : TESTNET_CONTRACT.address;
+  : (NETWORK === 'mainnet' ? MAINNET_CONTRACT.address : TESTNET_CONTRACT.address);
 
 export const CONTRACT_NAME = 'stackflow-options-v2';
 

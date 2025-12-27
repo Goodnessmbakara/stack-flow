@@ -86,8 +86,12 @@ class PriceService {
         // Fallback to Stacks API if CoinGecko fails
         if (price === 0) {
           try {
+            const isMainnet = import.meta.env.VITE_STACKS_NETWORK === 'mainnet';
+            const stacksApiUrl = isMainnet 
+              ? 'https://api.mainnet.hiro.so'
+              : 'https://api.testnet.hiro.so';
             const response = await fetch(
-              'https://api.testnet.hiro.so/v2/pox'
+              `${stacksApiUrl}/v2/pox`
             );
 
             if (response.ok) {

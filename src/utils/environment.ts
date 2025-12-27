@@ -1,7 +1,7 @@
 export const ENVIRONMENT = {
   // Stacks Network Configuration
-  STACKS_NETWORK: import.meta.env.VITE_STACKS_NETWORK || 'testnet',
-  STACKS_API_URL: import.meta.env.VITE_STACKS_API_URL || 'https://api.testnet.hiro.so',
+  STACKS_NETWORK: import.meta.env.VITE_STACKS_NETWORK || 'mainnet',
+  STACKS_API_URL: import.meta.env.VITE_STACKS_API_URL || 'https://api.mainnet.hiro.so',
   STACKS_CONTRACT_ADDRESS: import.meta.env.VITE_STACKS_CONTRACT_ADDRESS,
   
   // App Configuration
