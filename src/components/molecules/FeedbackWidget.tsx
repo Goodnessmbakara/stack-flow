@@ -59,42 +59,45 @@ export function FeedbackWidget() {
             <button
                 id="feedback-button"
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 z-50 bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform group"
+                className="fixed bottom-24 right-6 z-50 bg-[#0d120c]/80 backdrop-blur-md border border-[#37F741]/20 text-white p-3 rounded-full shadow-[0_0_20px_rgba(55,247,65,0.15)] hover:scale-110 hover:shadow-[0_0_30px_rgba(55,247,65,0.3)] hover:border-[#37F741]/50 transition-all duration-300 group"
                 aria-label="Give feedback"
             >
-                <MessageCircle className="w-6 h-6" />
-                <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-slate-900 text-white px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    Give Feedback
+                <div className="absolute inset-0 bg-[#37F741]/10 rounded-full animate-pulse group-hover:animate-none"></div>
+                <MessageCircle className="w-6 h-6 relative z-10" />
+                <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-[#0d120c]/90 border border-white/10 text-white px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none backdrop-blur-md">
+                    Feedback
                 </span>
             </button>
 
             {/* Modal */}
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-[#0d120c] border border-[#37F741]/20 rounded-2xl max-w-md w-full p-6 shadow-[0_0_50px_rgba(55,247,65,0.1)]">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-white">Send Feedback</h2>
+                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                <span className="text-[#37F741]">Feedback</span>
+                            </h2>
                             <button
                                 onClick={() => setIsOpen(false)}
-                                className="text-slate-400 hover:text-white transition-colors"
+                                className="text-gray-400 hover:text-white transition-colors bg-white/5 p-1 rounded-full hover:bg-white/10"
                             >
-                                <X className="w-6 h-6" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         <form onSubmit={handleSubmit}>
                             {/* Feedback Type */}
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    What kind of feedback?
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-400 mb-3">
+                                    Type
                                 </label>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-3 gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setFeedbackType('bug')}
-                                        className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${feedbackType === 'bug'
-                                            ? 'bg-red-500 text-white'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                                        className={`py-2 px-3 rounded-xl text-sm font-medium transition-all border ${feedbackType === 'bug'
+                                            ? 'bg-red-500/10 border-red-500 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                                            : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'
                                             }`}
                                     >
                                         🐛 Bug
@@ -102,9 +105,9 @@ export function FeedbackWidget() {
                                     <button
                                         type="button"
                                         onClick={() => setFeedbackType('feature')}
-                                        className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${feedbackType === 'feature'
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                                        className={`py-2 px-3 rounded-xl text-sm font-medium transition-all border ${feedbackType === 'feature'
+                                            ? 'bg-[#37F741]/10 border-[#37F741] text-[#37F741] shadow-[0_0_15px_rgba(55,247,65,0.2)]'
+                                            : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'
                                             }`}
                                     >
                                         💡 Feature
@@ -112,9 +115,9 @@ export function FeedbackWidget() {
                                     <button
                                         type="button"
                                         onClick={() => setFeedbackType('general')}
-                                        className={`py-2 px-3 rounded-lg text-sm font-medium transition-all ${feedbackType === 'general'
-                                            ? 'bg-purple-500 text-white'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10'
+                                        className={`py-2 px-3 rounded-xl text-sm font-medium transition-all border ${feedbackType === 'general'
+                                            ? 'bg-blue-500/10 border-blue-500 text-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.2)]'
+                                            : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'
                                             }`}
                                     >
                                         💬 General
@@ -124,14 +127,14 @@ export function FeedbackWidget() {
 
                             {/* Message */}
                             <div className="mb-6">
-                                <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    Your feedback
+                                <label className="block text-sm font-medium text-gray-400 mb-2">
+                                    Message
                                 </label>
                                 <textarea
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     placeholder="Tell us what you think..."
-                                    className="w-full h-32 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+                                    className="w-full h-32 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#37F741]/50 focus:ring-1 focus:ring-[#37F741]/50 resize-none transition-all"
                                     disabled={isSubmitting}
                                 />
                             </div>
@@ -141,17 +144,18 @@ export function FeedbackWidget() {
                                 <button
                                     type="button"
                                     onClick={() => setIsOpen(false)}
-                                    className="flex-1 bg-white/10 text-white px-4 py-3 rounded-lg font-semibold hover:bg-white/20 transition-all"
+                                    className="flex-1 bg-white/5 text-gray-400 px-4 py-3 rounded-xl font-medium hover:bg-white/10 transition-all"
                                     disabled={isSubmitting}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50"
+                                    className="flex-1 bg-[#37F741] text-black px-4 py-3 rounded-xl font-bold hover:brightness-110 transition-all shadow-[0_0_20px_rgba(55,247,65,0.3)] disabled:opacity-50 disabled:shadow-none"
                                     disabled={isSubmitting}
+                                    style={{ textShadow: "none" }}
                                 >
-                                    {isSubmitting ? 'Sending...' : 'Send'}
+                                    {isSubmitting ? 'Sending...' : 'Send Feedback'}
                                 </button>
                             </div>
                         </form>

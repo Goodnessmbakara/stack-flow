@@ -127,8 +127,8 @@ const Footer = () => {
         </div>
 
         <div
-          className={`fixed bottom-5 right-12 h-[46px] w-[46px] cursor-pointer rounded-full 
-        shadow-[inset_0_0_0_2px_rgba(187,247,55,0.2)] z-10000 transition-all duration-200
+          className={`fixed bottom-6 right-6 h-[46px] w-[46px] cursor-pointer rounded-full 
+        shadow-[inset_0_0_0_2px_rgba(187,247,55,0.2)] z-[90] transition-all duration-200 bg-[#0d120c]/80 backdrop-blur-md
         ${
           isVisible
             ? "opacity-100 visible translate-y-0"
@@ -149,7 +149,7 @@ const Footer = () => {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <FaArrowUp className="text-white hover:text-[#2871ff] transition-colors duration-200 text-lg" />
+            <FaArrowUp className="text-white hover:text-[#37f741] transition-colors duration-200 text-lg" />
           </div>
         </div>
       </div>
