@@ -8,6 +8,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
 import "./index.css";
 import App from "./App.tsx";
 import { WalletProvider } from "./context/WalletContext.tsx";
+import "./lib/wallet-config"; 
 
 const queryClient = new QueryClient();
 

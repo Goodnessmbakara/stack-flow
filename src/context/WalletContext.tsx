@@ -8,11 +8,9 @@ import {
 import {
   AppConfig,
   UserSession,
-  connect,
-  isConnected,
-  getLocalStorage,
-  disconnect as disconnectWallet,
 } from "@stacks/connect";
+import { modal } from "../lib/wallet-config";
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
 
 // Configure the app - only request necessary permissions
 const appConfig = new AppConfig(["store_write"]);
@@ -50,91 +48,54 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     btc: AddressData[];
   }>({ stx: [], btc: [] });
   const [isLoading, setIsLoading] = useState(true);
-  const [isConnecting, setIsConnecting] = useState(false);
 
-  // Load wallet state from localStorage on mount
+  const { address: reownAddress, isConnected: reownIsConnected } = useAppKitAccount();
+  const { walletProvider: _walletProvider } = useAppKitProvider('stacks') as any;
+
+  // Sync addresses from AppKit/WalletConnect
   useEffect(() => {
-    const loadWalletState = () => {
-      try {
-        // Check if user is connected using v8 API
-        if (isConnected()) {
-          const storageData = getLocalStorage();
-          if (storageData && storageData.addresses) {
-            setAddresses({
-              stx: storageData.addresses.stx || [],
-              btc: storageData.addresses.btc || [],
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error loading wallet state:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadWalletState();
-  }, []);
+    if (reownIsConnected && reownAddress) {
+      // For Stacks via WalletConnect, we often get multiple addresses via JSON-RPC
+      // But AppKitAccount gives the primary one.
+      setAddresses({
+        stx: [{ address: reownAddress, symbol: 'STX' }],
+        btc: [] // BTC addresses might require specific RPC calls if available
+      });
+    } else {
+      setAddresses({ stx: [], btc: [] });
+    }
+    setIsLoading(false);
+  }, [reownAddress, reownIsConnected]);
 
   const handleConnect = async () => {
-    setIsConnecting(true);
     try {
-      // Use the new connect() API from @stacks/connect v8
-      // This automatically stores addresses in localStorage
-      const result = await connect();
-
-      if (result && result.addresses) {
-        // Separate STX and BTC addresses
-        const stxAddrs: AddressData[] = [];
-        const btcAddrs: AddressData[] = [];
-
-        result.addresses.forEach((addr) => {
-          const addressData = {
-            address: addr.address,
-            symbol: addr.symbol,
-            // purpose: addr.purpose, // Property doesn't exist on AddressEntry
-          };
-
-          // STX addresses start with 'S'
-          if (addr.address.startsWith('S')) {
-            stxAddrs.push(addressData);
-          } else {
-            btcAddrs.push(addressData);
-          }
-        });
-
-        setAddresses({ stx: stxAddrs, btc: btcAddrs });
-      }
+      await modal.open();
     } catch (error) {
-      console.error("Error connecting wallet:", error);
-    } finally {
-      setIsConnecting(false);
+      console.error("Error opening Reown modal:", error);
     }
   };
 
-  const handleDisconnect = () => {
-    // Use v8's built-in disconnect function
-    disconnectWallet();
-    setAddresses({ stx: [], btc: [] });
-    userSession.signUserOut();
+  const handleDisconnect = async () => {
+    try {
+      await modal.disconnect();
+      setAddresses({ stx: [], btc: [] });
+    } catch (error) {
+      console.error("Error disconnecting Reown:", error);
+    }
   };
 
-  // Extract primary addresses
-  const stxAddress = addresses.stx.length > 0 ? addresses.stx[0].address : null;
-  const btcAddress = addresses.btc.length > 0
-    ? addresses.btc.find(a => a.purpose === 'payment')?.address || addresses.btc[0].address
-    : null;
-
-  // Use STX address as primary address
-  const address = stxAddress;
+  // Primary address
+  const address = reownAddress || null;
+  const stxAddress = address;
+  const btcAddress = addresses.btc.length > 0 ? addresses.btc[0].address : null;
 
   return (
     <WalletContext.Provider
       value={{
         userSession,
         isLoading,
-        isConnecting,
-        isConnected: !!address,
+        isConnecting: false, // AppKit handles its own loading state
+        isConnected: reownIsConnected,
         connectWallet: handleConnect,
         disconnect: handleDisconnect,
         address,

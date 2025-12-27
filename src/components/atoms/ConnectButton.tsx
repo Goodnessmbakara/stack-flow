@@ -29,8 +29,9 @@ const CustomConnectButton = ({
       setIsLoadingBalance(true);
       try {
         // Fetch STX balance from Stacks API
+        const apiBase = import.meta.env.VITE_STACKS_API_URL || 'https://api.mainnet.hiro.so';
         const response = await fetch(
-          `https://api.testnet.hiro.so/extended/v1/address/${address}/stx`
+          `${apiBase}/extended/v1/address/${address}/stx`
         );
         
         if (response.ok) {
