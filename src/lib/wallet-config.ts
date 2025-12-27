@@ -1,11 +1,19 @@
-import { createAppKit } from '@reown/appkit/react';
-
 // Get Project ID from environment
 export const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || '5423def4a6d894310da27a68b0f97ab5';
 
 if (projectId === '8e390c8b668d2a65a2977727e0256860') {
   console.warn('[WalletConfig] Using default Reown Project ID. Please set VITE_REOWN_PROJECT_ID in your .env for better reliability.');
 }
+
+// NOTE: AppKit is not used for Stacks connections.
+// We use @stacks/connect directly because AppKit doesn't have native Stacks support.
+// The projectId above is exported for use with @stacks/connect's walletConnectProjectId option.
+
+/*
+// COMMENTED OUT: AppKit configuration (not supported for Stacks)
+// If you need to add EVM, Solana, or Bitcoin support in the future, you can uncomment and configure this.
+
+import { createAppKit } from '@reown/appkit/react';
 
 // Define Stacks networks for Reown
 export const stacksMainnet = {
@@ -69,3 +77,4 @@ export const modal = createAppKit({
     }
   }
 });
+*/

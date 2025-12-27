@@ -8,9 +8,9 @@ import {
 import {
   AppConfig,
   UserSession,
+  showConnect,
 } from "@stacks/connect";
-import { modal } from "../lib/wallet-config";
-import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
+import { projectId } from "../lib/wallet-config";
 
 // Configure the app - only request necessary permissions
 const appConfig = new AppConfig(["store_write"]);
@@ -48,45 +48,76 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     btc: AddressData[];
   }>({ stx: [], btc: [] });
   const [isLoading, setIsLoading] = useState(true);
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  const { address: reownAddress, isConnected: reownIsConnected } = useAppKitAccount();
-  const { walletProvider: _walletProvider } = useAppKitProvider('stacks') as any;
-
-  // Sync addresses from AppKit/WalletConnect
+  // Check if user is already authenticated on mount
   useEffect(() => {
-    if (reownIsConnected && reownAddress) {
-      // For Stacks via WalletConnect, we often get multiple addresses via JSON-RPC
-      // But AppKitAccount gives the primary one.
+    if (userSession.isUserSignedIn()) {
+      const userData = userSession.loadUserData();
+      const stxAddr = userData.profile.stxAddress;
+      const mainnetAddr = stxAddr.mainnet;
+      const testnetAddr = stxAddr.testnet;
+      
       setAddresses({
-        stx: [{ address: reownAddress, symbol: 'STX' }],
-        btc: [] // BTC addresses might require specific RPC calls if available
+        stx: [
+          { address: mainnetAddr, symbol: 'STX', purpose: 'mainnet' },
+          { address: testnetAddr, symbol: 'STX', purpose: 'testnet' }
+        ],
+        btc: [] // BTC addresses can be added if available
       });
-    } else {
-      setAddresses({ stx: [], btc: [] });
     }
     setIsLoading(false);
-  }, [reownAddress, reownIsConnected]);
+  }, []);
 
   const handleConnect = async () => {
+    setIsConnecting(true);
     try {
-      await modal.open();
+      showConnect({
+        appDetails: {
+          name: import.meta.env.VITE_APP_NAME || 'StackFlow',
+          icon: import.meta.env.VITE_APP_ICON || window.location.origin + '/icon.svg',
+        },
+        onFinish: () => {
+          setIsConnecting(false);
+          if (userSession.isUserSignedIn()) {
+            const userData = userSession.loadUserData();
+            const stxAddr = userData.profile.stxAddress;
+            const mainnetAddr = stxAddr.mainnet;
+            const testnetAddr = stxAddr.testnet;
+            
+            setAddresses({
+              stx: [
+                { address: mainnetAddr, symbol: 'STX', purpose: 'mainnet' },
+                { address: testnetAddr, symbol: 'STX', purpose: 'testnet' }
+              ],
+              btc: []
+            });
+          }
+        },
+        onCancel: () => {
+          setIsConnecting(false);
+        },
+        userSession,
+        walletConnectProjectId: projectId,
+      });
     } catch (error) {
-      console.error("Error opening Reown modal:", error);
+      console.error("Error opening Stacks Connect modal:", error);
+      setIsConnecting(false);
     }
   };
 
-  const handleDisconnect = async () => {
+  const handleDisconnect = () => {
     try {
-      await modal.disconnect();
+      userSession.signUserOut();
       setAddresses({ stx: [], btc: [] });
     } catch (error) {
-      console.error("Error disconnecting Reown:", error);
+      console.error("Error disconnecting wallet:", error);
     }
   };
 
-  // Primary address
-  const address = reownAddress || null;
-  const stxAddress = address;
+  // Primary address (mainnet by default)
+  const isConnected = userSession.isUserSignedIn();
+  const stxAddress = addresses.stx.find(a => a.purpose === 'mainnet')?.address || addresses.stx[0]?.address || null;
   const btcAddress = addresses.btc.length > 0 ? addresses.btc[0].address : null;
 
   return (
@@ -94,11 +125,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       value={{
         userSession,
         isLoading,
-        isConnecting: false, // AppKit handles its own loading state
-        isConnected: reownIsConnected,
+        isConnecting,
+        isConnected,
         connectWallet: handleConnect,
         disconnect: handleDisconnect,
-        address,
+        address: stxAddress,
         stxAddress,
         btcAddress,
         addresses,
