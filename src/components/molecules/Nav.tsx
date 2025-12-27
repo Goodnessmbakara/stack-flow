@@ -84,7 +84,7 @@ const Nav = (): ReactElement => {
             {/* Navigation Links */}
             <nav className="flex items-center gap-6">
               <ul className="flex list-none gap-6 m-0 items-center">
-                {['About', 'Services', 'Contact'].map((item) => (
+                {['About', 'Services', 'Options', 'Contact'].map((item) => (
                   <li
                     key={item}
                     className="relative text-white/80 text-[0.85rem] font-medium cursor-pointer transition-all duration-300 hover:text-[#37F741] group"
@@ -151,7 +151,7 @@ const Nav = (): ReactElement => {
             <div className="flex-1 flex flex-col justify-between overflow-y-auto mt-8 pb-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <nav>
                 <ul className="flex flex-col gap-2">
-                  {['About', 'Services', 'Contact'].map((item, idx) => (
+                  {['About', 'Services', 'Options', 'Contact'].map((item, idx) => (
                     <li
                       key={item}
                       className="text-white text-2xl font-light hover:text-[#37F741] hover:pl-2 cursor-pointer transition-all duration-300 py-3 border-b border-white/5"
