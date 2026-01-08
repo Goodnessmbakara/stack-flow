@@ -1,8 +1,7 @@
-so import { io } from 'socket.io-client';
+import { io } from 'socket.io-client';
 import { Server } from 'socket.io';
 import http from 'http';
 import dotenv from 'dotenv';
-import fetch from 'node-fetch';
 import { dbService } from '../src/lib/db.ts';
 
 dotenv.config();

@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { CopyTradingPools } from "../app/copy-trading-pools";
 import { WhaleTracker } from "../app/whale-tracker";
 import { useWallet } from "../../context/WalletContext";
+import { useWhaleWebSocket } from "../../hooks/useWhaleWebSocket";
+import { WhaleAlert } from "../ui/whale-alert";
 import { 
   Users, 
   TrendingUp, 
@@ -16,7 +18,9 @@ import {
   Sparkles, 
   BarChart3, 
   ArrowUpRight,
-  Layers
+  Layers,
+  Radio,
+  Clock
 } from 'lucide-react';
 import {
   type CopyTradingPool,
@@ -42,6 +46,18 @@ export default function CopyTradingDashboard() {
     totalPools: 0,
     avgPerformance: 0
   });
+  
+  // Real-time whale WebSocket connection
+  const { connected, latestTransaction, transactionHistory, error } = useWhaleWebSocket();
+  const [showAlert, setShowAlert] = useState(false);
+  const [showOnlySignificant, setShowOnlySignificant] = useState(true);
+
+  // Show alert for new significant transactions
+  useEffect(() => {
+    if (latestTransaction?.isSignificant) {
+      setShowAlert(true);
+    }
+  }, [latestTransaction]);
 
   // Load user positions from localStorage (in production, this would be from blockchain)
   useEffect(() => {
@@ -128,6 +144,22 @@ export default function CopyTradingDashboard() {
               <p className="text-slate-400 text-sm sm:text-base max-w-xl">
                 Track whale wallets, follow expert strategies, and mirror successful trades on Stacks
               </p>
+            </div>
+
+            {/* Real-time Status Indicator */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.02] border border-white/10">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${connected ? 'bg-[#37F741] animate-pulse' : 'bg-red-500'}`} />
+                <Radio className={`w-4 h-4 ${connected ? 'text-[#37F741]' : 'text-red-400'}`} />
+                <span className="text-xs text-slate-400">
+                  {connected ? 'Live' : error ? 'Disconnected' : 'Connecting...'}
+                </span>
+              </div>
+              {transactionHistory.length > 0 && (
+                <div className="ml-2 px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/30 text-[10px] text-purple-300">
+                  {transactionHistory.length} events
+                </div>
+              )}
             </div>
 
             {/* Stats Cards */}
@@ -228,6 +260,82 @@ export default function CopyTradingDashboard() {
             </div>
 
             <WhaleTracker maxWhales={10} onWhaleSelect={handleWhaleSelect} />
+
+            {/* Real-time Activity Feed */}
+            {transactionHistory.length > 0 && (
+              <div className="backdrop-blur-xl bg-white/[0.02] rounded-xl border border-white/10 overflow-hidden">
+                <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#37F741]" />
+                    <h3 className="text-sm font-semibold text-white">Live Whale Activity</h3>
+                    <div className="w-2 h-2 rounded-full bg-[#37F741] animate-pulse" />
+                  </div>
+                  <button
+                    onClick={() => setShowOnlySignificant(!showOnlySignificant)}
+                    className={`text-xs px-3 py-1 rounded-lg transition-all ${
+                      showOnlySignificant
+                        ? 'bg-[#37F741]/20 text-[#37F741] border border-[#37F741]/30'
+                        : 'bg-white/5 text-slate-400 border border-white/10'
+                    }`}
+                  >
+                    {showOnlySignificant ? 'Significant Only' : 'All Transactions'}
+                  </button>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {transactionHistory
+                    .filter(tx => !showOnlySignificant || tx.isSignificant)
+                    .map((tx, idx) => (
+                      <div
+                        key={`${tx.transaction.tx_id}-${idx}`}
+                        className="p-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-mono text-slate-400">
+                                {tx.whale.alias || `${tx.whale.address.slice(0, 6)}...${tx.whale.address.slice(-4)}`}
+                              </span>
+                              {tx.isSignificant && (
+                                <span className="px-2 py-0.5 rounded-full bg-yellow-500/20 border border-yellow-500/30 text-[10px] text-yellow-300 font-medium">
+                                  WHALE ALERT
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-white mb-2">{tx.transaction.action}</p>
+                            <div className="flex items-center gap-3 text-xs">
+                              <span className={`flex items-center gap-1 ${
+                                tx.transaction.intent === 'bullish' ? 'text-[#37F741]' :
+                                tx.transaction.intent === 'bearish' ? 'text-red-400' :
+                                'text-slate-400'
+                              }`}>
+                                <span className="text-base">
+                                  {tx.transaction.intent === 'bullish' ? '🟢' : 
+                                   tx.transaction.intent === 'bearish' ? '🔴' : '⚪'}
+                                </span>
+                                {tx.transaction.intent}
+                              </span>
+                              {tx.transaction.protocol && (
+                                <span className="text-slate-500">via {tx.transaction.protocol}</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-[#37F741]">
+                              ${tx.transaction.valueUSD.toLocaleString()}
+                            </div>
+                            <div className="text-xs text-slate-500 font-mono">
+                              {tx.transaction.valueSTX.toLocaleString()} STX
+                            </div>
+                            <div className="text-[10px] text-slate-600 mt-1">
+                              {new Date(tx.transaction.timestamp).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -355,6 +463,14 @@ export default function CopyTradingDashboard() {
           </div>
         )}
       </div>
+
+      {/* Whale Alert Notification */}
+      {showAlert && latestTransaction?.isSignificant && (
+        <WhaleAlert
+          transaction={latestTransaction}
+          onDismiss={() => setShowAlert(false)}
+        />
+      )}
 
       {/* Footer accent line */}
       <div className="fixed bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#37F741]/20 to-transparent" />
