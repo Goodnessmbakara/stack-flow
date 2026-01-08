@@ -7,7 +7,6 @@ import {
 } from "react";
 import { useConnect } from "@stacks/connect-react";
 import { showConnect, disconnect } from "@stacks/connect";
-import { StacksMainnet } from "@stacks/network";
 
 interface AddressData {
   address: string;
@@ -31,8 +30,6 @@ interface WalletContextType {
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
-
-const network = new StacksMainnet();
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   // Use Stacks Connect React hook
@@ -68,7 +65,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           name: "StackFlow",
           icon: window.location.origin + "/logo.png",
         },
-        network,
         onFinish: () => {
           console.log("[WalletContext] Wallet connected successfully");
           setIsConnecting(false);
