@@ -5,8 +5,8 @@ import {
   useState,
   useEffect,
 } from "react";
-import { useConnect } from "@stacks/connect-react";
-import { showConnect, disconnect } from "@stacks/connect";
+import { showConnect } from "@stacks/connect";
+import { AppConfig, UserSession } from "@stacks/auth";
 
 interface AddressData {
   address: string;
@@ -31,10 +31,13 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
+// Configure Stacks authentication
+const appConfig = new AppConfig(['store_write', 'publish_data']);
+const userSession = new UserSession({ appConfig });
+
 export function WalletProvider({ children }: { children: ReactNode }) {
-  // Use Stacks Connect React hook
-  const { isConnected, address } = useConnect();
-  
+  const [isConnected, setIsConnected] = useState(false);
+  const [address, setAddress] = useState<string | null>(null);
   const [addresses, setAddresses] = useState<{
     stx: AddressData[];
     btc: AddressData[];
@@ -42,20 +45,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Sync with Stacks Connect state
+  // Check for existing session on mount
   useEffect(() => {
-    if (isConnected && address) {
-      // Set address when connected
-      setAddresses({
-        stx: [{ address, symbol: 'STX', purpose: 'mainnet' }],
-        btc: [] // BTC address can be derived later if needed
-      });
-    } else {
-      // Clear addresses when disconnected
-      setAddresses({ stx: [], btc: [] });
+    if (userSession.isUserSignedIn()) {
+      const userData = userSession.loadUserData();
+      const stxAddr = userData.profile.stxAddress?.mainnet;
+      
+      if (stxAddr) {
+        setIsConnected(true);
+        setAddress(stxAddr);
+        setAddresses({
+          stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
+          btc: []
+        });
+      }
     }
     setIsLoading(false);
-  }, [isConnected, address]);
+  }, []);
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -65,9 +71,37 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           name: "StackFlow",
           icon: window.location.origin + "/logo.png",
         },
+        redirectTo: "/",
         onFinish: () => {
-          console.log("[WalletContext] Wallet connected successfully");
-          setIsConnecting(false);
+          // Handle pending sign in
+          if (userSession.isSignInPending()) {
+            userSession.handlePendingSignIn().then((userData) => {
+              const stxAddr = userData.profile.stxAddress?.mainnet;
+              if (stxAddr) {
+                setIsConnected(true);
+                setAddress(stxAddr);
+                setAddresses({
+                  stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
+                  btc: []
+                });
+              }
+              setIsConnecting(false);
+              console.log("[WalletContext] Connected:", stxAddr);
+            });
+          } else if (userSession.isUserSignedIn()) {
+            const userData = userSession.loadUserData();
+            const stxAddr = userData.profile.stxAddress?.mainnet;
+            if (stxAddr) {
+              setIsConnected(true);
+              setAddress(stxAddr);
+              setAddresses({
+                stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
+                btc: []
+              });
+            }
+            setIsConnecting(false);
+            console.log("[WalletContext] Already connected:", stxAddr);
+          }
         },
         onCancel: () => {
           console.log("[WalletContext] Connection cancelled");
@@ -75,24 +109,22 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         },
       });
     } catch (error) {
-      console.error("[WalletContext] Error connecting wallet:", error);
+      console.error("[WalletContext] Error connecting:", error);
       setIsConnecting(false);
     }
   };
 
   const handleDisconnect = () => {
     try {
-      disconnect();
+      userSession.signUserOut();
+      setIsConnected(false);
+      setAddress(null);
       setAddresses({ stx: [], btc: [] });
-      console.log("[WalletContext] Disconnected wallet");
+      console.log("[WalletContext] Disconnected");
     } catch (error) {
-      console.error("[WalletContext] Error disconnecting wallet:", error);
+      console.error("[WalletContext] Error disconnecting:", error);
     }
   };
-
-  // Primary address (mainnet by default)
-  const stxAddress = address || null;
-  const btcAddress = addresses.btc.length > 0 ? addresses.btc[0].address : null;
 
   return (
     <WalletContext.Provider
@@ -102,9 +134,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         isConnected,
         connectWallet: handleConnect,
         disconnect: handleDisconnect,
-        address: stxAddress,
-        stxAddress,
-        btcAddress,
+        address,
+        stxAddress: address,
+        btcAddress: null,
         addresses,
       }}
     >
