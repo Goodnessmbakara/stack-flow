@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { ToastContainer } from "react-toastify";
 import { Connect } from "@stacks/connect-react";
-import { AppConfig, UserSession } from "@stacks/auth";
 import { TurnKeyProviderEl } from "./lib/turnkey.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
 
