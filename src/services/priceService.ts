@@ -9,7 +9,7 @@ export interface PriceData {
   source: string;
 }
 
-export type AssetType = 'STX' | 'BTC' | 'ETH';
+export type AssetType = 'STX' | 'BTC' | 'ETH' | 'ALEX' | 'WELSH' | 'SBTC';
 
 class PriceService {
   private cache: Map<AssetType, PriceData> = new Map();
@@ -71,7 +71,14 @@ class PriceService {
       throw new Error(`Proxy returned ${response.status}`);
     } catch (e) {
       console.warn(`[PriceService] Proxy fetch failed for ${asset}, using static fallback.`, e);
-      const fallbacks: Record<AssetType, number> = { STX: 0.58, BTC: 64000, ETH: 3400 };
+      const fallbacks: Record<AssetType, number> = { 
+        STX: 2.10, 
+        BTC: 96000, 
+        ETH: 3300,
+        ALEX: 0.15,
+        WELSH: 0.002,
+        SBTC: 96000
+      };
       return {
         price: fallbacks[asset],
         timestamp: Date.now(),
@@ -85,7 +92,7 @@ class PriceService {
    */
   private startPeriodicUpdates(): void {
     this.updateInterval = setInterval(async () => {
-      const assets: AssetType[] = ['STX', 'BTC', 'ETH'];
+      const assets: AssetType[] = ['STX', 'BTC', 'ETH', 'ALEX', 'WELSH', 'SBTC'];
 
       for (const asset of assets) {
         try {

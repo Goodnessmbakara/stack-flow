@@ -4,6 +4,7 @@
  */
 
 import mongoClient from '../lib/mongoClient';
+import { priceService } from './priceService';
 
 // Stacks API configuration (routed through our dev proxy)
 const STACKS_API_URL = '/api/stacks';
@@ -82,6 +83,20 @@ export interface AddressBalance {
   };
   fungible_tokens: Record<string, { balance: string }>;
 }
+
+// Token contract mapping for price service
+const TOKEN_MAPPING: Record<string, string> = {
+  'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.age000-governance-token::alex': 'ALEX',
+  'SP3NE50G7MKSLRQD5SBDGRMTKC7JS8E3J0M9543A9.welshcorgicoin-token::welsh': 'WELSH',
+  'SM3VDXK3WZZS1A27S09M26S07H6N8HDBM0X047G9.sbtc-token::sbtc': 'SBTC',
+};
+
+const TOKEN_DECIMALS: Record<string, number> = {
+  'ALEX': 8,
+  'WELSH': 6,
+  'SBTC': 8,
+  'STX': 6,
+};
 
 // Known protocol contracts on mainnet
 const PROTOCOL_CONTRACTS: Record<string, string> = {
@@ -243,10 +258,11 @@ class EcosystemWhaleService {
   async buildWhaleProfile(address: string, baseData?: Partial<WhaleProfile>): Promise<WhaleProfile | null> {
     console.log(`[WhaleService] Building profile for ${address}...`);
     
-    // Fetch balance and transactions in parallel
-    const [balance, transactions] = await Promise.all([
+    // Fetch balance, transactions, and STX price in parallel
+    const [balance, transactions, stxPrice] = await Promise.all([
       this.fetchAddressBalance(address),
       this.fetchAddressTransactions(address, 50),
+      priceService.getCurrentPrice('STX')
     ]);
     
     if (!balance) {
@@ -272,6 +288,14 @@ class EcosystemWhaleService {
       ? new Date(lastTx.burn_block_time * 1000).toISOString()
       : new Date().toISOString();
     
+    // Parse token balances
+    const tokens = await this.parseTokenBalances(balance.fungible_tokens);
+
+    // Calculate total portfolio value in USD (STX + Tokens)
+    const stxValueUSD = (stxBalance + stxLocked) * stxPrice;
+    const tokensValueUSD = tokens.reduce((sum, t) => sum + (t.value || 0), 0);
+    const totalValueUSD = stxValueUSD + tokensValueUSD;
+    
     // Build profile
     const profile: WhaleProfile = {
       address,
@@ -283,8 +307,8 @@ class EcosystemWhaleService {
       portfolio: {
         stxBalance,
         stxLocked,
-        totalValueUSD: stxBalance * 1.5, // Rough estimate, should use price service
-        tokens: this.parseTokenBalances(balance.fungible_tokens),
+        totalValueUSD,
+        tokens,
       },
       
       activity: {
@@ -305,13 +329,32 @@ class EcosystemWhaleService {
   }
 
   /**
-   * Parse token balances from Stacks API response
+   * Parse token balances and fetch their values
    */
-  private parseTokenBalances(tokens: Record<string, { balance: string }>): Array<{ symbol: string; amount: number }> {
-    return Object.entries(tokens).map(([token, data]) => ({
-      symbol: token.split('::')[1] || token.split('.')[1] || 'Unknown',
-      amount: parseInt(data.balance) / 1_000_000,
-    })).filter(t => t.amount > 0);
+  private async parseTokenBalances(tokenData: Record<string, { balance: string }>): Promise<Array<{ symbol: string; amount: number; value?: number }>> {
+    const results = await Promise.all(Object.entries(tokenData).map(async ([tokenId, data]) => {
+      // Extract symbol
+      const symbol = tokenId.split('::')[1] || tokenId.split('.')[1] || 'Unknown';
+      
+      // Get price and decimals if we track it
+      const assetType = TOKEN_MAPPING[tokenId] as any;
+      const decimals = assetType ? (TOKEN_DECIMALS[assetType] || 6) : 6;
+      
+      // Calculate amount
+      const amount = parseInt(data.balance) / Math.pow(10, decimals);
+      
+      if (amount <= 0) return null;
+
+      let value = 0;
+      if (assetType) {
+        const price = await priceService.getCurrentPrice(assetType);
+        value = amount * price;
+      }
+
+      return { symbol, amount, value };
+    }));
+
+    return results.filter((t): t is { symbol: string; amount: number; value: number } => t !== null);
   }
 
   /**
@@ -450,7 +493,7 @@ class EcosystemWhaleService {
    * Get finality status of a transaction based on block heights
    */
   getFinalityStatus(
-    stacksBlockHeight: number,
+    _stacksBlockHeight: number,
     bitcoinBlockHeight?: number
   ): 'mempool' | 'microblock' | 'bitcoin-anchored' | 'bitcoin-final' {
     if (!bitcoinBlockHeight) {

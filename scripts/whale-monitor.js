@@ -10,6 +10,7 @@ dotenv.config();
 const STACKS_API_URL = process.env.VITE_STACKS_API_URL || 'https://api.mainnet.hiro.so';
 const UPDATE_THRESHOLD_USD = parseInt(process.env.WHALE_ALERT_THRESHOLD || '50000'); // $50K+ transactions
 const WHALE_SOCKET_PORT = parseInt(process.env.WHALE_SOCKET_PORT || '5181');
+const PRICE_PROXY_PORT = parseInt(process.env.PRICE_PROXY_PORT || '5177');
 
 // Dynamic STX price (updated every 5 minutes)
 let STX_PRICE_USD = 1.5; // Fallback
@@ -116,22 +117,69 @@ function classifyTransaction(tx) {
   return { type: txType, intent: 'neutral', action: 'Unknown transaction' };
 }
 
+const TOKEN_CONTRACTS = {
+  'SP3K8BC0PPEVCV7NZ6QSRWPQ2JE9E5B6N3PA0KBR9.age000-governance-token': 'ALEX',
+  'SP3NE50G7MKSLRQD5SBDGRMTKC7JS8E3J0M9543A9.welshcorgicoin-token': 'WELSH',
+  'SM3VDXK3WZZS1A27S09M26S07H6N8HDBM0X047G9.sbtc-token': 'SBTC'
+};
+
+const TOKEN_DECIMALS = {
+  'ALEX': 8,
+  'WELSH': 6,
+  'SBTC': 8,
+  'STX': 6
+};
+
 /**
  * Calculate transaction value in USD
  */
-function calculateTransactionValue(tx) {
+async function calculateTransactionValue(tx) {
   let valueSTX = 0;
-  
+  let valueUSD = 0;
+  let asset = 'STX';
+  const priceSTX = await getSTXPrice();
+
   if (tx.tx_type === 'token_transfer' && tx.token_transfer) {
     valueSTX = parseInt(tx.token_transfer.amount) / 1_000_000;
-  } else if (tx.tx_type === 'contract_call') {
-    // For contract calls, use fee as proxy for significance
-    valueSTX = parseInt(tx.fee_rate || '0') / 1_000_000;
+    valueUSD = valueSTX * priceSTX;
+  } else if (tx.tx_type === 'contract_call' && tx.contract_call) {
+    const contractId = tx.contract_call.contract_id;
+    const isTokenTransfer = tx.contract_call.function_name === 'transfer';
+    
+    if (isTokenTransfer && TOKEN_CONTRACTS[contractId]) {
+      asset = TOKEN_CONTRACTS[contractId];
+      // Try to get amount from args
+      // Typical SIP-010: (transfer (uint) (principal) (principal) (optional (buff 34)))
+      const amountArg = tx.contract_call.function_args?.find(a => a.name === 'amount' || a.type === 'uint');
+      const amount = amountArg ? parseInt(amountArg.repr.replace('u', '')) : 0;
+      
+      // Values decimals vary by token
+      const decimals = TOKEN_DECIMALS[asset] || 6;
+      const tokenAmount = amount / Math.pow(10, decimals);
+      
+      // Fetch token price from proxy
+      try {
+        const response = await fetch(`http://localhost:${PRICE_PROXY_PORT}/api/prices?asset=${asset}`);
+        const data = await response.json();
+        valueUSD = tokenAmount * (data.price || 0);
+      } catch (e) {
+        // Fallback (approximate)
+        const tokenPrices = { ALEX: 0.15, WELSH: 0.002, SBTC: 96000 };
+        valueUSD = tokenAmount * (tokenPrices[asset] || 0);
+      }
+      
+      valueSTX = valueUSD / priceSTX;
+    } else {
+      // For general contract calls, use fee as proxy for significance
+      valueSTX = parseInt(tx.fee_rate || '0') / 1_000_000;
+      valueUSD = valueSTX * priceSTX;
+    }
   }
   
   return {
     stx: valueSTX,
-    usd: valueSTX * STX_PRICE_USD // Dynamic price
+    usd: valueUSD,
+    asset
   };
 }
 

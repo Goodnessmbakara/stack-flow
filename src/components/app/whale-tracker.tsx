@@ -315,22 +315,52 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 10 }: WhaleTrackerProp
                   <div className="mt-4 pt-4 border-t border-white/5">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                       <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3">
-                        <div className="text-xs text-slate-500 mb-1">Total Value (STX)</div>
+                        <div className="text-xs text-slate-500 mb-1">STX Balance</div>
                         <div className="font-bold text-white">{formatCurrency(whale.portfolio?.stxBalance || 0)} STX</div>
                       </div>
                       <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3">
-                        <div className="text-xs text-slate-500 mb-1">Transactions (30d)</div>
-                        <div className="font-bold text-white">{whale.activity?.txCount30d?.toLocaleString() || 0}</div>
+                        <div className="text-xs text-slate-500 mb-1">Total Net Worth</div>
+                        <div className="font-bold text-[#37F741]">${formatCurrency(whale.portfolio?.totalValueUSD || 0)}</div>
                       </div>
                       <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3">
                         <div className="text-xs text-slate-500 mb-1">Activity Level</div>
                         <div className="font-bold text-white capitalize">{whale.activity?.activityLevel || 'medium'}</div>
                       </div>
                       <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3">
-                        <div className="text-xs text-slate-500 mb-1">Source</div>
-                        <div className="font-bold text-[#37F741] capitalize">{whale.source || 'AI'}</div>
+                        <div className="text-xs text-slate-500 mb-1">Profile Group</div>
+                        <div className="font-bold text-purple-400 capitalize">{whale.category || 'Trader'}</div>
                       </div>
                     </div>
+
+                    {/* Token Holdings */}
+                    {whale.portfolio?.tokens && whale.portfolio.tokens.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
+                          <TrendingUp className="w-4 h-4 text-[#37F741]" />
+                          Holdings & Ecosystem Exposure
+                        </h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                          {whale.portfolio.tokens.map((token, i) => (
+                            <div key={`${token.symbol}-${i}`} className="backdrop-blur-sm bg-white/[0.02] rounded-lg p-3 border border-white/5 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-[10px] font-bold text-slate-400 border border-white/5">
+                                  {token.symbol.substring(0, 3)}
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-white">{token.symbol}</div>
+                                  <div className="text-[10px] text-slate-500">{formatCurrency(token.amount)} tokens</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs font-semibold text-[#37F741]">
+                                  ${formatCurrency(token.value || 0)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Recent Transactions Section */}
                     {whale.recentTransactions && whale.recentTransactions.length > 0 && (

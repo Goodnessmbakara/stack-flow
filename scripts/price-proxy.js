@@ -16,6 +16,19 @@ const assetMap = {
   STX: { coingecko: 'blockstack', coincap: 'stacks', binance: 'STXUSDT' },
   BTC: { coingecko: 'bitcoin', coincap: 'bitcoin', binance: 'BTCUSDT' },
   ETH: { coingecko: 'ethereum', coincap: 'ethereum', binance: 'ETHUSDT' },
+  ALEX: { coingecko: 'alexgo', coincap: null, binance: null },
+  WELSH: { coingecko: 'welshcorgicoin', coincap: null, binance: null },
+  SBTC: { coingecko: 'bitcoin', coincap: 'bitcoin', binance: 'BTCUSDT' }, // Pegged to BTC
+};
+
+// Fallback constants
+const fallbacks = { 
+  STX: 1.50, 
+  BTC: 96000, 
+  ETH: 3300, 
+  ALEX: 0.15, 
+  WELSH: 0.002,
+  SBTC: 96000 
 };
 
 async function fetchFromCoinCap(id) {
@@ -57,24 +70,26 @@ app.get('/api/prices', async (req, res) => {
   }
 
   const config = assetMap[asset];
-  
-  // Try sources in order
-  let price = await fetchFromCoinCap(config.coincap);
-  let source = 'CoinCap';
+  let price = null;
+  let source = '';
 
-  if (!price) {
+  // Try sources in order based on availability
+  if (config.coincap) {
+    price = await fetchFromCoinCap(config.coincap);
+    source = 'CoinCap';
+  }
+
+  if (!price && config.binance) {
     price = await fetchFromBinance(config.binance);
     source = 'Binance';
   }
 
-  if (!price) {
+  if (!price && config.coingecko) {
     price = await fetchFromCoinGecko(config.coingecko);
     source = 'CoinGecko';
   }
 
   if (!price) {
-    // Fallback constants
-    const fallbacks = { STX: 0.58, BTC: 64000, ETH: 3400 };
     price = fallbacks[asset];
     source = 'Fallback';
   }
