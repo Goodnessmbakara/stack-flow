@@ -5,12 +5,9 @@ import {
   useState,
   useEffect,
 } from "react";
-import {
-  disconnect,
-  isConnected,
-  openSignatureRequest,
-} from "@stacks/connect";
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
+import { useConnect } from "@stacks/connect-react";
+import { showConnect, disconnect } from "@stacks/connect";
+import { StacksMainnet } from "@stacks/network";
 
 interface AddressData {
   address: string;
@@ -35,9 +32,11 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
+const network = new StacksMainnet();
+
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const { open } = useAppKit();
-  const { address: appKitAddress, isConnected: appKitConnected } = useAppKitAccount();
+  // Use Stacks Connect React hook
+  const { isConnected, address } = useConnect();
   
   const [addresses, setAddresses] = useState<{
     stx: AddressData[];
@@ -45,33 +44,42 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }>({ stx: [], btc: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [connected, setConnected] = useState(false);
 
-  // Sync with AppKit state
+  // Sync with Stacks Connect state
   useEffect(() => {
-    if (appKitConnected && appKitAddress) {
-      setConnected(true);
-      // If we don't have addresses yet, set the primary one
-      if (addresses.stx.length === 0) {
-        setAddresses({
-          stx: [{ address: appKitAddress, symbol: 'STX', purpose: 'mainnet' }],
-          btc: []
-        });
-      }
+    if (isConnected && address) {
+      // Set address when connected
+      setAddresses({
+        stx: [{ address, symbol: 'STX', purpose: 'mainnet' }],
+        btc: [] // BTC address can be derived later if needed
+      });
     } else {
-      setConnected(false);
+      // Clear addresses when disconnected
       setAddresses({ stx: [], btc: [] });
     }
     setIsLoading(false);
-  }, [appKitConnected, appKitAddress]);
+  }, [isConnected, address]);
 
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      await open();
-      setIsConnecting(false);
+      showConnect({
+        appDetails: {
+          name: "StackFlow",
+          icon: window.location.origin + "/logo.png",
+        },
+        network,
+        onFinish: () => {
+          console.log("[WalletContext] Wallet connected successfully");
+          setIsConnecting(false);
+        },
+        onCancel: () => {
+          console.log("[WalletContext] Connection cancelled");
+          setIsConnecting(false);
+        },
+      });
     } catch (error) {
-      console.error("Error opening Reown AppKit modal:", error);
+      console.error("[WalletContext] Error connecting wallet:", error);
       setIsConnecting(false);
     }
   };
@@ -79,15 +87,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const handleDisconnect = () => {
     try {
       disconnect();
-      setConnected(false);
       setAddresses({ stx: [], btc: [] });
+      console.log("[WalletContext] Disconnected wallet");
     } catch (error) {
-      console.error("Error disconnecting wallet:", error);
+      console.error("[WalletContext] Error disconnecting wallet:", error);
     }
   };
 
   // Primary address (mainnet by default)
-  const stxAddress = addresses.stx.find(a => a.purpose === 'mainnet')?.address || addresses.stx[0]?.address || null;
+  const stxAddress = address || null;
   const btcAddress = addresses.btc.length > 0 ? addresses.btc[0].address : null;
 
   return (
@@ -95,7 +103,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       value={{
         isLoading,
         isConnecting,
-        isConnected: connected,
+        isConnected,
         connectWallet: handleConnect,
         disconnect: handleDisconnect,
         address: stxAddress,

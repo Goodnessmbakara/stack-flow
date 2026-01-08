@@ -226,12 +226,14 @@ async function startWhaleMonitor() {
     process.exit(1);
   }
   
-  // Create WebSocket connection
+  // Create WebSocket connection with extended timeouts
   const socket = io(STACKS_API_URL, {
     transports: ['websocket'],
     reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: Infinity
+    reconnectionDelay: 2000,
+    reconnectionDelayMax: 120000, // 2 minutes max delay
+    reconnectionAttempts: Infinity,
+    timeout: 120000 // 2 minute connection timeout
   });
   
   // Connection handlers
