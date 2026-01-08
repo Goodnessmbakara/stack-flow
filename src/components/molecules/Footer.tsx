@@ -106,7 +106,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 pt-8 border-t border-gray-800 md:grid-cols-2">
           <div>
             <p className="text-gray-300">
-              © 2025 StackFlow. All rights reserved.
+              © 2026 StackFlow. All rights reserved.
             </p>
           </div>
 
