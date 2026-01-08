@@ -23,6 +23,7 @@
     "@reown/appkit": "^1.8.15",
     "@splinetool/react-spline": "^4.0.0",
     "@splinetool/runtime": "^1.9.46",
+    "@stacks/auth": "^7.3.1",
     "@stacks/connect": "^8.2.0",
     "@stacks/connect-react": "^23.1.0",
     "@stacks/network": "^7.2.0",

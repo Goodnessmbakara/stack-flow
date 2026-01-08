@@ -429,6 +429,11 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 10 }: WhaleTrackerProp
                 {whales.length} whales tracked
               </span>
             </div>
+            <span className="text-xs text-slate-500">
+              Stacks Mainnet
+            </span>
+          </div>
+        )}
         
         {/* Live Transaction Feed */}
         {transactionHistory.length > 0 && (
@@ -468,12 +473,6 @@ export function WhaleTracker({ onWhaleSelect, maxWhales = 10 }: WhaleTrackerProp
           onDismiss={() => setAlertTransaction(null)}
         />
       )}
-            <span className="text-xs text-slate-500">
-              Stacks Mainnet
-            </span>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

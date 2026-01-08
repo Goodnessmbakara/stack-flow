@@ -23,6 +23,9 @@ importers:
       '@splinetool/runtime':
         specifier: ^1.9.46
         version: 1.10.77
+      '@stacks/auth':
+        specifier: ^7.3.1
+        version: 7.3.1
       '@stacks/connect':
         specifier: ^8.2.0
         version: 8.2.0(@types/react@18.3.26)(bufferutil@4.1.0)(lit@3.3.0)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.25.76)
@@ -1525,14 +1528,17 @@ packages:
   '@splinetool/runtime@1.10.77':
     resolution: {integrity: sha512-2uMy7/LDWqRsvClDDyyLZ7GbTHwCIJvhmadTRLLso4VwVNaeKrz/P9IPF71Z7HTj3mAGoavxxdKemb4bkcJxjA==}
 
-  '@stacks/auth@7.2.0':
-    resolution: {integrity: sha512-u+Ky4CMQWFTPI6Au3VFcW74nSIA4Zb8YjsbOkcv0q9E6LiALyK4gozpKTxKvfW3/z1ER3z1Ky9uH/s4zY59rvg==}
+  '@stacks/auth@7.3.1':
+    resolution: {integrity: sha512-8zjQrnthhymJruSWYuP17IRx+c0k8LrOZYH9DRyaTzjEZ+pbvsRUM9v7hH1aGr2LG94BI9249qXpCtGWorVI+g==}
 
   '@stacks/common@6.16.0':
     resolution: {integrity: sha512-PnzvhrdGRMVZvxTulitlYafSK4l02gPCBBoI9QEoTqgSnv62oaOXhYAUUkTMFKxdHW1seVEwZsrahuXiZPIAwg==}
 
   '@stacks/common@7.0.2':
     resolution: {integrity: sha512-+RSecHdkxOtswmE4tDDoZlYEuULpnTQVeDIG5eZ32opK8cFxf4EugAcK9CsIsHx/Se1yTEaQ21WGATmJGK84lQ==}
+
+  '@stacks/common@7.3.1':
+    resolution: {integrity: sha512-29ANTFcSSlXnGQlgDVWg7OQ74lgQhu3x8JkeN19Q+UE/1lbQrzcctgPHG74XHjWNp8NPBqskUYA8/HLgIKuKNQ==}
 
   '@stacks/connect-react@23.1.0':
     resolution: {integrity: sha512-5TIJ2FjEKVRWYa9qI1pvNenj87RuCa0QfBEtgMcEi7P4cPGjn0tPPx5Yut2XD+REOV9zjypr8GjiwJylzChc9A==}
@@ -1549,14 +1555,23 @@ packages:
   '@stacks/encryption@7.2.0':
     resolution: {integrity: sha512-XDgb5GuR2kURC0YJWo70xnWPKeizBg/qpGPDApBVLFgaOqFL4FdFmvxHXU5lVbFR3W+mtdxPHedWtQpxxOBlMQ==}
 
+  '@stacks/encryption@7.3.1':
+    resolution: {integrity: sha512-hCY61gd4PVr5LUZKOuzWfPLmuPrIGEapd1LkMintToJ+F3R/x0T+iIJVnJf2Y1l0cJsc4Xxq/TWCBeEAfybScg==}
+
   '@stacks/network@6.17.0':
     resolution: {integrity: sha512-numHbfKjwco/rbkGPOEz8+FcJ2nBnS/tdJ8R422Q70h3SiA9eqk9RjSzB8p4JP8yW1SZvW+eihADHfMpBuZyfw==}
 
   '@stacks/network@7.2.0':
     resolution: {integrity: sha512-AkLougCF2RLbK97TtISZxAhF3cE757XMXWOGKvEFWNauiQ5/bYyI9W5jZypG3yI/AyYIo04NKoFWWTnpJcn1iA==}
 
+  '@stacks/network@7.3.1':
+    resolution: {integrity: sha512-dQjhcwkz8lihSYSCUMf7OYeEh/Eh0++NebDtXbIB3pHWTvNCYEH7sxhYTB1iyunurv31/QEi0RuWdlfXK/BjeA==}
+
   '@stacks/profile@7.2.0':
     resolution: {integrity: sha512-pzPgn/NpmjA7TdeA5U9OjXLwBNqGPrjWhsMy/ZC3iUdnIUvthgWwlPpydgQOTJaRqaDMdY24hFgT+og6QbyQQA==}
+
+  '@stacks/profile@7.3.1':
+    resolution: {integrity: sha512-fjysyN29e0mZYN3PHkZAE+6w3cfWInamDYmKLLi+wTIw0ds4YRk0CaPnMHlanVybqdIQ84yeghETNL/+o+QxEQ==}
 
   '@stacks/stacking@7.2.0':
     resolution: {integrity: sha512-PJq0NltGzI5JdK4ACVjtoJZxJhu2zabOCcxIClOfjvs0PzqzLPLmr8GcxAddWlVYnHKR58ggwBwQSIrPUoew9w==}
@@ -1572,6 +1587,9 @@ packages:
 
   '@stacks/transactions@7.2.0':
     resolution: {integrity: sha512-U7wjlxM9Q+408ihRsv5mlKRslXGt2WCShKi1lduiqf5+dBSRGdVi8ttCIEckSsg3ulCVF3EHTQF3LZgw4kwKlQ==}
+
+  '@stacks/transactions@7.3.1':
+    resolution: {integrity: sha512-ufnC1BPrOKz5b5gxxdseP3vBrFq1+qx1L6t+J/QnjXULyWdkhtS+LBEqRw2bL5qNteMvU2GhqPgFtYQPzolGbw==}
 
   '@stacks/wallet-sdk@7.2.0':
     resolution: {integrity: sha512-w4UmIaulB03ki0eosWA2ju4vXtF1N+n+nX+/GuV8ZW3rbZ7xeRCv16IzZZL6TspMcaUKyZKTVB2uximqBNbqPQ==}
@@ -6815,13 +6833,13 @@ snapshots:
       on-change: 4.0.2
       semver-compare: 1.0.0
 
-  '@stacks/auth@7.2.0':
+  '@stacks/auth@7.3.1':
     dependencies:
       '@noble/secp256k1': 1.7.1
-      '@stacks/common': 7.0.2
-      '@stacks/encryption': 7.2.0
-      '@stacks/network': 7.2.0
-      '@stacks/profile': 7.2.0
+      '@stacks/common': 7.3.1
+      '@stacks/encryption': 7.3.1
+      '@stacks/network': 7.3.1
+      '@stacks/profile': 7.3.1
       cross-fetch: 3.2.0
       jsontokens: 4.0.1
     transitivePeerDependencies:
@@ -6833,6 +6851,8 @@ snapshots:
       '@types/node': 18.19.130
 
   '@stacks/common@7.0.2': {}
+
+  '@stacks/common@7.3.1': {}
 
   '@stacks/connect-react@23.1.0(@types/react@18.3.26)(bufferutil@4.1.0)(lit@3.3.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.25.76)':
     dependencies:
@@ -6923,6 +6943,17 @@ snapshots:
       ripemd160-min: 0.0.6
       varuint-bitcoin: 1.1.2
 
+  '@stacks/encryption@7.3.1':
+    dependencies:
+      '@noble/hashes': 1.1.5
+      '@noble/secp256k1': 1.7.1
+      '@scure/bip39': 1.1.0
+      '@stacks/common': 7.3.1
+      base64-js: 1.5.1
+      bs58: 5.0.0
+      ripemd160-min: 0.0.6
+      varuint-bitcoin: 1.1.2
+
   '@stacks/network@6.17.0':
     dependencies:
       '@stacks/common': 6.16.0
@@ -6937,11 +6968,29 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@stacks/network@7.3.1':
+    dependencies:
+      '@stacks/common': 7.3.1
+      cross-fetch: 3.2.0
+    transitivePeerDependencies:
+      - encoding
+
   '@stacks/profile@7.2.0':
     dependencies:
       '@stacks/common': 7.0.2
       '@stacks/network': 7.2.0
       '@stacks/transactions': 7.2.0
+      jsontokens: 4.0.1
+      schema-inspector: 2.1.0
+      zone-file: 2.0.0-beta.3
+    transitivePeerDependencies:
+      - encoding
+
+  '@stacks/profile@7.3.1':
+    dependencies:
+      '@stacks/common': 7.3.1
+      '@stacks/network': 7.3.1
+      '@stacks/transactions': 7.3.1
       jsontokens: 4.0.1
       schema-inspector: 2.1.0
       zone-file: 2.0.0-beta.3
@@ -6965,7 +7014,7 @@ snapshots:
 
   '@stacks/storage@7.2.0':
     dependencies:
-      '@stacks/auth': 7.2.0
+      '@stacks/auth': 7.3.1
       '@stacks/common': 7.0.2
       '@stacks/encryption': 7.2.0
       '@stacks/network': 7.2.0
@@ -6996,11 +7045,22 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@stacks/transactions@7.3.1':
+    dependencies:
+      '@noble/hashes': 1.1.5
+      '@noble/secp256k1': 1.7.1
+      '@stacks/common': 7.3.1
+      '@stacks/network': 7.3.1
+      c32check: 2.0.0
+      lodash.clonedeep: 4.5.0
+    transitivePeerDependencies:
+      - encoding
+
   '@stacks/wallet-sdk@7.2.0':
     dependencies:
       '@scure/bip32': 1.1.3
       '@scure/bip39': 1.1.0
-      '@stacks/auth': 7.2.0
+      '@stacks/auth': 7.3.1
       '@stacks/common': 7.0.2
       '@stacks/encryption': 7.2.0
       '@stacks/network': 7.2.0
