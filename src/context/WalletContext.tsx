@@ -47,17 +47,28 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   // Check for existing session on mount
   useEffect(() => {
-    if (userSession.isUserSignedIn()) {
-      const userData = userSession.loadUserData();
-      const stxAddr = userData.profile.stxAddress?.mainnet;
-      
-      if (stxAddr) {
-        setIsConnected(true);
-        setAddress(stxAddr);
-        setAddresses({
-          stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
-          btc: []
-        });
+    try {
+      if (userSession.isUserSignedIn()) {
+        const userData = userSession.loadUserData();
+        const stxAddr = userData.profile.stxAddress?.mainnet;
+        
+        if (stxAddr) {
+          setIsConnected(true);
+          setAddress(stxAddr);
+          setAddresses({
+            stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
+            btc: []
+          });
+        }
+      }
+    } catch (error) {
+      // Clear corrupted session data from old WalletConnect
+      console.warn('[WalletContext] Clearing corrupted session:', error);
+      try {
+        userSession.signUserOut();
+      } catch (e) {
+        // If signOut fails, manually clear localStorage
+        localStorage.removeItem('blockstack-session');
       }
     }
     setIsLoading(false);
