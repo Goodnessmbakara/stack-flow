@@ -5,10 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"npm run start:gemini-proxy\" \"npm run start:mongo-proxy\" \"npm run start:price-proxy\" \"npm run start:whale-indexer\"",
+    "dev:full": "concurrently \"vite\" \"npm run start:gemini-proxy\" \"npm run start:mongo-proxy\" \"npm run start:price-proxy\" \"npm run start:whale-indexer\" \"npm run start:whale-monitor\"",
     "start:gemini-proxy": "node ./scripts/gemini-proxy.js",
     "start:mongo-proxy": "node ./scripts/mongo-proxy.js",
     "start:price-proxy": "node ./scripts/price-proxy.js",
     "start:whale-indexer": "node ./scripts/whale-indexer.js",
+    "start:whale-monitor": "node ./scripts/whale-monitor.js",
+    "seed:whales": "node ./scripts/whale-seeder.js",
     "test:gemini": "node ./scripts/gemini-test.js",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -49,6 +52,7 @@
     "rehype-raw": "^7.0.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
+    "socket.io-client": "^4.8.3",
     "swiper": "^11.1.15",
     "tailwind-merge": "^2.5.5",
     "tailwindcss": "^4.1.14"
