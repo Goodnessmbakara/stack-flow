@@ -2,14 +2,52 @@ so import { io } from 'socket.io-client';
 import { Server } from 'socket.io';
 import http from 'http';
 import dotenv from 'dotenv';
+import fetch from 'node-fetch';
 import { dbService } from '../src/lib/db.ts';
 
 dotenv.config();
 
 const STACKS_API_URL = process.env.VITE_STACKS_API_URL || 'https://api.mainnet.hiro.so';
 const UPDATE_THRESHOLD_USD = parseInt(process.env.WHALE_ALERT_THRESHOLD || '50000'); // $50K+ transactions
-const STX_PRICE_ESTIMATE = 1.5; // Rough estimate, should use price service
 const WHALE_SOCKET_PORT = parseInt(process.env.WHALE_SOCKET_PORT || '5181');
+
+// Dynamic STX price (updated every 5 minutes)
+let STX_PRICE_USD = 1.5; // Fallback
+let lastPriceUpdate = 0;
+const PRICE_UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+/**
+ * Fetch current STX price from CoinGecko
+ */
+async function fetchSTXPrice() {
+  try {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=blockstack&vs_currencies=usd'
+    );
+    const data = await response.json();
+    
+    if (data.blockstack?.usd) {
+      STX_PRICE_USD = data.blockstack.usd;
+      lastPriceUpdate = Date.now();
+      console.log(`[WhaleMonitor] 💰 Updated STX price: $${STX_PRICE_USD}`);
+      return STX_PRICE_USD;
+    }
+  } catch (error) {
+    console.warn('[WhaleMonitor] Failed to fetch STX price:', error.message);
+  }
+  return STX_PRICE_USD; // Return last known price
+}
+
+/**
+ * Get current STX price (cached)
+ */
+async function getSTXPrice() {
+  const now = Date.now();
+  if (now - lastPriceUpdate > PRICE_UPDATE_INTERVAL) {
+    await fetchSTXPrice();
+  }
+  return STX_PRICE_USD;
+}
 
 // Known protocols for transaction classification
 const PROTOCOLS = {
