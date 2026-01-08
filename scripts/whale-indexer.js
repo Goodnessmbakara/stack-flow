@@ -73,25 +73,50 @@ async function fetchAddressBalance(address) {
 }
 
 /**
- * Fetch recent transactions for an address
+ * Fetch recent transactions for an address with retry logic
  */
-async function fetchAddressTransactions(address, limit = 50) {
-  try {
-    const response = await rateLimitedFetch(
-      `${STACKS_API_URL}/extended/v1/address/${address}/transactions?limit=${limit}`
-    );
-    
-    if (!response.ok) {
-      console.error(`[WhaleIndexer] Transaction fetch failed for ${address}: ${response.status}`);
-      return [];
+async function fetchAddressTransactions(address, limit = 50, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await rateLimitedFetch(
+        `${STACKS_API_URL}/extended/v1/address/${address}/transactions?limit=${limit}`
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.results || [];
+      }
+      
+      // Handle different error codes
+      if (response.status === 500) {
+        console.warn(`[WhaleIndexer] API 500 error for ${address}, attempt ${attempt}/${retries}`);
+        if (attempt < retries) {
+          // Exponential backoff: 1s, 2s, 4s
+          const backoffMs = Math.pow(2, attempt - 1) * 1000;
+          console.log(`[WhaleIndexer] Retrying in ${backoffMs}ms...`);
+          await new Promise(r => setTimeout(r, backoffMs));
+          continue;
+        }
+      } else if (response.status === 429) {
+        console.warn(`[WhaleIndexer] Rate limited for ${address}, backing off...`);
+        await new Promise(r => setTimeout(r, 5000)); // Wait 5s for rate limit
+        if (attempt < retries) continue;
+      } else {
+        console.error(`[WhaleIndexer] Transaction fetch failed for ${address}: ${response.status}`);
+      }
+      
+      return []; // Return empty on final failure
+    } catch (error) {
+      console.error(`[WhaleIndexer] Error fetching transactions for ${address} (attempt ${attempt}):`, error.message);
+      if (attempt === retries) return [];
+      
+      // Backoff on network errors too
+      const backoffMs = Math.pow(2, attempt - 1) * 1000;
+      await new Promise(r => setTimeout(r, backoffMs));
     }
-    
-    const data = await response.json();
-    return data.results || [];
-  } catch (error) {
-    console.error(`[WhaleIndexer] Error fetching transactions for ${address}:`, error.message);
-    return [];
   }
+  
+  return [];
 }
 
 /**
