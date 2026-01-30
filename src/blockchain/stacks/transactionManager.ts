@@ -4,29 +4,20 @@
 import { openContractCall, type FinishedTxData } from '@stacks/connect';
 import { uintCV, AnchorMode, PostConditionMode } from '@stacks/transactions';
 import { STACKS_TESTNET, STACKS_MAINNET } from '@stacks/network';
+import { 
+  OPTIONS_CONTRACT, 
+  NETWORK_INFO,
+  getContractAddress,
+  getContractName 
+} from '../../config/contracts.config';
 
-// Contract configuration
-const TESTNET_CONTRACT = {
-  address: 'ST3DSAPR2WF7D7SMR6W0R436AA6YYTD8RFT9E9NPH',
-  name: 'stackflow-options-v2',
-};
-
-const MAINNET_CONTRACT = {
-  address: 'SP2ZNGJ85ENDY6QRHQ5P2D4FXKGZWCKTB2T0Z55KS', // Example mainnet address provided by user/analysis
-  name: 'stackflow-options-v2',
-};
-
-const NETWORK = import.meta.env.VITE_STACKS_NETWORK || 'mainnet';
 const API_URL = '/api/stacks';
 
-export const CONTRACT_ADDRESS = import.meta.env.VITE_STACKS_CONTRACT_ADDRESS 
-  ? import.meta.env.VITE_STACKS_CONTRACT_ADDRESS.split('.')[0]
-  : (NETWORK === 'mainnet' ? MAINNET_CONTRACT.address : TESTNET_CONTRACT.address);
-
-export const CONTRACT_NAME = 'stackflow-options-v2';
+export const CONTRACT_ADDRESS = getContractAddress(OPTIONS_CONTRACT)!;
+export const CONTRACT_NAME = getContractName(OPTIONS_CONTRACT)!;
 
 export function getNetwork() {
-  return NETWORK === 'mainnet' ? STACKS_MAINNET : STACKS_TESTNET;
+  return NETWORK_INFO.isTestnet ? STACKS_TESTNET : STACKS_MAINNET;
 }
 
 export type StrategyType = 'CALL' | 'STRAP' | 'BCSP' | 'BPSP' | 'PUT' | 'STRIP' | 'BEPS' | 'BECS';
@@ -233,7 +224,7 @@ export async function monitorTransaction(
 }
 
 export function getExplorerUrl(txId: string): string {
-  const chain = NETWORK === 'mainnet' ? 'mainnet' : 'testnet';
+  const chain = NETWORK_INFO.isTestnet ? 'testnet' : 'mainnet';
   return `https://explorer.hiro.so/txid/${txId}?chain=${chain}`;
 }
 

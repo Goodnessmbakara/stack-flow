@@ -5,7 +5,7 @@ import {
   useState,
   useEffect,
 } from "react";
-import { useConnect } from "@stacks/connect-react";
+import { showConnect } from "@stacks/connect";
 import { AppConfig, UserSession } from "@stacks/auth";
 
 interface AddressData {
@@ -35,6 +35,12 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 const userSession = new UserSession({ appConfig });
 
+// Determine network from environment (mainnet or testnet)
+const NETWORK = import.meta.env.VITE_STACKS_NETWORK || 'mainnet';
+const isTestnet = NETWORK === 'testnet';
+
+console.log('[WalletContext] Network configured:', NETWORK);
+
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
@@ -45,21 +51,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Use @stacks/connect-react v8 hook
-  const { doOpenAuth } = useConnect();
-
   // Check for existing session on mount
   useEffect(() => {
     try {
       if (userSession.isUserSignedIn()) {
         const userData = userSession.loadUserData();
-        const stxAddr = userData.profile.stxAddress?.mainnet;
+        // Use testnet or mainnet address based on network config
+        const stxAddr = isTestnet 
+          ? userData.profile.stxAddress?.testnet 
+          : userData.profile.stxAddress?.mainnet;
+        
+        console.log('[WalletContext] Existing session found, network:', NETWORK, 'address:', stxAddr);
         
         if (stxAddr) {
           setIsConnected(true);
           setAddress(stxAddr);
           setAddresses({
-            stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
+            stx: [{ address: stxAddr, symbol: 'STX', purpose: NETWORK }],
             btc: []
           });
         }
@@ -80,8 +88,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      // Use v8 API with doOpenAuth from useConnect hook
-      doOpenAuth({
+      // Use showConnect from @stacks/connect
+      showConnect({
         appDetails: {
           name: "StackFlow",
           icon: window.location.origin + "/logo.png",
@@ -91,26 +99,41 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           // Handle pending sign in
           if (userSession.isSignInPending()) {
             userSession.handlePendingSignIn().then((userData) => {
-              const stxAddr = userData.profile.stxAddress?.mainnet;
+              // Use testnet or mainnet address based on network config
+              const stxAddr = isTestnet 
+                ? userData.profile.stxAddress?.testnet 
+                : userData.profile.stxAddress?.mainnet;
+              
+              console.log('[WalletContext] Sign-in pending resolved, network:', NETWORK, 'address:', stxAddr);
+              
               if (stxAddr) {
                 setIsConnected(true);
                 setAddress(stxAddr);
                 setAddresses({
-                  stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
+                  stx: [{ address: stxAddr, symbol: 'STX', purpose: NETWORK }],
                   btc: []
                 });
               }
               setIsConnecting(false);
               console.log("[WalletContext] Connected:", stxAddr);
+            }).catch((error) => {
+              console.error('[WalletContext] Error handling pending sign-in:', error);
+              setIsConnecting(false);
             });
           } else if (userSession.isUserSignedIn()) {
             const userData = userSession.loadUserData();
-            const stxAddr = userData.profile.stxAddress?.mainnet;
+            // Use testnet or mainnet address based on network config
+            const stxAddr = isTestnet 
+              ? userData.profile.stxAddress?.testnet 
+              : userData.profile.stxAddress?.mainnet;
+            
+            console.log('[WalletContext] Already signed in, network:', NETWORK, 'address:', stxAddr);
+            
             if (stxAddr) {
               setIsConnected(true);
               setAddress(stxAddr);
               setAddresses({
-                stx: [{ address: stxAddr, symbol: 'STX', purpose: 'mainnet' }],
+                stx: [{ address: stxAddr, symbol: 'STX', purpose: NETWORK }],
                 btc: []
               });
             }
