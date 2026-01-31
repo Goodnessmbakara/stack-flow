@@ -11,10 +11,10 @@ import { CopyTradingPools } from "./copy-trading-pools";
 import { 
   socialSentimentService, 
   type SocialSentimentData,
-  type WhaleWallet,
   type MemeSignal,
   type CopyTradingPool
 } from "../../services/socialSentimentService";
+import { type WhaleProfile } from "../../services/ecosystemWhaleService";
 
 export function SocialSentimentDashboard() {
   const [sentimentData, setSentimentData] = useState<SocialSentimentData | null>(null);
@@ -62,8 +62,8 @@ export function SocialSentimentDashboard() {
     return num.toString();
   };
 
-  const handleWhaleSelect = (whale: WhaleWallet) => {
-    console.log('Selected whale:', whale.alias);
+  const handleWhaleSelect = (whale: WhaleProfile) => {
+    console.log('Selected whale:', whale.address);
     // Could trigger a modal or detailed view
   };
 

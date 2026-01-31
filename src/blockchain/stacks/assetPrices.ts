@@ -7,8 +7,7 @@
 export { 
   getAssetPrice, 
   getAllPrices, 
-  clearPriceCache,
-  getCacheStats 
+  clearPriceCache
 } from './priceOracle';
 
 

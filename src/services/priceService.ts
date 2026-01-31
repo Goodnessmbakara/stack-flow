@@ -9,7 +9,7 @@ export interface PriceData {
   source: string;
 }
 
-export type AssetType = 'STX' | 'BTC' | 'ETH';
+export type AssetType = 'STX' | 'BTC' | 'ETH' | 'ALEX' | 'WELSH' | 'SBTC';
 
 class PriceService {
   private cache: Map<AssetType, PriceData> = new Map();
@@ -60,95 +60,29 @@ class PriceService {
   }
 
   /**
-   * Fetch price from external APIs
+   * Fetch price from external APIs with improved CORS and rate-limit handling
    */
   private async fetchPrice(asset: AssetType): Promise<PriceData> {
     try {
-      let price = 0;
-      let source = '';
-
-      if (asset === 'STX') {
-        // Try CoinGecko first for STX
-        try {
-          const response = await fetch(
-            'https://api.coingecko.com/api/v3/simple/price?ids=stacks&vs_currencies=usd'
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            price = data.stacks?.usd || 0;
-            source = 'CoinGecko';
-          }
-        } catch (error) {
-          console.warn('CoinGecko failed for STX:', error);
-        }
-
-        // Fallback to Stacks API if CoinGecko fails
-        if (price === 0) {
-          try {
-            const response = await fetch(
-              'https://api.testnet.hiro.so/v2/pox'
-            );
-
-            if (response.ok) {
-              await response.json();
-              // This is a simplified approach - you might need to adjust based on actual API
-              price = 0.58; // Fallback price
-              source = 'Stacks API';
-            }
-          } catch (error) {
-            console.warn('Stacks API failed:', error);
-          }
-        }
-      } else {
-        // Use Binance for BTC/ETH
-        const symbol = asset === 'BTC' ? 'BTCUSDT' : 'ETHUSDT';
-
-        try {
-          const response = await fetch(
-            `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            price = parseFloat(data.price);
-            source = 'Binance';
-          }
-        } catch (error) {
-          console.warn(`Binance failed for ${asset}:`, error);
-        }
+      const response = await fetch(`/api/prices?asset=${asset}`);
+      if (response.ok) {
+        return await response.json();
       }
-
-      // Final fallback
-      if (price === 0) {
-        const fallbackPrices = {
-          'STX': 0.58,
-          'BTC': 50000,
-          'ETH': 3000
-        };
-        price = fallbackPrices[asset];
-        source = 'Fallback';
-      }
-
-      return {
-        price,
-        timestamp: Date.now(),
-        source
+      throw new Error(`Proxy returned ${response.status}`);
+    } catch (e) {
+      console.warn(`[PriceService] Proxy fetch failed for ${asset}, using static fallback.`, e);
+      const fallbacks: Record<AssetType, number> = { 
+        STX: 2.10, 
+        BTC: 96000, 
+        ETH: 3300,
+        ALEX: 0.15,
+        WELSH: 0.002,
+        SBTC: 96000
       };
-    } catch (error) {
-      console.error(`Failed to fetch price for ${asset}:`, error);
-
-      // Return fallback price
-      const fallbackPrices = {
-        'STX': 0.58,
-        'BTC': 50000,
-        'ETH': 3000
-      };
-
       return {
-        price: fallbackPrices[asset],
+        price: fallbacks[asset],
         timestamp: Date.now(),
-        source: 'Error Fallback'
+        source: 'Internal Fallback'
       };
     }
   }
@@ -158,7 +92,7 @@ class PriceService {
    */
   private startPeriodicUpdates(): void {
     this.updateInterval = setInterval(async () => {
-      const assets: AssetType[] = ['STX', 'BTC', 'ETH'];
+      const assets: AssetType[] = ['STX', 'BTC', 'ETH', 'ALEX', 'WELSH', 'SBTC'];
 
       for (const asset of assets) {
         try {

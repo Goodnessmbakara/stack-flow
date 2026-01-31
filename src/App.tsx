@@ -5,7 +5,10 @@ import { DashboardLayout } from "./components/layout/dashboard-layout";
 const HomePage = lazy(() => import("./components/pages/home"));
 const NewTradePage = lazy(() => import("./components/pages/new"));
 const TradingHistoryPage = lazy(() => import("./components/pages/history"));
+const AboutPage = lazy(() => import("./components/pages/about"));
 const WhitepaperPage = lazy(() => import("./components/pages/whitepaper"));
+const CopyTradingDashboard = lazy(() => import("./components/pages/copy-trading-dashboard"));
+const SentimentDashboard = lazy(() => import("./components/pages/sentiment-dashboard"));
 import { AppContextProvider } from "./context/AppContext";
 
 const router = createBrowserRouter([
@@ -27,6 +30,10 @@ const router = createBrowserRouter([
       },
       {
         path: "/about",
+        element: <AboutPage />,
+      },
+      {
+        path: "/whitepaper",
         element: <WhitepaperPage />,
       },
       // @DEV: Default /app route to /app/trade/new
@@ -42,10 +49,14 @@ const router = createBrowserRouter([
             path: "/trade/history",
             element: <TradingHistoryPage />,
           },
-          // {
-          //   path: "/app/trade/referrals",
-          //   element: <ReferralPage />,
-          // },
+          {
+            path: "/trade/copy",
+            element: <CopyTradingDashboard />,
+          },
+          {
+            path: "/trade/sentiment",
+            element: <SentimentDashboard />,
+          },
         ],
       },
     ],

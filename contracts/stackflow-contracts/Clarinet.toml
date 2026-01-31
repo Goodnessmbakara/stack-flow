@@ -25,6 +25,11 @@ path = 'contracts/stackflow-options-m1.clar'
 clarity_version = 3
 epoch = 'latest'
 
+[contracts.stackflow-options-v2]
+path = 'contracts/stackflow-options-v2.clar'
+clarity_version = 3
+epoch = 'latest'
+
 [contracts.stackflow-options-m2-v2]
 path = 'contracts/stackflow-options-m2-v2.clar'
 clarity_version = 3

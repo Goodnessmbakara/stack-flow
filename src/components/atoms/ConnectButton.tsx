@@ -29,8 +29,9 @@ const CustomConnectButton = ({
       setIsLoadingBalance(true);
       try {
         // Fetch STX balance from Stacks API
+        const apiBase = import.meta.env.VITE_STACKS_API_URL || 'https://api.mainnet.hiro.so';
         const response = await fetch(
-          `https://api.testnet.hiro.so/extended/v1/address/${address}/stx`
+          `${apiBase}/extended/v1/address/${address}/stx`
         );
         
         if (response.ok) {
@@ -70,11 +71,11 @@ const CustomConnectButton = ({
           return (
             <Button
               variant="gradient"
-              className="w-full"
+              className="w-full px-4 py-1.5 text-xs font-bold"
               onclick={connectWallet}
               disabled={isConnecting}
             >
-              {isConnecting ? "Connecting..." : "Connect Stacks Wallet"}
+              {isConnecting ? "Connecting..." : "Connect Wallet"}
             </Button>
           );
         }
@@ -85,15 +86,15 @@ const CustomConnectButton = ({
               <Button
                 variant="gradient"
                 onclick={disconnect}
-                className="w-full"
+                className="w-full px-4 py-1.5 text-xs font-bold"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="w-1.5 h-1.5 bg-green-900 rounded-full animate-pulse"></div>
                   {address ? 
-                    `${address.slice(0, 6)}...${address.slice(-4)}` : 
+                    `${address.slice(0, 4)}..${address.slice(-4)}` : 
                     "Connected"
                   }
-                  {stxBalance ? ` (${stxBalance} STX)` : ""}
+                  {stxBalance ? ` (${stxBalance.toFixed(1)} STX)` : ""}
                 </div>
               </Button>
             )}
@@ -101,7 +102,7 @@ const CustomConnectButton = ({
             {onclick && (
               <Button
                 variant="gradient"
-                className={`w-full ${
+                className={`w-full px-4 py-1.5 text-xs font-bold ${
                   stxBalance &&
                   selectedPremium &&
                   stxBalance < Number(selectedPremium)
@@ -114,7 +115,7 @@ const CustomConnectButton = ({
                 selectedPremium &&
                 stxBalance < Number(selectedPremium)
                   ? "Insufficient balance"
-                  : "Buy this strategy"}
+                  : "Buy Strategy"}
               </Button>
             )}
           </div>

@@ -32,6 +32,14 @@
     background-color: #1a1a1ad3
   }
 
+  :root{
+    --accent-green: #37F741;
+    --accent-green-strong: #40F749;
+    --bg-dark: #1D2215;
+    --panel-bg: #0f140f;
+    --muted: #94a3b8;
+  }
+
   * {
     font-family: "Lato", sans-serif;
   }
@@ -155,6 +163,46 @@ input[type="number"]::-webkit-outer-spin-button {
   text-shadow: 0 0 30px rgba(187, 247, 55, 0.1);
 }
 
+/* Reusable UI helpers for the new green theme */
+.accent-glow {
+  text-shadow: 0 0 14px rgba(64, 247, 73, 0.12);
+}
+
+.card {
+  background-color: var(--panel-bg);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 1rem;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(64,247,73,0.06);
+  border-color: rgba(55,247,65,0.12);
+}
+
+.neon-badge {
+  background-color: var(--accent-green);
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(55,247,65,0.08);
+}
+
+.tag-pill {
+  background-color: rgba(55,247,65,0.08);
+  color: var(--accent-green);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.muted { color: var(--muted); }
+
+.sentiment-score { text-shadow: 0 8px 36px rgba(64,247,73,0.06); }
+
 /* Enhance link hover effects */
 .whitepaper-content a:hover {
   text-shadow: 0 0 10px rgba(187, 247, 55, 0.3);
@@ -188,4 +236,42 @@ input[type="number"]::-webkit-outer-spin-button {
   padding: 2px 4px;
   border-radius: 3px;
   box-shadow: 0 0 0 2px rgba(187, 248, 56, 0.3);
+}
+
+/* Hero Animations */
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 200% 200%;
+    background-position: left center;
+  }
+  50% {
+    background-size: 200% 200%;
+    background-position: right center;
+  }
+}
+.animate-gradient-x {
+  animation: gradient-x 6s ease infinite;
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(-5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 4s infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }

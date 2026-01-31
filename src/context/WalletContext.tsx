@@ -5,20 +5,8 @@ import {
   useState,
   useEffect,
 } from "react";
-import {
-  AppConfig,
-  UserSession,
-  connect,
-  isConnected,
-  getLocalStorage,
-  disconnect as disconnectWallet,
-} from "@stacks/connect";
-
-// Configure the app - only request necessary permissions
-const appConfig = new AppConfig(["store_write"]);
-
-// Create a single user session instance
-const userSession = new UserSession({ appConfig });
+import { showConnect } from "@stacks/connect";
+import { AppConfig, UserSession } from "@stacks/auth";
 
 interface AddressData {
   address: string;
@@ -27,9 +15,9 @@ interface AddressData {
 }
 
 interface WalletContextType {
-  userSession: UserSession;
   isLoading: boolean;
   isConnecting: boolean;
+  isConnected: boolean;
   connectWallet: () => Promise<void>;
   disconnect: () => void;
   address: string | null;
@@ -43,7 +31,19 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
+// Configure Stacks authentication
+const appConfig = new AppConfig(['store_write', 'publish_data']);
+const userSession = new UserSession({ appConfig });
+
+// Determine network from environment (mainnet or testnet)
+const NETWORK = import.meta.env.VITE_STACKS_NETWORK || 'mainnet';
+const isTestnet = NETWORK === 'testnet';
+
+console.log('[WalletContext] Network configured:', NETWORK);
+
 export function WalletProvider({ children }: { children: ReactNode }) {
+  const [isConnected, setIsConnected] = useState(false);
+  const [address, setAddress] = useState<string | null>(null);
   const [addresses, setAddresses] = useState<{
     stx: AddressData[];
     btc: AddressData[];
@@ -51,93 +51,130 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Load wallet state from localStorage on mount
+  // Check for existing session on mount
   useEffect(() => {
-    const loadWalletState = () => {
-      try {
-        // Check if user is connected using v8 API
-        if (isConnected()) {
-          const storageData = getLocalStorage();
-          if (storageData && storageData.addresses) {
-            setAddresses({
-              stx: storageData.addresses.stx || [],
-              btc: storageData.addresses.btc || [],
-            });
-          }
+    try {
+      if (userSession.isUserSignedIn()) {
+        const userData = userSession.loadUserData();
+        // Use testnet or mainnet address based on network config
+        const stxAddr = isTestnet 
+          ? userData.profile.stxAddress?.testnet 
+          : userData.profile.stxAddress?.mainnet;
+        
+        console.log('[WalletContext] Existing session found, network:', NETWORK, 'address:', stxAddr);
+        
+        if (stxAddr) {
+          setIsConnected(true);
+          setAddress(stxAddr);
+          setAddresses({
+            stx: [{ address: stxAddr, symbol: 'STX', purpose: NETWORK }],
+            btc: []
+          });
         }
-      } catch (error) {
-        console.error("Error loading wallet state:", error);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    loadWalletState();
+    } catch (error) {
+      // Clear corrupted session data from old WalletConnect
+      console.warn('[WalletContext] Clearing corrupted session:', error);
+      try {
+        userSession.signUserOut();
+      } catch (e) {
+        // If signOut fails, manually clear localStorage
+        localStorage.removeItem('blockstack-session');
+      }
+    }
+    setIsLoading(false);
   }, []);
 
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      // Use the new connect() API from @stacks/connect v8
-      // This automatically stores addresses in localStorage
-      const result = await connect();
-      
-      if (result && result.addresses) {
-        // Separate STX and BTC addresses
-        const stxAddrs: AddressData[] = [];
-        const btcAddrs: AddressData[] = [];
-        
-        result.addresses.forEach((addr) => {
-          const addressData = {
-            address: addr.address,
-            symbol: addr.symbol,
-            // purpose: addr.purpose, // Property doesn't exist on AddressEntry
-          };
-          
-          // STX addresses start with 'S'
-          if (addr.address.startsWith('S')) {
-            stxAddrs.push(addressData);
-          } else {
-            btcAddrs.push(addressData);
+      // Use showConnect from @stacks/connect
+      showConnect({
+        appDetails: {
+          name: "StackFlow",
+          icon: window.location.origin + "/logo.png",
+        },
+        redirectTo: "/",
+        onFinish: () => {
+          // Handle pending sign in
+          if (userSession.isSignInPending()) {
+            userSession.handlePendingSignIn().then((userData) => {
+              // Use testnet or mainnet address based on network config
+              const stxAddr = isTestnet 
+                ? userData.profile.stxAddress?.testnet 
+                : userData.profile.stxAddress?.mainnet;
+              
+              console.log('[WalletContext] Sign-in pending resolved, network:', NETWORK, 'address:', stxAddr);
+              
+              if (stxAddr) {
+                setIsConnected(true);
+                setAddress(stxAddr);
+                setAddresses({
+                  stx: [{ address: stxAddr, symbol: 'STX', purpose: NETWORK }],
+                  btc: []
+                });
+              }
+              setIsConnecting(false);
+              console.log("[WalletContext] Connected:", stxAddr);
+            }).catch((error) => {
+              console.error('[WalletContext] Error handling pending sign-in:', error);
+              setIsConnecting(false);
+            });
+          } else if (userSession.isUserSignedIn()) {
+            const userData = userSession.loadUserData();
+            // Use testnet or mainnet address based on network config
+            const stxAddr = isTestnet 
+              ? userData.profile.stxAddress?.testnet 
+              : userData.profile.stxAddress?.mainnet;
+            
+            console.log('[WalletContext] Already signed in, network:', NETWORK, 'address:', stxAddr);
+            
+            if (stxAddr) {
+              setIsConnected(true);
+              setAddress(stxAddr);
+              setAddresses({
+                stx: [{ address: stxAddr, symbol: 'STX', purpose: NETWORK }],
+                btc: []
+              });
+            }
+            setIsConnecting(false);
+            console.log("[WalletContext] Already connected:", stxAddr);
           }
-        });
-        
-        setAddresses({ stx: stxAddrs, btc: btcAddrs });
-      }
+        },
+        onCancel: () => {
+          console.log("[WalletContext] Connection cancelled");
+          setIsConnecting(false);
+        },
+      });
     } catch (error) {
-      console.error("Error connecting wallet:", error);
-    } finally {
+      console.error("[WalletContext] Error connecting:", error);
       setIsConnecting(false);
     }
   };
 
   const handleDisconnect = () => {
-    // Use v8's built-in disconnect function
-    disconnectWallet();
-    setAddresses({ stx: [], btc: [] });
-    userSession.signUserOut();
+    try {
+      userSession.signUserOut();
+      setIsConnected(false);
+      setAddress(null);
+      setAddresses({ stx: [], btc: [] });
+      console.log("[WalletContext] Disconnected");
+    } catch (error) {
+      console.error("[WalletContext] Error disconnecting:", error);
+    }
   };
-
-  // Extract primary addresses
-  const stxAddress = addresses.stx.length > 0 ? addresses.stx[0].address : null;
-  const btcAddress = addresses.btc.length > 0 
-    ? addresses.btc.find(a => a.purpose === 'payment')?.address || addresses.btc[0].address
-    : null;
-
-  // Use STX address as primary address
-  const address = stxAddress;
 
   return (
     <WalletContext.Provider
       value={{
-        userSession,
         isLoading,
         isConnecting,
+        isConnected,
         connectWallet: handleConnect,
         disconnect: handleDisconnect,
         address,
-        stxAddress,
-        btcAddress,
+        stxAddress: address,
+        btcAddress: null,
         addresses,
       }}
     >
@@ -153,4 +190,3 @@ export function useWallet() {
   }
   return context;
 }
-

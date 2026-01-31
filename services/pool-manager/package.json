@@ -1,0 +1,36 @@
+{
+  "name": "@stackflow/pool-manager",
+  "version": "1.0.0",
+  "description": "Automated whale portfolio analysis and pool rebalancing service",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": ["stacks", "defi", "whale-tracking", "automation"],
+  "author": "StackFlow Team",
+  "license": "MIT",
+  "dependencies": {
+    "@stacks/transactions": "^6.13.0",
+    "@stacks/network": "^6.13.0",
+    "mongodb": "^6.3.0",
+    "node-cron": "^3.0.3",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "socket.io": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "vitest": "^1.0.4",
+    "eslint": "^8.56.0"
+  }
+}

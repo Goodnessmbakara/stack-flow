@@ -84,13 +84,24 @@ export default function EnhancedTradingPage() {
           {asset === "BTC" && (
             <div className="mt-8">
               <div className="bg-[#1D2215] rounded-lg p-6 mb-4">
-                <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                  <Icons.users className="w-5 h-5 text-[#bbf838]" />
-                  Social Trading Insights for {asset}
-                </h3>
-                <p className="text-gray-400 text-sm mb-4">
-                  See how whales and the community are trading {asset}. Switch to Social Sentiment view for full details.
-                </p>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                      <Icons.users className="w-5 h-5 text-[#bbf838]" />
+                      Social Trading Insights for {asset}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                      See how whales and the community are trading {asset}.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveView('social')}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#37f741]/10 hover:bg-[#37f741]/20 text-[#37f741] transition-colors text-sm font-medium"
+                  >
+                    <span>View Full Analysis</span>
+                    <Icons.arrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
