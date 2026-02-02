@@ -83,8 +83,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
     setIsConnecting(true);
     try {
-      // connect() returns { addresses: AddressEntry[] }; pass network so wallet uses correct chain
-      const response = await connect({ network: NETWORK });
+      // connect() returns { addresses: AddressEntry[] }. Call with no params to avoid "Invalid parameters"
+      // from wallets that don't support the network param for getAddresses; they use their default network.
+      const response = await connect();
       const list = response?.addresses ?? [];
       const stxList = list.filter((a: { address: string; symbol?: string }) => a.symbol === 'STX' || a.address.startsWith('S'));
       const btcList = list.filter((a: { address: string; symbol?: string }) => a.symbol === 'BTC' || (a.address && !a.address.startsWith('S')));
